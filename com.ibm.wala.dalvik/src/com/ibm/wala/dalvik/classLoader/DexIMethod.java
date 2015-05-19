@@ -61,9 +61,11 @@ import static org.jf.dexlib.Util.AccessFlags.VOLATILE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.jf.dexlib.AnnotationDirectoryItem;
 import org.jf.dexlib.AnnotationItem;
 import org.jf.dexlib.AnnotationSetItem;
 import org.jf.dexlib.ClassDataItem.EncodedMethod;
@@ -3356,8 +3358,22 @@ public class DexIMethod implements IBytecodeMethod {
 
 	@Override
 	public Collection<Annotation> getAnnotations() {
-		return DexUtil.getAnnotations(myClass.getAnnotations(eMethod.method, null), myClass.getClassLoader().getReference());
+//		return DexUtil.getAnnotations(myClass.getAnnotations(eMethod.method, null), myClass.getClassLoader().getReference());
+		Collection<Annotation> annSet = new HashSet<Annotation>();
+		AnnotationDirectoryItem annotationItem = myClass.getClassDefItem().getAnnotations();
+		if(annotationItem != null){
+			AnnotationSetItem annotationSetItem = annotationItem.getMethodAnnotations(eMethod.method);
+			if(annotationSetItem != null)
+				for(AnnotationItem item : annotationSetItem.getAnnotations()){
+					String annotation = item.getEncodedAnnotation().annotationType.getTypeDescriptor();
+					annotation = annotation.substring(0,annotation.length()-1);
+					TypeReference tr = TypeReference.findOrCreate(ClassLoaderReference.Application, annotation);
+					annSet.add(Annotation.make(tr));
+				}
+		}
+		return annSet;
 	}
+
 
 	@Override
 	public Collection<Annotation> getAnnotations(boolean runtimeInvisible) {

@@ -126,6 +126,7 @@ public final class WalaProperties {
       throw new IllegalArgumentException("null fileName");
     }
     final InputStream propertyStream = loader.getResourceAsStream(fileName);
+
     if (propertyStream == null) {
       // create default properties
       Properties defprop = new Properties();
