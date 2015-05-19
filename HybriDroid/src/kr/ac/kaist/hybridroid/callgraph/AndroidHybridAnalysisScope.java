@@ -74,8 +74,8 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
     
     //TODO: support HTML file
     for (int i = 0; i < jsScopeReader.getJSList().size(); i++) {
-//		URL script = new File(jsScopeReader.getJSList().get(i)).toURI().toURL();
-    	URL script = new File("/Users/LeeSH/projects/hybridroid/apps/assets/www/name.js").toURI().toURL();
+		URL script = new File(jsScopeReader.getJSList().get(i)).toURI().toURL();
+//    	URL script = new File("/Users/LeeSH/projects/hybridroid/apps/assets/www/name.js").toURI().toURL();
 		scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
 	}
 //		for (int i = 0; i < jsScopeReader.getHTMLList().size(); i++) {
