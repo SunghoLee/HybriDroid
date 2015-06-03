@@ -1,10 +1,15 @@
 package kr.ac.kaist.hybridroid.types;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
+import com.ibm.wala.ipa.callgraph.propagation.ConstantKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.TypeReference;
@@ -43,6 +48,7 @@ public class AndroidJavaJavaScriptTypeMap {
 	private static IClass JS_CLASS_ARRAY;
 	
 	private static Map<IClass, IClass> java2js_typemap = new HashMap<IClass, IClass>();
+	private static Map<IClass, Set<IClass>> js2java_typemap = new HashMap<IClass, Set<IClass>>();
 	
 	public static void initialize(IClassHierarchy cha){
 		JAVA_CLASS_BOOLEAN = cha.lookupClass(JAVA_BOOLEAN);
@@ -62,6 +68,20 @@ public class AndroidJavaJavaScriptTypeMap {
 		java2js_typemap.put(JAVA_CLASS_FLOAT, JS_CLASS_NUMBER);
 		java2js_typemap.put(JAVA_CLASS_DOUBLE, JS_CLASS_NUMBER);
 		java2js_typemap.put(JAVA_CLASS_STRING, JS_CLASS_STRING);
+		
+		Set<IClass> nTypeSet = new HashSet<IClass>();
+		nTypeSet.add(JAVA_CLASS_INTEGER);
+		nTypeSet.add(JAVA_CLASS_FLOAT);
+		nTypeSet.add(JAVA_CLASS_DOUBLE);
+		js2java_typemap.put(JS_CLASS_NUMBER, nTypeSet);
+		
+		Set<IClass> sTypeSet = new HashSet<IClass>();
+		sTypeSet.add(JAVA_CLASS_STRING);
+		js2java_typemap.put(JS_CLASS_STRING, sTypeSet);
+		
+		Set<IClass> bTypeSet = new HashSet<IClass>();
+		bTypeSet.add(JAVA_CLASS_BOOLEAN);
+		js2java_typemap.put(JS_CLASS_BOOLEAN, bTypeSet);
 	}
 	
 	public static boolean isJava2JSConvertable(IClass c){
@@ -72,7 +92,20 @@ public class AndroidJavaJavaScriptTypeMap {
 		return java2js_typemap.get(c);
 	}
 	
-	public static IClass getJSStringClass(){
-		return JS_CLASS_STRING;
+	public static InstanceKey js2JavaTypeConvert(InstanceKey ik, IClass targetClass){
+		IClass argType = ik.getConcreteType();
+		if(js2java_typemap.containsKey(argType)){
+			Set<IClass> convertableTypes = js2java_typemap.get(argType);
+			if(convertableTypes.contains(targetClass)){
+				if(ik instanceof ConcreteTypeKey){
+					return new ConcreteTypeKey(targetClass);	
+				}else if(ik instanceof ConstantKey){
+					ConstantKey cik = (ConstantKey) ik;
+					return new ConstantKey(cik.getValue(), targetClass);
+				}
+			}
+		}
+		
+		return ik;
 	}
 }

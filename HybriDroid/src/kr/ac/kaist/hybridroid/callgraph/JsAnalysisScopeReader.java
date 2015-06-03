@@ -12,9 +12,9 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import kr.ac.kaist.hybridroid.util.debug.Debug;
+import kr.ac.kaist.hybridroid.util.files.LoaderUtils;
 
 import org.jf.dexlib.Util.FileUtils;
-import org.scandroid.util.LoaderUtils;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;

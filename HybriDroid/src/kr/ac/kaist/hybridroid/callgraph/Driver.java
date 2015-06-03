@@ -8,7 +8,6 @@ import java.util.Properties;
 
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizeCGTest;
 
 import com.ibm.wala.cast.ipa.callgraph.CrossLanguageMethodTargetSelector;
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
@@ -73,18 +72,17 @@ public class Driver {
 	        new StandardFunctionTargetSelector(cha, options.getMethodTargetSelector())));
 	    methodTargetSelectors.put(Language.JAVA.getName(), options.getMethodTargetSelector());
 	    
-	    
 	    options.setSelector(new AndroidHybridMethodTargetSelector(methodTargetSelectors));
-	    
-//	    options.setUseConstantSpecificKeys(true);
+	    options.setUseConstantSpecificKeys(true);
   }
   
   public static void check(CallGraph cg, PointerAnalysis<InstanceKey> pa){
+	  boolean find = false;
 	  for(CGNode node : cg){
 		  
 		  if(node.toString().contains("< Application, Lcom/example/hellohybrid/JavascriptBridge, sendName(Ljava/lang/String;)V > Context: Everywhere")){
 			  System.out.println("===========================>");
-			  
+			  find = true;
 			  for(int i=1; i<4; i++){
 				  PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(node, i);
 				  Iterator<InstanceKey> ikIter = pa.getPointsToSet(pk).iterator();
@@ -97,6 +95,9 @@ public class Driver {
 			  }
 			  System.out.println("<===========================");
 		  }
+	  }
+	  if(find == false){
+		  System.out.println(" Incomplete Call Graph!");
 	  }
   }
   
@@ -130,7 +131,7 @@ public class Driver {
     CallGraph cg = b.makeCallGraph(options);
 
     System.out.println("Done");
-    VisualizeCGTest.visualizeCallGraph(cg, "/Users/LeeSH/temp/cg_dex", true);
+//    VisualizeCGTest.visualizeCallGraph(cg, "/Users/leesh/tmp/cg_dex", true);
     
     check(cg, b.getPointerAnalysis());
 //    System.err.println(cg);

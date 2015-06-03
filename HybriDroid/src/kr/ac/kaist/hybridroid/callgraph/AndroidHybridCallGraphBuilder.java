@@ -3,6 +3,8 @@ package kr.ac.kaist.hybridroid.callgraph;
 import java.util.Collection;
 
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
+import kr.ac.kaist.hybridroid.pointer.InterfaceClass;
+import kr.ac.kaist.hybridroid.pointer.JSCompatibleClassFilter;
 import kr.ac.kaist.hybridroid.pointer.MockupInstanceKey;
 import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 
@@ -24,7 +26,6 @@ import com.ibm.wala.ipa.callgraph.ContextKey;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSite;
 import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
-import com.ibm.wala.ipa.callgraph.propagation.ConstantKey;
 import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
@@ -69,13 +70,10 @@ public class AndroidHybridCallGraphBuilder extends
 	}
 
 	private FilteredPointerKey getFilteredPointerKeyForInterfParams(CGNode node, int valueNumber, IClass filter){
-		if(AndroidJavaJavaScriptTypeMap.isJava2JSConvertable(filter)){
-			IClass[] filters = new IClass[2];
-			filters[0] = filter;
-			filters[1] = AndroidJavaJavaScriptTypeMap.java2JSTypeConvert(filter);
-			
-			return getFilteredPointerKeyForLocal(node, valueNumber, new FilteredPointerKey.MultipleClassesFilter(filters));
+		if(AndroidJavaJavaScriptTypeMap.isJava2JSConvertable(filter)){	
+			return getFilteredPointerKeyForLocal(node, valueNumber, JSCompatibleClassFilter.make(filter));
 		}else{
+			// incompatible type with JS type
 			return super.getFilteredPointerKeyForLocal(node, valueNumber, filter);
 		}
 	}
@@ -92,40 +90,43 @@ public class AndroidHybridCallGraphBuilder extends
 	    return C;
 	  }
 	
-		@Override
-	  public PointerKey getTargetPointerKey(CGNode target, int index) {
-	    int vn;
-	    if (target.getIR() != null) {
-	      vn = target.getIR().getSymbolTable().getParameter(index);
-	    } else {
-	      vn = index+1;
-	    }
+	@Override
+	public PointerKey getTargetPointerKey(CGNode target, int index) {
+		int vn;
+		if (target.getIR() != null) {
+			vn = target.getIR().getSymbolTable().getParameter(index);
+		} else {
+			vn = index + 1;
+		}
 
-	    FilteredPointerKey.TypeFilter filter = (FilteredPointerKey.TypeFilter) target.getContext().get(ContextKey.PARAMETERS[index]);
-	    if (filter != null && !filter.isRootFilter()) {
-	        return getFilteredPointerKeyForLocal(target, vn, filter);
-	    
-	    } else { 
-	      // the context does not select a particular concrete type for the
-	      // receiver, so use the type of the method
-	      IClass C;
-	      if (index == 0 && !target.getMethod().isStatic()) {
-	        C = getReceiverClass(target.getMethod());
-	      } else {
-	        C = cha.lookupClass(target.getMethod().getParameterType(index));
-	      }
-	      
-	      if (C == null || C.getClassHierarchy().getRootClass().equals(C)) {
-	        return getPointerKeyForLocal(target, vn);        
-	      } else {
-	    	  if(this.hasJavascriptInterfaceAnnotation(target.getMethod()) && vn < target.getMethod().getNumberOfParameters() + 1)
-	    		  return getFilteredPointerKeyForInterfParams(target, vn, C);
-	    	  else
-	    		  return getFilteredPointerKeyForLocal(target, vn, new FilteredPointerKey.SingleClassFilter(C));
-	      }
-	      
-	    } 
-	  }
+		FilteredPointerKey.TypeFilter filter = (FilteredPointerKey.TypeFilter) target
+				.getContext().get(ContextKey.PARAMETERS[index]);
+		if (filter != null && !filter.isRootFilter()) {
+			return getFilteredPointerKeyForLocal(target, vn, filter);
+
+		} else {
+			// the context does not select a particular concrete type for the
+			// receiver, so use the type of the method
+			IClass C;
+			if (index == 0 && !target.getMethod().isStatic()) {
+				C = getReceiverClass(target.getMethod());
+			} else {
+				C = cha.lookupClass(target.getMethod().getParameterType(index));
+			}
+
+			if (C == null || C.getClassHierarchy().getRootClass().equals(C)) {
+				return getPointerKeyForLocal(target, vn);
+			} else {
+				if (this.hasJavascriptInterfaceAnnotation(target.getMethod())
+						&& vn <= target.getMethod().getNumberOfParameters())
+					return getFilteredPointerKeyForInterfParams(target, vn, C);
+				else
+					return getFilteredPointerKeyForLocal(target, vn,
+							new FilteredPointerKey.SingleClassFilter(C));
+			}
+
+		}
+	}
 	  
 	private void processHybridCallingConstraints(CGNode caller, SSAAbstractInvokeInstruction instruction, CGNode target, InstanceKey[][] constParams, PointerKey uniqueCatchKey){
 
@@ -135,15 +136,15 @@ public class AndroidHybridCallGraphBuilder extends
 	    // pass actual arguments to formals in the normal way
 	    for (int i = 0; i < Math.min(paramCount, argCount); i++) {
 	    	
-	      PointerKey F = this.getTargetPointerKey(target, i);
+	      final PointerKey F = this.getTargetPointerKey(target, i);
 	      
 	      if (constParams != null && constParams[i+1] != null) {
 	        for (int j = 0; j < constParams[i+1].length; j++) {
 	        	this.getSystem().newConstraint(F, constParams[i+1][j]);
 	        }
-	      } else {
+	      } else { // do implicit type conversion between JavaScript and Android Java
 	        PointerKey A = this.getPointerKeyForLocal(caller, instruction.getUse(i+1));
-	        this.getSystem().newConstraint(F, (F instanceof FilteredPointerKey) ? this.filterOperator : assignOperator, A);
+    		this.getSystem().newConstraint(F, (F instanceof FilteredPointerKey)? this.filterOperator : assignOperator, A);
 	      }
 	    }
 
@@ -245,16 +246,20 @@ public class AndroidHybridCallGraphBuilder extends
 							NewSiteReference newSite = ((SSANewInstruction) defInst)
 									.getNewSite();
 							TypeReference tr = newSite.getDeclaredType();
+							
 							IClass objClass = cha.lookupClass(tr);
-							Collection<IMethod> methods = objClass
-									.getAllMethods();
+							InterfaceClass wClass = wrappingClass(objClass);
+							cha.addClass(wClass);
+							
+							Collection<IMethod> methods = wClass.getAllMethods();
+							
 							InstanceKey objKey = new AllocationSite(
-									caller.getMethod(), newSite, objClass);
+									caller.getMethod(), newSite, wClass);
 							AndroidHybridAppModel.addJSInterface(name, objKey);
-
+							
 							System.err.println("#InterfaceName: " + name);
 							System.err.println("#InterfaceClass: "
-									+ objClass.getName().getClassName());
+									+ wClass.getName().getClassName());
 
 							/*
 							 * make mock-up object for Android Java methods of
@@ -271,26 +276,19 @@ public class AndroidHybridCallGraphBuilder extends
 							AbstractFieldPointerKey typePK = ReflectedFieldPointerKey
 									.mapped(new ConcreteTypeKey(jsStringClass),
 											objKey);
-
+							
 							for (IMethod method : methods) {
 								if (hasJavascriptInterfaceAnnotation(method)) {
+									wClass.addMethodAsField(method);
 									String mname = method.getName().toString();
-
-									AbstractFieldPointerKey constantPK = ReflectedFieldPointerKey
-											.mapped(new ConstantKey<String>(
-													mname, jsStringClass),
-													objKey);
-
-									// InstanceKey ik =
-									// makeMockupInstanceKey(method);//new
-									// NormalAllocationInNode(node, a,
-									// objClass);
-
-									InstanceKey ik = makeMockupInstanceKey(method);// new
-																					// NormalAllocationInNode(node,
-																					// a,
-																					// objClass);
+									IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
+									
+									PointerKey constantPK = builder.getPointerKeyForInstanceField(objKey, f);
+									
+									InstanceKey ik = makeMockupInstanceKey(method);
+									
 									system.findOrCreateIndexForInstanceKey(ik);
+									
 									system.newConstraint(constantPK, ik);
 									system.newConstraint(typePK, ik);
 								}
@@ -302,7 +300,6 @@ public class AndroidHybridCallGraphBuilder extends
 							 * used when finding the receiver at a JavaScript
 							 * call site
 							 */
-
 							InstanceKey globalObj = ((AstSSAPropagationCallGraphBuilder) builder)
 									.getGlobalObject(JavaScriptTypes.jsName);
 							system.findOrCreateIndexForInstanceKey(globalObj);
@@ -394,5 +391,8 @@ public class AndroidHybridCallGraphBuilder extends
 			}
 		return false;
 	}
-
+		
+	private InterfaceClass wrappingClass(IClass objClass){
+		return InterfaceClass.wrapping(objClass);
+	}
 }
