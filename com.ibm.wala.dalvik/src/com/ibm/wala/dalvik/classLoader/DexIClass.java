@@ -110,6 +110,11 @@ public class DexIClass extends BytecodeClass<IClassLoader> {
     private final DexModuleEntry dexModuleEntry;
 //    public IClassLoader loader;
 
+    //Lee
+    public DexModuleEntry getModuleEntry(){
+    	return dexModuleEntry;
+    }
+    //Lee
     public DexIClass(IClassLoader loader, IClassHierarchy cha,
             final DexModuleEntry dexEntry) {
         super(loader, cha);

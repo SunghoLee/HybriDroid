@@ -14,6 +14,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Set;
 
+import kar.ac.kaist.hybridroid.t.T;
+
 import com.ibm.wala.analysis.typeInference.TypeInference;
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
@@ -103,7 +105,7 @@ import com.ibm.wala.util.strings.Atom;
  * specially in {@link JSConstraintVisitor#visitAstGlobalRead(AstGlobalRead)}.
  */
 public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraphBuilder {
-
+  
   public static final boolean DEBUG_LEXICAL = false;
 
   public static final boolean DEBUG_TYPE_INFERENCE = false;
@@ -659,6 +661,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
     private void handleJavascriptDispatch(final JavaScriptInvoke instruction) {
       int receiverVn = instruction.getUse(1);
       PointerKey receiverKey = getPointerKeyForLocal(receiverVn);
+     
       if (contentsAreInvariant(symbolTable, du, receiverVn)) {
           system.recordImplicitPointsToSet(receiverKey);
           InstanceKey[] ik = getInvariantContents(receiverVn);
@@ -673,6 +676,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
           
           @Override
           public byte evaluate(PointsToSetVariable lhs, PointsToSetVariable rhs) {
+
             if (rhs.getValue() != null) {
               rhs.getValue().foreach(new IntSetAction() {
                 @Override
@@ -708,6 +712,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
 
         system.newSideEffect(new ReceiverForDispatchOp(), receiverKey);
       }
+      T.t = false;
     }
     
     // ///////////////////////////////////////////////////////////////////////////

@@ -23,13 +23,13 @@ public class AndroidHybridMethodTargetSelector extends
 	@Override
 	public IMethod getCalleeTarget(CGNode caller, CallSiteReference site,
 			IClass receiver) {
-
+		
 		if(receiver instanceof MockupClass){
-			return ((MockupClass)receiver).getMethod();
+			IMethod target = ((MockupClass)receiver).getMethod();
+			
+			return target;
 		}else{
 			return super.getCalleeTarget(caller, site, receiver);
 		}
-		
-	}
-	
+	}	
 }

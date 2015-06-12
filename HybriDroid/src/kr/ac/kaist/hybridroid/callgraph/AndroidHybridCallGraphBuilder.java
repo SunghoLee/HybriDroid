@@ -1,7 +1,10 @@
 package kr.ac.kaist.hybridroid.callgraph;
 
 import java.util.Collection;
+import java.util.Set;
 
+import kr.ac.kaist.hybridroid.checker.Js2JavaCompatibleTypeChecker;
+import kr.ac.kaist.hybridroid.checker.Js2JavaCompatibleTypeChecker.TypeWarning;
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.hybridroid.pointer.InterfaceClass;
 import kr.ac.kaist.hybridroid.pointer.JSCompatibleClassFilter;
@@ -61,17 +64,19 @@ public class AndroidHybridCallGraphBuilder extends
 			.findOrCreateAsciiAtom("addJavascriptInterface");
 	private static final Atom interfAnnotationName = Atom
 			.findOrCreateAsciiAtom("JavascriptInterface");
+	private Js2JavaCompatibleTypeChecker typeChecker;
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
-			AnalysisOptions options, AnalysisCache cache) {
+			AnalysisOptions options, AnalysisCache cache, Js2JavaCompatibleTypeChecker typeChecker) {
 		super(cha, options, cache);
 		// TODO Auto-generated constructor stub
 		AndroidJavaJavaScriptTypeMap.initialize(cha);
+		this.typeChecker = typeChecker;
 	}
 
-	private FilteredPointerKey getFilteredPointerKeyForInterfParams(CGNode node, int valueNumber, IClass filter){
+	private FilteredPointerKey getFilteredPointerKeyForInterfParams(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode node, int valueNumber, IClass filter){
 		if(AndroidJavaJavaScriptTypeMap.isJava2JSConvertable(filter)){	
-			return getFilteredPointerKeyForLocal(node, valueNumber, JSCompatibleClassFilter.make(filter));
+			return getFilteredPointerKeyForLocal(node, valueNumber, JSCompatibleClassFilter.make(caller, inst, node, valueNumber, typeChecker, filter));
 		}else{
 			// incompatible type with JS type
 			return super.getFilteredPointerKeyForLocal(node, valueNumber, filter);
@@ -90,8 +95,7 @@ public class AndroidHybridCallGraphBuilder extends
 	    return C;
 	  }
 	
-	@Override
-	public PointerKey getTargetPointerKey(CGNode target, int index) {
+	public PointerKey getTargetPointerKey(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode target, int index) {
 		int vn;
 		if (target.getIR() != null) {
 			vn = target.getIR().getSymbolTable().getParameter(index);
@@ -119,7 +123,7 @@ public class AndroidHybridCallGraphBuilder extends
 			} else {
 				if (this.hasJavascriptInterfaceAnnotation(target.getMethod())
 						&& vn <= target.getMethod().getNumberOfParameters())
-					return getFilteredPointerKeyForInterfParams(target, vn, C);
+					return getFilteredPointerKeyForInterfParams(caller, inst, target, vn, C);
 				else
 					return getFilteredPointerKeyForLocal(target, vn,
 							new FilteredPointerKey.SingleClassFilter(C));
@@ -136,7 +140,10 @@ public class AndroidHybridCallGraphBuilder extends
 	    // pass actual arguments to formals in the normal way
 	    for (int i = 0; i < Math.min(paramCount, argCount); i++) {
 	    	
-	      final PointerKey F = this.getTargetPointerKey(target, i);
+	    	if(typeChecker != null)
+	    		typeChecker.argNumCheck(caller, instruction, target.getMethod(), paramCount, argCount);
+	    	
+	      final PointerKey F = this.getTargetPointerKey(caller, instruction, target, i);
 	      
 	      if (constParams != null && constParams[i+1] != null) {
 	        for (int j = 0; j < constParams[i+1].length; j++) {
@@ -150,6 +157,10 @@ public class AndroidHybridCallGraphBuilder extends
 
 	    // return values
 	    if (instruction.getDef(0) != -1) {
+	    	//return type checking
+	    	if(typeChecker != null)
+	    		typeChecker.returnTypeCheck(caller, instruction, target.getMethod());
+	    	
 	      PointerKey RF = this.getPointerKeyForReturnValue(target);
 	      PointerKey RA = this.getPointerKeyForLocal(caller, instruction.getDef(0));
 	      this.getSystem().newConstraint(RA, assignOperator, RF);
@@ -394,5 +405,13 @@ public class AndroidHybridCallGraphBuilder extends
 		
 	private InterfaceClass wrappingClass(IClass objClass){
 		return InterfaceClass.wrapping(objClass);
+	}
+	
+	public Js2JavaCompatibleTypeChecker getTypeChecker(){
+		return typeChecker;
+	}
+	
+	public Set<TypeWarning> getWarnings(){
+		return typeChecker.getWarnings();
 	}
 }

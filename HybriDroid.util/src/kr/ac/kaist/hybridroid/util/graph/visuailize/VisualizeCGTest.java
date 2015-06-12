@@ -5,10 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.ibm.wala.cast.ipa.callgraph.AstCallGraph.AstCGNode;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.types.ClassLoaderReference;

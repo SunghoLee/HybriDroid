@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="source/java"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="/Users/LeeSH/fork/hybridroid/libs/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/commons-io-2.4.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
+	<classpathentry kind="src" path="source/java"/>
+	<classpathentry kind="lib" path="/Users/leesh/tools/eclipse/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar"/>
+	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/org.osgi.core-4.2.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/T"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

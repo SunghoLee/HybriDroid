@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import kr.ac.kaist.hybridroid.checker.Js2JavaCompatibleTypeChecker;
+import kr.ac.kaist.hybridroid.checker.Js2JavaCompatibleTypeChecker.TypeWarning;
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
+import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizeCGTest;
 
 import com.ibm.wala.cast.ipa.callgraph.CrossLanguageMethodTargetSelector;
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
@@ -59,7 +63,6 @@ public class Driver {
     methodTargetSelectors.put(JavaScriptLoader.JS.getName(), new JavaScriptConstructTargetSelector(cha,
         new StandardFunctionTargetSelector(cha, options.getMethodTargetSelector())));
     methodTargetSelectors.put(Language.JAVA.getName(), options.getMethodTargetSelector());
-    
     
     options.setSelector(new CrossLanguageMethodTargetSelector(methodTargetSelectors));
   }
@@ -120,20 +123,30 @@ public class Driver {
     options.setReflectionOptions(ReflectionOptions.NONE);
 
     addHybridDispatchLogic(options, scope, cha);
-//    addDefaultDispatchLogic(options, scope, cha);
     
     IRFactory<IMethod> factory = new HybridIRFactory();
     
     AnalysisCache cache = new AnalysisCache(factory);
-
-    AndroidHybridCallGraphBuilder b = new AndroidHybridCallGraphBuilder(cha, options, cache);
+    
+    AndroidHybridCallGraphBuilder b = new AndroidHybridCallGraphBuilder(cha, options, cache, Js2JavaCompatibleTypeChecker.getInstance());
     
     CallGraph cg = b.makeCallGraph(options);
 
     System.out.println("Done");
-//    VisualizeCGTest.visualizeCallGraph(cg, "/Users/leesh/tmp/cg_dex", true);
     
-    check(cg, b.getPointerAnalysis());
-//    System.err.println(cg);
+    VisualizeCGTest.visualizeCallGraph(cg, "/Users/leesh/Documents/plrg/tmp/cg_dex", true);
+    
+//    check(cg, b.getPointerAnalysis());
+    
+    printTypeWarning(b.getWarnings());
   }
+
+	private static void printTypeWarning(Set<TypeWarning> warnings) {
+		// TODO Auto-generated method stub
+		System.out.println("=== Type mismatch warnings ===");
+		for(TypeWarning tw : warnings){
+			System.out.println(tw);
+		}
+		System.out.println("==============================");
+	}
 }
