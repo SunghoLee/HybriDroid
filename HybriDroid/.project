@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>tmp/string-2.1</name>
+			<type>2</type>
+			<location>/Users/LeeSH/Downloads/string-2.1</location>
+		</link>
+	</linkedResources>
 </projectDescription>

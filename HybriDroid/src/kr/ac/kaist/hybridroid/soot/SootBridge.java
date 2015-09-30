@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import soot.Body;
+import soot.PackManager;
 import soot.PatchingChain;
 import soot.Scene;
+import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Transform;
 import soot.Unit;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
@@ -18,9 +22,14 @@ import soot.util.Chain;
 import com.ibm.wala.util.debug.Assertions;
 
 public class SootBridge {
-			
+	private List<String> args;		
 	public SootBridge(){
-		Options.v().set_whole_program(true);
+		args = new ArrayList<String>();
+		Options.v().set_src_prec(Options.src_prec_java);
+		args.add("-w");
+		args.add("-android-jars");
+		args.add("../../sdk");
+//		Options.v().set_whole_program(true);
 	}
 	
 	public void addDirScope(String dir) throws IOException{
@@ -34,7 +43,7 @@ public class SootBridge {
 		
 		@SuppressWarnings("unchecked")
 		List<String> dirList = Options.v().process_dir();
-		if(dirList == null){
+		if(dirList.isEmpty()){
 			dirList = new ArrayList<String>();
 			Options.v().set_process_dir(dirList);
 		}
@@ -52,36 +61,54 @@ public class SootBridge {
 			Assertions.UNREACHABLE("The file does not exist.");
 		
 		@SuppressWarnings("unchecked")
-		List<String> includeList = Options.v().include();
-		if(includeList == null){
+		List<String> includeList = (List<String>) Options.v().include();
+		if(includeList.isEmpty()){
 			includeList = new ArrayList<String>();
 			Options.v().set_include(includeList);
 		}
-		
+		args.add("-src-prec format ");
+		args.add("apk");
+		args.add("-process-dir");
+		args.add(jarFile.getCanonicalPath());
 		includeList.add(jarFile.getCanonicalPath());
 	}
 	
-	public void addDexScope(String dex) throws IOException{
-		File dexFile = new File(dex);
+	public void addDexScope(String apk) throws IOException{
+		File apkFile = new File(apk);
 		
-		if(!dex.endsWith(".dex"))
+		if(!apk.endsWith(".apk"))
 			Assertions.UNREACHABLE("The file is not 'dex' format.");
 		
-		if(!dexFile.exists())
-			Assertions.UNREACHABLE("The file does not exist.");
+		if(!apkFile.exists())
+			Assertions.UNREACHABLE("The file does not exist: " + apkFile.getCanonicalPath());
 		
 		@SuppressWarnings("unchecked")
 		List<String> includeList = Options.v().include();
-		if(includeList == null){
+		if(includeList.isEmpty()){
 			includeList = new ArrayList<String>();
 			Options.v().set_include(includeList);
 		}
 		
-		includeList.add(dexFile.getCanonicalPath());
+		includeList.add(apkFile.getCanonicalPath());
 	}
 	
 	public CallGraph getCallGraph(){
+		PackManager.v().getPack("cg").add(
+			      new Transform("cg.myTransform", new SceneTransformer() {
+			        protected void internalTransform(String phaseName,
+			            Map options) {
+			          System.err.println(Scene.v().getCallGraph());
+			        }
+			      }));
+		soot.Main.main(convert2StrArray(args));
 		return Scene.v().getCallGraph();
+	}
+	
+	private String[] convert2StrArray(List<String> list){
+		String[] strArray = new String[list.size()];
+		for(int i=0; i<list.size(); i++)
+			strArray[i] = list.get(i);
+		return strArray;
 	}
 	
 	public Chain<SootClass> getAllClasses(){

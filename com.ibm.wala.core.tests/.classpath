@@ -6,11 +6,10 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/junit-4.11.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/org.osgi.core-4.2.0.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/tools/eclipse/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/jericho-html-3.2.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/tools/eclipse/plugins/org.apache.ant_1.9.2.v201404171502/lib/ant.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/jericho-html-3.2.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.osgi.core-4.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

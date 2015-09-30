@@ -4,16 +4,16 @@
 	<classpathentry kind="src" path="dat"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/jericho-html-3.2.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/tools/eclipse/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/org.osgi.core-4.2.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/commons-compiler-2.6.1.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/commons-lang3-3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.osgi.core-4.2.0.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/jericho-html-3.2.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/commons-compiler-2.6.1.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/commons-cli-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

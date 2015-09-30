@@ -6,11 +6,11 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/junit-4.11.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
-	<classpathentry kind="lib" path="/Users/leesh/tools/eclipse/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/org.osgi.core-4.2.0.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.osgi.core-4.2.0.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/junit-4.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

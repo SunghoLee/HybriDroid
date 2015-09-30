@@ -3,12 +3,12 @@
 	<classpathentry kind="src" path="source"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/rhino-1.7.3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/org.osgi.core-4.2.0.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/tools/eclipse/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/rhino-1.7.3.1.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.osgi.core-4.2.0.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/org.eclipse.core.runtime-3.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

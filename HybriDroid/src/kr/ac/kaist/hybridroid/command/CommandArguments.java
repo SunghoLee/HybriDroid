@@ -16,6 +16,7 @@ public class CommandArguments {
 	static final public String DROIDEL_ARG = "droidel";
 	static final public String MANIFEST_ARG = "manifest";
 	static final public String CFG_ARG = "cfg";
+	static final public String PRE_STRING_ARG = "prestr";
 	
 	static{
 		options = new Options();
@@ -31,7 +32,7 @@ public class CommandArguments {
 		OptionGroup functions = new OptionGroup();
 		functions.addOption(new Option(CFG_ARG, false, "construct cfg for the android application"));
 		options.addOptionGroup(functions);
-		
+//		options.addOption(new Option(PRE_STRING_ARG, false, "pre-analysis for "), hasArg, description)
 		options.addOption(new Option(DROIDEL_ARG, false, "enable pre transforming using DROIDEL"));
 		options.addOption(new Option(MANIFEST_ARG, false, "enable the manifest analysis"));
 	}

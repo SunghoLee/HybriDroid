@@ -11,6 +11,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/junit-4.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

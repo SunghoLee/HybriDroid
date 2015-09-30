@@ -12,9 +12,12 @@ import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
+import kr.ac.kaist.hybridroid.soot.SootBridge;
 
 import org.apache.commons.cli.ParseException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
+
+import soot.jimple.toolkits.callgraph.CallGraph;
 
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.properties.WalaProperties;
@@ -77,6 +80,12 @@ public class Shell {
 		 */
 		// Build Control-flow Graph.
 		if (cArgs.has(CommandArguments.CFG_ARG)) {
+//			StringAnalysisWithJSA preAnalyzer = new StringAnalysisWithJSA();
+//			preAnalyzer.addAnalysisScope(targetPath);
+			SootBridge bridge = new SootBridge();
+			bridge.addDexScope(targetPath);
+			CallGraph cg = bridge.getCallGraph();
+			System.out.println("SOOT: " + cg.toString());
 			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
 					target, cArgs.has(CommandArguments.DROIDEL_ARG));
 

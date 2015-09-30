@@ -2,11 +2,9 @@ package kr.ac.kaist.hybridroid.preanalysis.jsa;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Set;
 
 import kr.ac.kaist.hybridroid.soot.SootBridge;
-import soot.ValueBox;
 
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.util.debug.Assertions;
@@ -27,7 +25,7 @@ public class StringAnalysisWithJSA {
 			Assertions.UNREACHABLE("File is not exist: " + path);
 		
 		if(file.isDirectory())
-			bridge.addDirScope(path);
+				bridge.addDirScope(path);
 		else
 			if(path.endsWith(".dex"))
 				bridge.addDexScope(path);
