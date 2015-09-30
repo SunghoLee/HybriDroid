@@ -1,67 +1,156 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="com.ibm.wala.cast.js" default="getJars" basedir=".">
-
-  <property name="basews" value="${ws}"/>
-  <property name="baseos" value="${os}"/>
-  <property name="basearch" value="${arch}"/>
-  <property name="basenl" value="${nl}"/>
-  
-  <!-- Compiler settings. -->
-  <property name="javacFailOnError" value="true"/>
-  <property name="javacDebugInfo" value="on"/>
-  <property name="javacVerbose" value="false"/>
-  <property name="logExtension" value=".log"/>
-  <property name="compilerArg" value=""/>
-  <property name="javacSource" value="1.5"/>
-  <property name="javacTarget" value="1.5"/>
-  <!-- This property has been updated to correspond to the paths used by the latest Java update
-       on Mac OS X 10.6 (Java version 1.6.0_22).  If you are not using this version of Mac OS X or Java,
-       try changing the value of the property to "${java.home}/../../../Classes" -->
-  <condition property="dir_bootclasspath" value="${java.home}/../Classes">
-    <os family="mac"/>
-  </condition>
-  <property name="dir_bootclasspath" value="${java.home}/lib"/>
-  <path id="path_bootclasspath">
-    <fileset dir="${dir_bootclasspath}">
-      
-      <include name="*.jar"/>
-    </fileset>
-  </path>	
-  <property name="bootclasspath" refid="path_bootclasspath"/>
-  <property name="bundleJavacSource" value="${javacSource}"/>
-  <property name="bundleJavacTarget" value="${javacTarget}"/>
-  <property name="bundleBootClasspath" value="${bootclasspath}"/>
-  
-  <target name="JerichoPresent" depends="init">
-    <available file="${plugin.destination}/lib/jericho-html-3.2.jar" property="jericho.present"/>
-  </target>
-  
-  <target name="fetchJericho" depends="JerichoPresent" unless="jericho.present">
-    <delete dir="${temp.folder}"/>
-    <mkdir dir="${temp.folder}"/>
-    <get src="http://sourceforge.net/projects/jerichohtml/files/jericho-html/3.2/jericho-html-3.2.zip/download" dest="${temp.folder}/jericho-html-3.2.zip"/>
-    <unzip src="${temp.folder}/jericho-html-3.2.zip" dest="${temp.folder}"/>
-    <copy file="${temp.folder}/jericho-html-3.2/dist/jericho-html-3.2.jar" tofile="${plugin.destination}/lib/jericho-html-3.2.jar" />
-    <delete dir="${temp.folder}"/>
-  </target>  
-  
-  <target name="getJars" depends="fetchJericho" />
-  
-  <target name="init" depends="properties">
-    <condition property="pluginTemp" value="${buildTempFolder}/plugins">
-      <isset property="buildTempFolder"/>
-    </condition>
-    <property name="pluginTemp" value="${basedir}"/>
-    <condition property="build.result.folder" value="${pluginTemp}/com.ibm.wala.core.testdata">
-      <isset property="buildTempFolder"/>
-    </condition>
-    <property name="build.result.folder" value="${basedir}"/>
-    <property name="temp.folder" value="${basedir}/temp.folder"/>
-    <property name="plugin.destination" value="${basedir}"/>
-  </target>
-  
-  <target name="properties" if="eclipse.running">
-    <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-  </target>
-  
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="com.ibm.wala.cast.js">
+    <property environment="env"/>
+    <property name="HybriDroid.location" value="../HybriDroid"/>
+    <property name="HybriDroid.util.location" value="../HybriDroid.util"/>
+    <property name="com.ibm.wala.cast.js.rhino.location" value="../com.ibm.wala.cast.js.rhino"/>
+    <property name="com.ibm.wala.cast.js.test.location" value="../com.ibm.wala.cast.js.test"/>
+    <property name="com.ibm.wala.util.location" value="../com.ibm.wala.util"/>
+    <property name="com.ibm.wala.shrike.location" value="../com.ibm.wala.shrike"/>
+    <property name="com.ibm.wala.core.location" value="../com.ibm.wala.core"/>
+    <property name="com.ibm.wala.cast.location" value="../com.ibm.wala.cast"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.cast.js]].libraryclasspath"/>
+    <path id="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.core]].libraryclasspath"/>
+    <path id="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.util]].libraryclasspath"/>
+    <path id="com.ibm.wala.util.classpath">
+        <pathelement location="${com.ibm.wala.util.location}/bin"/>
+        <path refid="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.util]].libraryclasspath"/>
+    </path>
+    <path id="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.shrike]].libraryclasspath"/>
+    <path id="com.ibm.wala.shrike.classpath">
+        <path refid="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.shrike]].libraryclasspath"/>
+        <pathelement location="${com.ibm.wala.shrike.location}/bin"/>
+        <path refid="com.ibm.wala.util.classpath"/>
+    </path>
+    <path id="com.ibm.wala.core.classpath">
+        <path refid="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.core]].libraryclasspath"/>
+        <pathelement location="${com.ibm.wala.core.location}/bin"/>
+        <path refid="com.ibm.wala.util.classpath"/>
+        <path refid="com.ibm.wala.shrike.classpath"/>
+    </path>
+    <path id="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.cast]].libraryclasspath"/>
+    <path id="com.ibm.wala.cast.classpath">
+        <path refid="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.cast]].libraryclasspath"/>
+        <pathelement location="${com.ibm.wala.cast.location}/../libs/commons-io-2.4.jar"/>
+        <path refid="com.ibm.wala.core.classpath"/>
+        <path refid="com.ibm.wala.util.classpath"/>
+        <path refid="com.ibm.wala.shrike.classpath"/>
+        <pathelement location="${com.ibm.wala.cast.location}/bin"/>
+        <pathelement location="${com.ibm.wala.cast.location}/../../../../../../tools/eclipse/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar"/>
+        <pathelement location="${com.ibm.wala.cast.location}/../libs/org.osgi.core-4.2.0.jar"/>
+    </path>
+    <path id="com.ibm.wala.cast.js.classpath">
+        <pathelement location="bin"/>
+        <path refid="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.cast.js]].libraryclasspath"/>
+        <pathelement location="../libs/jericho-html-3.2.jar"/>
+        <pathelement location="../libs/commons-io-2.4.jar"/>
+        <pathelement location="../../../../../../tools/eclipse/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar"/>
+        <pathelement location="../libs/org.osgi.core-4.2.0.jar"/>
+        <path refid="com.ibm.wala.core.classpath"/>
+        <path refid="com.ibm.wala.cast.classpath"/>
+        <path refid="com.ibm.wala.util.classpath"/>
+        <pathelement location="../libs/commons-cli-1.2.jar"/>
+        <pathelement location="../libs/commons-compiler-2.6.1.jar"/>
+        <pathelement location="../libs/commons-lang3-3.1.jar"/>
+        <path refid="com.ibm.wala.shrike.classpath"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="source">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="dat">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall">
+        <ant antfile="build.xml" dir="${com.ibm.wala.util.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.shrike.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.core.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.location}" inheritAll="false" target="clean"/>
+    </target>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects">
+        <ant antfile="build.xml" dir="${com.ibm.wala.util.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.shrike.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.core.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+    </target>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="source"/>
+            <src path="dat"/>
+            <classpath refid="com.ibm.wala.cast.js.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
+        <ant antfile="build.xml" dir="${HybriDroid.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${HybriDroid.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${HybriDroid.util.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${HybriDroid.util.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.rhino.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.rhino.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.test.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.test.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+    </target>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
 </project>

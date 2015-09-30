@@ -14,8 +14,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Set;
 
-import kar.ac.kaist.hybridroid.t.T;
-
 import com.ibm.wala.analysis.typeInference.TypeInference;
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
@@ -712,7 +710,6 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
 
         system.newSideEffect(new ReceiverForDispatchOp(), receiverKey);
       }
-      T.t = false;
     }
     
     // ///////////////////////////////////////////////////////////////////////////

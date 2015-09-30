@@ -16,5 +16,8 @@
 	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/dexlib-1.3.4-dev.jar"/>
 	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="/Users/leesh/tools/eclipse/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
+	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/hybridroid/WALA/libs/commons-cli-1.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JSA"/>
+	<classpathentry kind="lib" path="/Users/leesh/Documents/workspace_Hybrid/JSA/lib/soot.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

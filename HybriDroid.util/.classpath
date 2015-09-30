@@ -10,7 +10,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.rhino"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.test"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.testdata"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.dalvik"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>

@@ -3,13 +3,15 @@ package kr.ac.kaist.hybridroid.callgraph;
 import java.util.Collection;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.checker.Js2JavaCompatibleTypeChecker;
-import kr.ac.kaist.hybridroid.checker.Js2JavaCompatibleTypeChecker.TypeWarning;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.hybridroid.pointer.InterfaceClass;
 import kr.ac.kaist.hybridroid.pointer.JSCompatibleClassFilter;
+import kr.ac.kaist.hybridroid.pointer.JavaCompatibleClassFilter;
 import kr.ac.kaist.hybridroid.pointer.MockupInstanceKey;
 import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
+import kr.ac.kaist.hybridroid.util.print.IRPrinter;
 
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.ipa.callgraph.ReflectedFieldPointerKey;
@@ -35,11 +37,14 @@ import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationSystem;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.TypeReference;
@@ -64,18 +69,17 @@ public class AndroidHybridCallGraphBuilder extends
 			.findOrCreateAsciiAtom("addJavascriptInterface");
 	private static final Atom interfAnnotationName = Atom
 			.findOrCreateAsciiAtom("JavascriptInterface");
-	private Js2JavaCompatibleTypeChecker typeChecker;
+	private HybridAPIMisusesChecker typeChecker;
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
-			AnalysisOptions options, AnalysisCache cache, Js2JavaCompatibleTypeChecker typeChecker) {
+			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker) {
 		super(cha, options, cache);
 		// TODO Auto-generated constructor stub
-		AndroidJavaJavaScriptTypeMap.initialize(cha);
 		this.typeChecker = typeChecker;
 	}
 
 	private FilteredPointerKey getFilteredPointerKeyForInterfParams(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode node, int valueNumber, IClass filter){
-		if(AndroidJavaJavaScriptTypeMap.isJava2JSConvertable(filter)){	
+		if(AndroidJavaJavaScriptTypeMap.isJava2JsTypeCompatible(filter.getReference())){	
 			return getFilteredPointerKeyForLocal(node, valueNumber, JSCompatibleClassFilter.make(caller, inst, node, valueNumber, typeChecker, filter));
 		}else{
 			// incompatible type with JS type
@@ -128,7 +132,6 @@ public class AndroidHybridCallGraphBuilder extends
 					return getFilteredPointerKeyForLocal(target, vn,
 							new FilteredPointerKey.SingleClassFilter(C));
 			}
-
 		}
 	}
 	  
@@ -140,6 +143,7 @@ public class AndroidHybridCallGraphBuilder extends
 	    // pass actual arguments to formals in the normal way
 	    for (int i = 0; i < Math.min(paramCount, argCount); i++) {
 	    	
+	    	// check the numbers between Android Java parameters and JavaScript arguments.
 	    	if(typeChecker != null)
 	    		typeChecker.argNumCheck(caller, instruction, target.getMethod(), paramCount, argCount);
 	    	
@@ -162,8 +166,11 @@ public class AndroidHybridCallGraphBuilder extends
 	    		typeChecker.returnTypeCheck(caller, instruction, target.getMethod());
 	    	
 	      PointerKey RF = this.getPointerKeyForReturnValue(target);
-	      PointerKey RA = this.getPointerKeyForLocal(caller, instruction.getDef(0));
-	      this.getSystem().newConstraint(RA, assignOperator, RF);
+//	      PointerKey RA = this.getPointerKeyForLocal(caller, instruction.getDef(0));
+	      PointerKey RA = this.getFilteredPointerKeyForLocal(caller, instruction.getDef(0), JavaCompatibleClassFilter.make(caller, instruction, target, typeChecker));
+		  
+//	      this.getSystem().newConstraint(RA, assignOperator, RF);
+	      this.getSystem().newConstraint(RA, this.filterOperator, RF);
 	    }
 
 	    PointerKey EF = this.getPointerKeyForExceptionalReturnValue(target);
@@ -237,25 +244,18 @@ public class AndroidHybridCallGraphBuilder extends
 						if (symTab.isConstant(nameUse)) {
 							String name = (String) symTab
 									.getConstantValue(nameUse);
-
-							// only support intra created object.
-							if (!(defInst instanceof SSANewInstruction)) {
-								// TODO: Track the object creation site between
-								// methods
-								System.err.println("-------");
-								System.err.println("# caller: " + node);
-								System.err
-										.println("# method: addJavascriptInterface");
-								System.err.println("# object paramter: "
-										+ objUse);
-								System.err.println("\tlocal creation? no");
-								System.err.println("-------");
-								Assertions
-										.UNREACHABLE("now, only support local creation object of 'addJavascriptInterface' object parameter.");
+							
+							NewSiteReference newSite = getLocalCreationSite(ir.getInstructions(), caller.getDU(), objUse);
+							
+							if(newSite == null){
+								try {
+									throw new NotLocalCreationException(caller, invoke, objUse);
+								} catch (NotLocalCreationException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							}
-
-							NewSiteReference newSite = ((SSANewInstruction) defInst)
-									.getNewSite();
+							
 							TypeReference tr = newSite.getDeclaredType();
 							
 							IClass objClass = cha.lookupClass(tr);
@@ -263,6 +263,7 @@ public class AndroidHybridCallGraphBuilder extends
 							cha.addClass(wClass);
 							
 							Collection<IMethod> methods = wClass.getAllMethods();
+							
 							
 							InstanceKey objKey = new AllocationSite(
 									caller.getMethod(), newSite, wClass);
@@ -290,12 +291,13 @@ public class AndroidHybridCallGraphBuilder extends
 							
 							for (IMethod method : methods) {
 								if (hasJavascriptInterfaceAnnotation(method)) {
+									System.err.println("\t#method: " + method);
 									wClass.addMethodAsField(method);
 									String mname = method.getName().toString();
 									IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
 									
 									PointerKey constantPK = builder.getPointerKeyForInstanceField(objKey, f);
-									
+									System.err.println("\t#CK: " + constantPK);
 									InstanceKey ik = makeMockupInstanceKey(method);
 									
 									system.findOrCreateIndexForInstanceKey(ik);
@@ -368,7 +370,30 @@ public class AndroidHybridCallGraphBuilder extends
 			}
 		};
 	}
-
+	
+	private NewSiteReference getLocalCreationSite(SSAInstruction[] insts, DefUse du, int objUse){
+		SSAInstruction defInst = du.getDef(objUse);
+		
+		if(defInst instanceof SSANewInstruction){
+			return ((SSANewInstruction)defInst).getNewSite();
+		}else if(defInst instanceof SSAGetInstruction){
+			SSAGetInstruction getInst = (SSAGetInstruction)defInst;
+			FieldReference F = getInst.getDeclaredField();
+			int objectF = getInst.getUse(0);
+			for(int index = defInst.iindex-1; index > -1; index--){
+				SSAInstruction targetInst = insts[index];
+				if(targetInst != null && targetInst instanceof SSAPutInstruction){
+					SSAPutInstruction putInst = (SSAPutInstruction)targetInst;
+					if(putInst.getDeclaredField().equals(F) && putInst.getUse(0) == objectF)
+						return getLocalCreationSite(insts, du, putInst.getUse(1));
+				}
+			}
+		}
+		// Fail to find the object creation site in the method. 
+		return null;
+	}
+	
+	
 	/**
 	 * making a mock-up instance key for the method which can be called from a
 	 * JavaScript call site.
@@ -404,14 +429,52 @@ public class AndroidHybridCallGraphBuilder extends
 	}
 		
 	private InterfaceClass wrappingClass(IClass objClass){
-		return InterfaceClass.wrapping(objClass);
+		return InterfaceClass.wrapping(objClass, cha.lookupClass(JavaScriptTypes.Root));
 	}
 	
-	public Js2JavaCompatibleTypeChecker getTypeChecker(){
+	public HybridAPIMisusesChecker getTypeChecker(){
 		return typeChecker;
 	}
 	
-	public Set<TypeWarning> getWarnings(){
+	public Set<Warning> getWarnings(){
 		return typeChecker.getWarnings();
+	}
+	
+	class NotLocalCreationException extends Exception{
+		
+		private static final long serialVersionUID = 1477197976866993695L;
+		private CGNode node;
+		private SSAInstruction inst;
+		private int obj;
+		
+		public NotLocalCreationException(CGNode node, SSAInstruction inst, int obj){
+			this.node = node;
+			this.inst = inst;
+			this.obj = obj;
+		}
+		
+		@Override
+		public String getMessage() {
+			// TODO Auto-generated method stub
+			
+			String msg = "-------\n";
+			msg += "# caller: " + node +"\n";
+			msg += "# instruction: " + "(" + inst.iindex + ") " + inst +"\n";
+			msg += "# targetMethod: addJavascriptInterface\n";
+			msg += "# object paramter: " + obj + "\n";
+			msg += "\tlocal creation? no\n";
+			msg += "-------\n";
+				
+			msg += IRPrinter.getPrintableInstructios(node);
+
+			return msg;
+		}
+
+		@Override
+		public String toString() {
+			// TODO Auto-generated method stub
+			return getMessage();
+		}
+		
 	}
 }

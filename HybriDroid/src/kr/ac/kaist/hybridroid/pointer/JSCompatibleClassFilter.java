@@ -3,36 +3,48 @@ package kr.ac.kaist.hybridroid.pointer;
 import java.util.HashSet;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.checker.Js2JavaCompatibleTypeChecker;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
+import com.ibm.wala.ipa.callgraph.propagation.ConstantKey;
 import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey.SingleClassFilter;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointsToSetVariable;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationSystem;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.IntSetAction;
 import com.ibm.wala.util.intset.IntSetUtil;
+
+/**
+ * JavaScript to Android Java type compatible class filter.
+ * This filter can be used for a parameter of bridge methods.
+ * The input JavaScript argument is converted to corresponding Android Java value.
+ * If type checker is set, the type checker collects mis-matched type warnings.  
+ * @author Sungho Lee
+ */
 
 public class JSCompatibleClassFilter extends SingleClassFilter {
 	final private CGNode caller;
 	final private SSAAbstractInvokeInstruction inst;
 	final private CGNode target;
 	final private int argNum;
-	final private Js2JavaCompatibleTypeChecker typeChecker;
+	final private HybridAPIMisusesChecker typeChecker;
 	
-	public static JSCompatibleClassFilter make(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode target, int argNum, Js2JavaCompatibleTypeChecker typeChecker, IClass concreteType){
-		if(!AndroidJavaJavaScriptTypeMap.isJava2JSConvertable(concreteType))
-			Assertions.UNREACHABLE("cannot convert this type to a JS type : " + concreteType);
+	
+	public static JSCompatibleClassFilter make(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode target, int argNum, HybridAPIMisusesChecker typeChecker, IClass concreteClass){
+		if(!AndroidJavaJavaScriptTypeMap.isJava2JsTypeCompatible(concreteClass.getReference()))
+			Assertions.UNREACHABLE("cannot convert this type to a JS type : " + concreteClass);
 		
-		return new JSCompatibleClassFilter(caller, inst, target, argNum, typeChecker, concreteType);
+		return new JSCompatibleClassFilter(caller, inst, target, argNum, typeChecker, concreteClass);
 	}
 	
-	private JSCompatibleClassFilter(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode target, int argNum, Js2JavaCompatibleTypeChecker typeChecker, IClass concreteType){
+	private JSCompatibleClassFilter(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode target, int argNum, HybridAPIMisusesChecker typeChecker, IClass concreteType){
 		super(concreteType);
 		this.caller = caller;
 		this.inst = inst;
@@ -51,14 +63,24 @@ public class JSCompatibleClassFilter extends SingleClassFilter {
 					// TODO Auto-generated method stub
 					InstanceKey ik = system.getInstanceKey(x);
 					
-					InstanceKey convertedIK = AndroidJavaJavaScriptTypeMap.js2JavaTypeConvert(ik, getConcreteType());
-					
-					//argument type checking
-					if(typeChecker != null)
-						typeChecker.argTypeCheck(caller, inst, argNum, target.getMethod(), getConcreteType().getReference(), ik.getConcreteType().getReference());
+					TypeReference jsType = ik.getConcreteType().getReference();
+					TypeReference javaType = getConcreteType().getReference();
 
-					int newX = system.findOrCreateIndexForInstanceKey(convertedIK);
-					xs.add(newX);
+					//type conversion from JavaScript to Java
+					if(AndroidJavaJavaScriptTypeMap.isJs2JavaTypeCompatible(jsType, javaType)){
+						InstanceKey convertedKey = null;
+						
+						if(ik instanceof ConcreteTypeKey){
+							convertedKey = new ConcreteTypeKey(getConcreteType());
+						}else if(ik instanceof ConstantKey){
+							convertedKey = new ConstantKey(((ConstantKey)ik).getValue(), getConcreteType());
+						}else
+							Assertions.UNREACHABLE("instance key must be either ConcreteTypeKey or ConstantKey.");
+						
+						int newX = system.findOrCreateIndexForInstanceKey(convertedKey);
+						xs.add(newX);
+					}else if(typeChecker != null) //argument type checking
+						typeChecker.argTypeCheck(caller, inst, argNum, target.getMethod(), getConcreteType().getReference(), ik.getConcreteType().getReference());
 				}
            	});
         }

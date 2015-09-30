@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="com.ibm.wala.util">
+    <property environment="env"/>
+    <property name="HybriDroid.location" value="../HybriDroid"/>
+    <property name="HybriDroid.util.location" value="../HybriDroid.util"/>
+    <property name="com.ibm.wala.cast.location" value="../com.ibm.wala.cast"/>
+    <property name="com.ibm.wala.cast.java.location" value="../com.ibm.wala.cast.java"/>
+    <property name="com.ibm.wala.cast.js.location" value="../com.ibm.wala.cast.js"/>
+    <property name="com.ibm.wala.cast.js.rhino.location" value="../com.ibm.wala.cast.js.rhino"/>
+    <property name="com.ibm.wala.cast.js.test.location" value="../com.ibm.wala.cast.js.test"/>
+    <property name="com.ibm.wala.cast.test.location" value="../com.ibm.wala.cast.test"/>
+    <property name="com.ibm.wala.core.location" value="../com.ibm.wala.core"/>
+    <property name="com.ibm.wala.core.tests.location" value="../com.ibm.wala.core.tests"/>
+    <property name="com.ibm.wala.dalvik.location" value="../com.ibm.wala.dalvik"/>
+    <property name="com.ibm.wala.shrike.location" value="../com.ibm.wala.shrike"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.util]].libraryclasspath"/>
+    <path id="com.ibm.wala.util.classpath">
+        <pathelement location="bin"/>
+        <path refid="Persisted container [org.eclipse.pde.core.requiredPlugins for project [com.ibm.wala.util]].libraryclasspath"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="com.ibm.wala.util.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
+        <ant antfile="build.xml" dir="${HybriDroid.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${HybriDroid.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${HybriDroid.util.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${HybriDroid.util.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.java.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.java.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.rhino.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.rhino.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.test.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.js.test.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.test.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.cast.test.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.core.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.core.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.core.tests.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.core.tests.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.dalvik.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.dalvik.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${com.ibm.wala.shrike.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${com.ibm.wala.shrike.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+    </target>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+</project>

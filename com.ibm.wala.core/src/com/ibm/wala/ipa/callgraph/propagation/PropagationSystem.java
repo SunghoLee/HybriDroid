@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import kar.ac.kaist.hybridroid.t.T;
-
 import com.ibm.wala.classLoader.ArrayClass;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.fixedpoint.impl.DefaultFixedPointSolver;

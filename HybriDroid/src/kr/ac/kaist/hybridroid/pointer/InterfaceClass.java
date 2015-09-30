@@ -1,18 +1,21 @@
 package kr.ac.kaist.hybridroid.pointer;
 
+import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import com.ibm.wala.cast.loader.AstClass;
+import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
 import com.ibm.wala.classLoader.FieldImpl;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IClassLoader;
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.dalvik.classLoader.DexIClass;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.shrikeBT.Constants;
 import com.ibm.wala.types.FieldReference;
@@ -22,36 +25,104 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.strings.Atom;
 
-public class InterfaceClass implements IClass {
-
-	private static Map<IClass, InterfaceClass> classes;
-	private IClass targetClass;
-	private Map<Atom, IField> mFields;
+public class InterfaceClass extends AstClass implements IClass {
+	private static final Map<Atom, IField> emptyField = Collections.emptyMap();
+	private static final Map<Selector, IMethod> emptyMethod = Collections.emptyMap();
 	
+	private static final Map<IClass, InterfaceClass> classes;
+	private static IClass jsrootClass;
+	
+	private final IClass javaClass;
+	private final Map<Atom, IField> mFields;
+
 	static{
 		classes = new HashMap<IClass, InterfaceClass>();
 	}
 	
-	public static InterfaceClass wrapping(IClass targetClass){
-		if(classes.keySet().contains(targetClass))
-			return classes.get(targetClass);
-		InterfaceClass c = new InterfaceClass((DexIClass)targetClass);
-		classes.put(targetClass, c);
+	public static InterfaceClass wrapping(final IClass javaClass, final IClass superClass){
+		if(jsrootClass == null)
+			jsrootClass = superClass;
+		
+		if(classes.keySet().contains(javaClass))
+			return classes.get(javaClass);
+		
+		final Position pos = new Position(){
+
+			@Override
+			public int getFirstLine() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int getLastLine() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int getFirstCol() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int getLastCol() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int getFirstOffset() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int getLastOffset() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int compareTo(Object o) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public URL getURL() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Reader getReader() throws IOException {
+				// TODO Auto-generated method stub
+				return javaClass.getSource();
+			}
+		};
+
+		
+		InterfaceClass c = new InterfaceClass(pos, javaClass);
+		classes.put(javaClass, c);
+		
 		return c;
 	}
-	
-	private InterfaceClass(DexIClass targetClass) {
-//		super(targetClass.getClassLoader(),targetClass.getClassHierarchy(),targetClass.getModuleEntry()); // this is dummy super call. 
-		this.targetClass = targetClass;
+
+	protected InterfaceClass(Position pos, IClass targetClass) {
+		super(pos, targetClass.getReference().getName(), targetClass.getClassLoader(), (short) 0, emptyField, emptyMethod);
+		
 		mFields = new HashMap<Atom, IField>();
+		this.javaClass = targetClass;
 	}
 
 	public void addMethodAsField(IMethod method){
-		FieldReference fr = FieldReference.findOrCreate(targetClass.getClassLoader().getReference(), 
-				targetClass.getReference().getName().toString(), 
+		FieldReference fr = FieldReference.findOrCreate(javaClass.getClassLoader().getReference(), 
+				javaClass.getReference().getName().toString(), 
 				method.getName().toString(), 
 				method.getReference().getName().toString());
-		IField f = new FieldImpl(targetClass, fr, getAccessFlagForMethod(method), (Collection)Collections.emptySet());
+		IField f = new FieldImpl(javaClass, fr, getAccessFlagForMethod(method), (Collection)Collections.emptySet());
 		mFields.put(method.getName(), f);
 	}
 	
@@ -68,147 +139,149 @@ public class InterfaceClass implements IClass {
 	}
 	
 	@Override
+    public String toString() {
+      return "JAVA_JS_BRIDGE:" + getReference().toString();
+    }
+
+	@Override
 	public IClassHierarchy getClassHierarchy() {
 		// TODO Auto-generated method stub
-		return targetClass.getClassHierarchy();
+		return javaClass.getClassHierarchy();
 	}
 
 	@Override
 	public IClassLoader getClassLoader() {
 		// TODO Auto-generated method stub
-		return targetClass.getClassLoader();
+		return javaClass.getClassLoader();
 	}
 
 	@Override
 	public boolean isInterface() {
 		// TODO Auto-generated method stub
-		return targetClass.isInterface();
+		return javaClass.isInterface();
 	}
 
 	@Override
 	public boolean isAbstract() {
 		// TODO Auto-generated method stub
-		return targetClass.isAbstract();
+		return javaClass.isAbstract();
 	}
 
 	@Override
 	public boolean isPublic() {
 		// TODO Auto-generated method stub
-		return targetClass.isPublic();
+		return javaClass.isPublic();
 	}
 
 	@Override
 	public boolean isPrivate() {
 		// TODO Auto-generated method stub
-		return targetClass.isPrivate();
+		return javaClass.isPrivate();
 	}
 
 	@Override
 	public int getModifiers() throws UnsupportedOperationException {
 		// TODO Auto-generated method stub
-		return targetClass.getModifiers();
+		return javaClass.getModifiers();
 	}
 
 	@Override
 	public IClass getSuperclass() {
 		// TODO Auto-generated method stub
-		return targetClass.getSuperclass();
+		return jsrootClass;
 	}
 
 	@Override
-	public Collection<? extends IClass> getDirectInterfaces() {
+	public Collection<IClass> getDirectInterfaces() {
 		// TODO Auto-generated method stub
-		return targetClass.getDirectInterfaces();
+		return (Collection<IClass>) javaClass.getDirectInterfaces();
 	}
 
 	@Override
 	public Collection<IClass> getAllImplementedInterfaces() {
 		// TODO Auto-generated method stub
-		return targetClass.getAllImplementedInterfaces();
+		return javaClass.getAllImplementedInterfaces();
 	}
 
 	@Override
 	public IMethod getMethod(Selector selector) {
 		// TODO Auto-generated method stub
-		return targetClass.getMethod(selector);
+		return javaClass.getMethod(selector);
 	}
 
 	@Override
 	public IField getField(Atom name) {
 		// TODO Auto-generated method stub
-		IField f = targetClass.getField(name);
-		if(f == null && mFields.containsKey(name))
-			return mFields.get(name);
+		IField f = javaClass.getField(name);
+		if (f == null) {
+			if (mFields.containsKey(name))
+				return mFields.get(name);
+			else //TODO: get warning message for absent property read.
+				return super.getField(name);
+		}
+			
 		return f;
 	}
 
 	@Override
 	public IField getField(Atom name, TypeName type) {
 		// TODO Auto-generated method stub
-		IField f = targetClass.getField(name, type);
-		if(f == null && mFields.containsKey(name)){
-			IField mf = mFields.get(name);
-			if(mf.getFieldTypeReference().getName().equals(type))
-				return mf;
-			else
-				return null;
-		}
-		return f;
+		return this.getField(name);
 	}
 
 	@Override
 	public TypeReference getReference() {
 		// TODO Auto-generated method stub
-		return targetClass.getReference();
+		return javaClass.getReference();
 	}
 
 	@Override
 	public String getSourceFileName() throws NoSuchElementException {
 		// TODO Auto-generated method stub
-		return targetClass.getSourceFileName();
+		return javaClass.getSourceFileName();
 	}
 
 	@Override
 	public Reader getSource() throws NoSuchElementException {
 		// TODO Auto-generated method stub
-		return targetClass.getSource();
+		return javaClass.getSource();
 	}
 
 	@Override
 	public IMethod getClassInitializer() {
 		// TODO Auto-generated method stub
-		return targetClass.getClassInitializer();
+		return javaClass.getClassInitializer();
 	}
 
 	@Override
 	public boolean isArrayClass() {
 		// TODO Auto-generated method stub
-		return targetClass.isArrayClass();
+		return javaClass.isArrayClass();
 	}
 
 	@Override
 	public Collection<IMethod> getDeclaredMethods() {
 		// TODO Auto-generated method stub
-		return targetClass.getDeclaredMethods();
+		return javaClass.getDeclaredMethods();
 	}
 
 	@Override
 	public Collection<IField> getAllInstanceFields() {
 		// TODO Auto-generated method stub
-		return targetClass.getAllInstanceFields();
+		return javaClass.getAllInstanceFields();
 	}
 
 	@Override
 	public Collection<IField> getAllStaticFields() {
 		// TODO Auto-generated method stub
-		return targetClass.getAllStaticFields();
+		return javaClass.getAllStaticFields();
 	}
 
 	@Override
 	public Collection<IField> getAllFields() {
 		// TODO Auto-generated method stub
 		Collection<IField> mfset = mFields.values();
-		Collection<IField> fset = targetClass.getAllFields();
+		Collection<IField> fset = javaClass.getAllFields();
 		fset.addAll(mfset);
 		return fset;
 	}
@@ -216,37 +289,37 @@ public class InterfaceClass implements IClass {
 	@Override
 	public Collection<IMethod> getAllMethods() {
 		// TODO Auto-generated method stub
-		return targetClass.getAllMethods();
+		return javaClass.getAllMethods();
 	}
 
 	@Override
 	public Collection<IField> getDeclaredInstanceFields() {
 		// TODO Auto-generated method stub
-		return targetClass.getDeclaredInstanceFields();
+		return javaClass.getDeclaredInstanceFields();
 	}
 
 	@Override
 	public Collection<IField> getDeclaredStaticFields() {
 		// TODO Auto-generated method stub
-		return targetClass.getDeclaredStaticFields();
+		return javaClass.getDeclaredStaticFields();
 	}
 
 	@Override
 	public TypeName getName() {
 		// TODO Auto-generated method stub
-		return targetClass.getName();
+		return javaClass.getName();
 	}
 
 	@Override
 	public boolean isReferenceType() {
 		// TODO Auto-generated method stub
-		return targetClass.isReferenceType();
+		return javaClass.isReferenceType();
 	}
 
 	@Override
 	public Collection<Annotation> getAnnotations() {
 		// TODO Auto-generated method stub
-		return targetClass.getAnnotations();
+		return javaClass.getAnnotations();
 	}
 
 }

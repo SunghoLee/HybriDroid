@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.classLoader.IClass;
@@ -16,7 +17,7 @@ public class VisualizeCGTest {
 	
 	static{
 		if (System.getProperty("os.name").matches(".*Mac.*"))
-			DOT_PATH = "dot";
+			DOT_PATH = "/usr/local/bin/dot";
 		else if (System.getProperty("os.name").contains("Windows"))
 			DOT_PATH = "\"C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe\"";
 	}
@@ -39,10 +40,12 @@ public class VisualizeCGTest {
 //				return true;
 			if(fromLoader(_node.getMethod().getDeclaringClass(), JavaScriptTypes.jsLoader))
 				return true;
-//			if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Primordial))
-//				return false;
-//			if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Extension))
-//				return false;
+			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Primordial))
+				return false;
+			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Extension))
+				return false;
+			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Application))
+				return true;
 			else
 				return false;
 		}
@@ -59,6 +62,8 @@ public class VisualizeCGTest {
 //				return false;
 //			if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Extension))
 //				return false;
+			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Application))
+				return true;
 			else
 				return false;
 
@@ -101,7 +106,20 @@ public class VisualizeCGTest {
 	}
 	
 	public static void visualizeCallGraph(CallGraph cg, String _outputFileName, boolean convert){
-		File visOut = new File(_outputFileName + ".dot");
+		File folder = new File("cfg");
+		File visOut = new File("cfg/" + _outputFileName + ".dot");
+		
+		if(folder.exists())
+			folder.delete();
+		folder.mkdirs();
+		
+		try {
+			visOut.createNewFile();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
 		System.out.println("#making " + _outputFileName + ".dot...");
 		try {
 			FileOutputStream outStream = new FileOutputStream(visOut);
@@ -128,16 +146,27 @@ public class VisualizeCGTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		visOut.setReadable(true);
 		
 		if (convert) {
-			Runtime runtime = Runtime.getRuntime();
-			System.out.println("#translating " + _outputFileName + ".dot to "
-					+ _outputFileName + ".svg...");
+			String filepath = "";
+			String dirpath = "";
 			try {
-				Process tr = runtime.exec(DOT_PATH + " -Tsvg -o "
-						+ _outputFileName + ".svg -v " + _outputFileName
-						+ ".dot");
-				tr.waitFor();
+				dirpath = folder.getCanonicalPath();
+				filepath = visOut.getCanonicalPath();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			ProcessBuilder pb = new ProcessBuilder(DOT_PATH,"-Tsvg","-o",dirpath + File.separator + _outputFileName + ".svg", "-v", filepath);
+			pb.directory(folder);
+			Map<String,String> envs = pb.environment();
+//			envs.put("PATH", envs.get("PATH") + ":" + "/usr/local/bin/");
+			System.err.println("#translating to " + dirpath + File.separator + _outputFileName + ".svg");
+			try {
+				Process tr = pb.start();
+				int result = tr.waitFor();
+				System.err.println("\tTranslation result: " + result);
 			} catch (IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

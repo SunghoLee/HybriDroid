@@ -230,13 +230,12 @@ public class ClassHierarchy implements IClassHierarchy {
         if (langNames.contains(ref.getLanguage())) {
           IClassLoader icl = factory.getLoader(ref, this, scope);
           loaders[idx++] = icl;
-
           if (progressMonitor != null) {
             progressMonitor.worked(idx);
           }
         }
       }
-
+            
       for (IClassLoader icl : loaders) {
         if (progressMonitor != null) {
           progressMonitor.subTask("From " + icl.getName().toString());
@@ -286,7 +285,6 @@ public class ClassHierarchy implements IClassHierarchy {
       }
     }
     loader.removeAll(toRemove);
-
   }
 
   /**

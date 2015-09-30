@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
 
@@ -17,10 +19,18 @@ import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.classLoader.SourceURLModule;
 import com.ibm.wala.dalvik.classLoader.DexFileModule;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
+import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.io.FileProvider;
+
+/**
+ * AnalysisScope for Android Hybrid application. This class supports DROIDEL Dex
+ * scope or original Android platform scope as well as JavaScript scope.
+ * 
+ * @author Sungho Lee
+ */
 
 public class AndroidHybridAnalysisScope extends AnalysisScope {
   private static final Set<Language> languages;
@@ -40,6 +50,95 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
     loadersByName.put(JavaScriptTypes.jsLoaderName, jsLoader);
   }
 
+	/**
+	 * Find all class files in the directory. It can find classes in the
+	 * directory and the sub directories recursively.
+	 * 
+	 * @param root the root directory file.
+	 * @return list of class files in the directory.
+	 */
+  private static List<File> getAllClassesInDir(File root){
+	 List<File> list = new ArrayList<File>();
+	 File[] internals = root.listFiles();
+	 
+	 for(File f : internals){
+		 if(f.isDirectory())
+			 list.addAll(getAllClassesInDir(f));
+		 else if(f.getName().endsWith(".class"))
+			 list.add(f);
+	 }
+	 return list;
+  }
+  
+	/**
+	 * Make AnalysisScope for Android hybrid application using DROIDEL.
+	 * 
+	 * @param classpath the target apk file uri.
+	 * @param exclusions the exclusion file.
+	 * @param droidelLibpath the DROIDEL library path.
+	 * @param androidLib the Android framework directory uri.
+	 * @return AnalysisScope for Android hybrid application.
+	 * @throws IOException 
+	 */
+  public static AndroidHybridAnalysisScope setUpDroidelAnalysisScope(URI classpath, String exclusions, String droidelLibpath, URI... androidLib) throws IOException{
+	    AndroidHybridAnalysisScope scope;
+
+	    scope = new AndroidHybridAnalysisScope();
+
+	    File exclusionsFile = new File(exclusions);
+	    InputStream fs = exclusionsFile.exists() ? new FileInputStream(exclusionsFile) : FileProvider.class.getClassLoader()
+	        .getResourceAsStream(exclusionsFile.getName());
+	    scope.setExclusions(new FileOfClasses(fs));
+
+	    scope.setLoaderImpl(ClassLoaderReference.Primordial, "com.ibm.wala.dalvik.classLoader.WDexClassLoaderImpl");
+
+	    File libdir = new File(droidelLibpath);
+	    List<File> classes = getAllClassesInDir(libdir);
+	    
+	    for (File f : classes) {
+	        try {
+				scope.addClassFileToScope(ClassLoaderReference.Primordial, f);
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidClassFileException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    
+	    for (URI al : androidLib) {
+	      try {
+	    		  if(al.toString().contains("core_classes.dex"))
+	    			  scope.addToScope(ClassLoaderReference.Primordial, DexFileModule.make(new File(al)));
+	    	  }catch (Exception e) {
+	    		  e.printStackTrace();
+	    		  scope.addToScope(ClassLoaderReference.Primordial, new JarFileModule(new JarFile(new File(al))));
+	    	  }
+	    }
+	    
+	    scope.setLoaderImpl(ClassLoaderReference.Application, "com.ibm.wala.dalvik.classLoader.WDexClassLoaderImpl");
+	    
+	    scope.addToScope(ClassLoaderReference.Application, DexFileModule.make(new File(classpath)));
+	    
+	    scope = setUpJsAnalysisScope(scope, classpath);
+	    
+	    fs.close();
+	    
+	    return scope;
+  }
+  
+	/**
+	 * Make AnalysisScope for Android hybrid application. If you want to use
+	 * DROIDEL as front-end, use setUpDroidelAnalysisScope method instead of
+	 * this.
+	 * 
+	 * @param classpath the target apk file uri.
+	 * @param exclusions the exclusion file.
+	 * @param androidLib the Android framework directory uri.
+	 * @return AnalysisScope for Android hybrid application.
+	 * @throws IOException
+	 */
   public static AndroidHybridAnalysisScope setUpAndroidAnalysisScope(URI classpath, String exclusions, URI... androidLib)
       throws IOException {
     AndroidHybridAnalysisScope scope;
@@ -50,45 +149,60 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
     InputStream fs = exclusionsFile.exists() ? new FileInputStream(exclusionsFile) : FileProvider.class.getClassLoader()
         .getResourceAsStream(exclusionsFile.getName());
     scope.setExclusions(new FileOfClasses(fs));
-
+    
     scope.setLoaderImpl(ClassLoaderReference.Primordial, "com.ibm.wala.dalvik.classLoader.WDexClassLoaderImpl");
-
+    
     for (URI al : androidLib) {
       try {
-        scope.addToScope(ClassLoaderReference.Primordial, DexFileModule.make(new File(al)));
+    		  scope.addToScope(ClassLoaderReference.Primordial, DexFileModule.make(new File(al)));
       } catch (Exception e) {
         e.printStackTrace();
         scope.addToScope(ClassLoaderReference.Primordial, new JarFileModule(new JarFile(new File(al))));
       }
     }
-
+    
     scope.setLoaderImpl(ClassLoaderReference.Application, "com.ibm.wala.dalvik.classLoader.WDexClassLoaderImpl");
     
-    File apkFile = new File(classpath);
+    scope.addToScope(ClassLoaderReference.Application, DexFileModule.make(new File(classpath)));
     
-    scope.addToScope(ClassLoaderReference.Application, DexFileModule.make(apkFile));
-
-    scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
-        
-    JsAnalysisScopeReader jsScopeReader = new JsAnalysisScopeReader(apkFile);
+    scope = setUpJsAnalysisScope(scope, classpath);
     
-    //TODO: support HTML file
-    for (int i = 0; i < jsScopeReader.getJSList().size(); i++) {
-		URL script = new File(jsScopeReader.getJSList().get(i)).toURI().toURL();
-//    	URL script = new File("/Users/LeeSH/projects/hybridroid/apps/assets/www/name.js").toURI().toURL();
-		scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
-	}
-//		for (int i = 0; i < jsScopeReader.getHTMLList().size(); i++) {
-//			System.out.println("@file: "+jsScopeReader.getHTMLList().get(i));
-//			URL script = new File(jsScopeReader.getHTMLList().get(i)).toURI().toURL();
-//			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
-//		}
-          
     fs.close();
     
     return scope;
   }
 
+	/**
+	 * Add JavaScript AnalysisScope for Android hybrid application.
+	 * 
+	 * @param scope the basic AndroidHybridAnalysisScope.
+	 * @param classpath the apk file uri.
+	 * @return AndroidHybridAnalysisScope which includes JavaScript scope for the Android hybrid applicartion.
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
+  private static AndroidHybridAnalysisScope setUpJsAnalysisScope(AndroidHybridAnalysisScope scope, URI classpath) throws IllegalArgumentException, IOException{
+	    File apkFile = new File(classpath);
+	    
+	    scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
+	    
+	    
+	    JsAnalysisScopeReader jsScopeReader = new JsAnalysisScopeReader(apkFile);
+	    
+	    //TODO: support HTML file
+	    for (int i = 0; i < jsScopeReader.getJSList().size(); i++) {
+			URL script = new File(jsScopeReader.getJSList().get(i)).toURI().toURL();
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
+		}
+//			for (int i = 0; i < jsScopeReader.getHTMLList().size(); i++) {
+//				System.out.println("@file: "+jsScopeReader.getHTMLList().get(i));
+//				URL script = new File(jsScopeReader.getHTMLList().get(i)).toURI().toURL();
+//				scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
+//			}
+	    	    
+	    return scope;
+  }
+  
   public ClassLoaderReference getJavaScriptLoader() {
     return getLoader(JavaScriptTypes.jsLoaderName);
   }
