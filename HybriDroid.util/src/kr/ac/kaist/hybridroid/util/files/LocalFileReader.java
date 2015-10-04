@@ -26,6 +26,13 @@ public class LocalFileReader {
 		return libs.toArray(new URI[ libs.size() ]);
 	}
 	
+	public static URI androidJar(Properties walaProperties) {
+		File libFile = new File(walaProperties.getProperty(ANDROID_RT_JAVA_JAR));
+		System.err.println("#lib: "+libFile.getAbsolutePath()+"("+libFile.exists()+")");
+		
+		return libFile.toURI();
+	}
+	
 	public static File droidelAndroidLib(Properties walaProperties) {
 		File libFile = new File(walaProperties.getProperty(DROIDEL_ANDROID_JAR));
 		System.err.println("#android_lib: "+libFile.getAbsolutePath());

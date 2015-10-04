@@ -4,32 +4,33 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import soot.Body;
-import soot.PackManager;
 import soot.PatchingChain;
 import soot.Scene;
-import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.Transform;
 import soot.Unit;
-import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.ValueBox;
+import soot.jimple.InvokeExpr;
+import soot.jimple.Stmt;
 import soot.options.Options;
 import soot.util.Chain;
 
 import com.ibm.wala.util.debug.Assertions;
 
 public class SootBridge {
-	private List<String> args;		
+	
+	private int localID = 0;
+	private boolean isClassLoaded = false;
+	
 	public SootBridge(){
-		args = new ArrayList<String>();
-		Options.v().set_src_prec(Options.src_prec_java);
-		args.add("-w");
-		args.add("-android-jars");
-		args.add("../../sdk");
-//		Options.v().set_whole_program(true);
+		Options.v().set_src_prec(Options.src_prec_apk);
+		Options.v().set_whole_program(true);
+//		Options.v().set_verbose(true);
+		Options.v().set_allow_phantom_refs(true);
+//		Options.v().set_app(true);
+//		PhaseOptions.v().setPhaseOption("cg.cha", "verbose");
 	}
 	
 	public void addDirScope(String dir) throws IOException{
@@ -51,29 +52,31 @@ public class SootBridge {
 		dirList.add(dirFile.getCanonicalPath());
 	}
 	
-	public void addJarScope(String jar) throws IOException{
+	public void setAndroidJar(String jar){
 		File jarFile = new File(jar);
-		
 		if(!jar.endsWith(".jar"))
 			Assertions.UNREACHABLE("The file is not 'Jar' format.");
 		
 		if(!jarFile.exists())
 			Assertions.UNREACHABLE("The file does not exist.");
 		
-		@SuppressWarnings("unchecked")
-		List<String> includeList = (List<String>) Options.v().include();
-		if(includeList.isEmpty()){
-			includeList = new ArrayList<String>();
-			Options.v().set_include(includeList);
-		}
-		args.add("-src-prec format ");
-		args.add("apk");
-		args.add("-process-dir");
-		args.add(jarFile.getCanonicalPath());
-		includeList.add(jarFile.getCanonicalPath());
+		Options.v().set_android_jars(jar);
 	}
 	
-	public void addDexScope(String apk) throws IOException{
+	public void setJavaEnv(String jar){
+		jar = "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/charsets.jar";
+//		File jarFile = new File(jar);
+//		
+//		if(!jar.endsWith(".jar"))
+//			Assertions.UNREACHABLE("The file is not 'Jar' format.");
+//		
+//		if(!jarFile.exists())
+//			Assertions.UNREACHABLE("The file does not exist.");
+		
+		Options.v().set_soot_classpath(jar);
+	}
+	
+	public void setTargetApk(String apk) throws IOException{
 		File apkFile = new File(apk);
 		
 		if(!apk.endsWith(".apk"))
@@ -82,26 +85,47 @@ public class SootBridge {
 		if(!apkFile.exists())
 			Assertions.UNREACHABLE("The file does not exist: " + apkFile.getCanonicalPath());
 		
-		@SuppressWarnings("unchecked")
-		List<String> includeList = Options.v().include();
-		if(includeList.isEmpty()){
-			includeList = new ArrayList<String>();
-			Options.v().set_include(includeList);
+		List<String> targets = Options.v().process_dir();
+		if(targets.isEmpty()){
+			targets = new ArrayList<String>();
+			Options.v().set_process_dir(targets);
 		}
-		
-		includeList.add(apkFile.getCanonicalPath());
+		targets.add(apk);
+//		Options.v().set_soot_classpath(apkFile.getCanonicalPath());
 	}
 	
-	public CallGraph getCallGraph(){
-		PackManager.v().getPack("cg").add(
-			      new Transform("cg.myTransform", new SceneTransformer() {
-			        protected void internalTransform(String phaseName,
-			            Map options) {
-			          System.err.println(Scene.v().getCallGraph());
-			        }
-			      }));
-		soot.Main.main(convert2StrArray(args));
-		return Scene.v().getCallGraph();
+	public List<ValueBox> getHotspots(String methodName, int paramNum, int argIndex){
+		if(paramNum < argIndex + 1)
+			Assertions.UNREACHABLE("Parameter number must be bigger than argument index + 1.");
+		
+		List<ValueBox> hotspots = new ArrayList<ValueBox>();
+		
+		if(!isClassLoaded){
+			isClassLoaded = true;
+			Scene.v().loadNecessaryClasses();
+		}
+		
+		for(SootClass sootclass : Scene.v().getApplicationClasses()){
+			if(sootclass.getJavaPackageName().startsWith("android") || sootclass.getJavaPackageName().startsWith("google"))
+				continue;
+			for(SootMethod sootmethod : sootclass.getMethods()){
+				if(sootmethod.isConcrete()){
+					for(Unit unit : this.getStmts(sootmethod)){
+						Stmt stmt = (Stmt)unit;
+						if(stmt.containsInvokeExpr()){
+							InvokeExpr invoke = stmt.getInvokeExpr();
+							if(invoke.getMethod().getName().equals(methodName) && invoke.getMethod().getParameterCount() == paramNum){
+								ValueBox hotspot = invoke.getArgBox(argIndex);
+								System.out.println("hotspot: " + invoke.getMethod().getSignature());
+								System.out.println("hotspot: " + hotspot);
+								hotspots.add(hotspot);
+							}
+						}
+					}
+				}
+			}
+		}
+		return hotspots;
 	}
 	
 	private String[] convert2StrArray(List<String> list){

@@ -13,16 +13,20 @@ import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
 import kr.ac.kaist.hybridroid.soot.SootBridge;
+import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
 
 import org.apache.commons.cli.ParseException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
 
-import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.Scene;
+import soot.ValueBox;
 
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.properties.WalaProperties;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
+
+import dk.brics.string.StringAnalysis;
 
 /**
  * HybriDroid is a framework to analyze Android hybrid applications. It is
@@ -83,9 +87,16 @@ public class Shell {
 //			StringAnalysisWithJSA preAnalyzer = new StringAnalysisWithJSA();
 //			preAnalyzer.addAnalysisScope(targetPath);
 			SootBridge bridge = new SootBridge();
-			bridge.addDexScope(targetPath);
-			CallGraph cg = bridge.getCallGraph();
-			System.out.println("SOOT: " + cg.toString());
+			System.out.println("Android libs: " + LocalFileReader.androidJar(Shell.walaProperties));
+			bridge.setAndroidJar(LocalFileReader.androidJar(Shell.walaProperties).getPath());
+			bridge.setTargetApk(targetPath);
+			bridge.setJavaEnv("");
+//			CallGraph cg = bridge.getCallGraph();
+			List<ValueBox> hotspots = StringAnalysis.getArgumentExpressions("<android.webkit.WebView: void loadUrl(java.lang.String)>", 0);//bridge.getHotspots("loadUrl", 1, 0);
+			Scene.v().getApplicationClasses();
+			System.out.println("hotspots: " + hotspots);
+			StringAnalysis strAnal = new StringAnalysis(hotspots);
+//			strAnal
 			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
 					target, cArgs.has(CommandArguments.DROIDEL_ARG));
 

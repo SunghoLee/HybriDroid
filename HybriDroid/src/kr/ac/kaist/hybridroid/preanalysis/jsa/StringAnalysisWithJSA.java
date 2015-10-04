@@ -27,10 +27,10 @@ public class StringAnalysisWithJSA {
 		if(file.isDirectory())
 				bridge.addDirScope(path);
 		else
-			if(path.endsWith(".dex"))
-				bridge.addDexScope(path);
+			if(path.endsWith(".dex") || path.endsWith(".apk"))
+				bridge.setTargetApk(path);
 			else if(path.endsWith(".jar"))
-				bridge.addJarScope(path);
+				bridge.setAndroidJar(path);
 			else
 				Assertions.UNREACHABLE("The file format can not be readable: " + file.getName());			
 	}
