@@ -12,21 +12,20 @@ import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
-import kr.ac.kaist.hybridroid.soot.SootBridge;
+import kr.ac.kaist.hybridroid.preanalysis.jsa.StringAnalysisWithJSA;
+import kr.ac.kaist.hybridroid.preanalysis.spots.ArgumentHotspot;
+import kr.ac.kaist.hybridroid.preanalysis.spots.Hotspot;
 import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
 
 import org.apache.commons.cli.ParseException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
-
-import soot.Scene;
-import soot.ValueBox;
 
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.properties.WalaProperties;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
 
-import dk.brics.string.StringAnalysis;
+import dk.brics.automaton.Automaton;
 
 /**
  * HybriDroid is a framework to analyze Android hybrid applications. It is
@@ -84,18 +83,20 @@ public class Shell {
 		 */
 		// Build Control-flow Graph.
 		if (cArgs.has(CommandArguments.CFG_ARG)) {
-//			StringAnalysisWithJSA preAnalyzer = new StringAnalysisWithJSA();
-//			preAnalyzer.addAnalysisScope(targetPath);
-			SootBridge bridge = new SootBridge();
-			System.out.println("Android libs: " + LocalFileReader.androidJar(Shell.walaProperties));
-			bridge.setAndroidJar(LocalFileReader.androidJar(Shell.walaProperties).getPath());
-			bridge.setTargetApk(targetPath);
-			bridge.setJavaEnv("");
-//			CallGraph cg = bridge.getCallGraph();
-			List<ValueBox> hotspots = StringAnalysis.getArgumentExpressions("<android.webkit.WebView: void loadUrl(java.lang.String)>", 0);//bridge.getHotspots("loadUrl", 1, 0);
-			Scene.v().getApplicationClasses();
-			System.out.println("hotspots: " + hotspots);
-			StringAnalysis strAnal = new StringAnalysis(hotspots);
+			
+			StringAnalysisWithJSA strAnalyzer = new StringAnalysisWithJSA();
+			strAnalyzer.addAnalysisScope(LocalFileReader.androidJar(Shell.walaProperties).getPath());
+			strAnalyzer.addAnalysisScope(targetPath);
+			List<Hotspot> hotspots = new ArrayList<Hotspot>();
+			hotspots.add(new ArgumentHotspot("loadUrl", 1, 0));
+			strAnalyzer.analyze(hotspots);
+			for(Hotspot spot : hotspots){
+				List<Automaton> automatons = strAnalyzer.getAutomaton(spot);
+				for(Automaton automaton : automatons)
+					for(String str : automaton.getFiniteStrings())
+						System.out.println(str);
+			}
+			
 //			strAnal
 			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
 					target, cArgs.has(CommandArguments.DROIDEL_ARG));

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import kr.ac.kaist.hybridroid.preanalysis.spots.ArgumentHotspot;
+import kr.ac.kaist.hybridroid.soot.phantom.PhantomClassManager;
 import soot.Body;
 import soot.PatchingChain;
 import soot.Scene;
@@ -21,19 +23,43 @@ import com.ibm.wala.util.debug.Assertions;
 
 public class SootBridge {
 	
-	private int localID = 0;
-	private boolean isClassLoaded = false;
+	static private String JAVA_ENV = "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/jce.jar";
+	private boolean isLocked = false;
+	
+	static private String[] excludeAppPacks = {
+		"android.support"	
+	};
 	
 	public SootBridge(){
-		Options.v().set_src_prec(Options.src_prec_apk);
+		initJava();
+		Options.v().set_keep_line_number(true);
 		Options.v().set_whole_program(true);
-//		Options.v().set_verbose(true);
+        // LWG
+		Options.v().setPhaseOption("jb", "use-original-names:true");
+		Options.v().setPhaseOption("cg", "verbose:false");
+		Options.v().setPhaseOption("cg", "trim-clinit:true");
+		 //soot.options.Options.v().setPhaseOption("jb.tr", "ignore-wrong-staticness:true");
+		 				 		
+		 // don't optimize the program 
+		Options.v().setPhaseOption("wjop", "enabled:false");
+		 // allow for the absence of some classes
 		Options.v().set_allow_phantom_refs(true);
+		 
+		Options.v().set_ignore_resolution_errors(true);
+
+		Options.v().set_src_prec(Options.src_prec_apk);
+//		Options.v().set_verbose(true);
 //		Options.v().set_app(true);
 //		PhaseOptions.v().setPhaseOption("cg.cha", "verbose");
 	}
 	
+	private void initJava(){
+		Options.v().set_soot_classpath(JAVA_ENV);
+	}
+	
 	public void addDirScope(String dir) throws IOException{
+		checkLocking(false, "SootBridge is already locked.");
+		
 		File dirFile = new File(dir);
 		
 		if(!dirFile.exists())
@@ -42,7 +68,6 @@ public class SootBridge {
 		if(!dirFile.isDirectory())
 			Assertions.UNREACHABLE("The file is not a directory.");
 		
-		@SuppressWarnings("unchecked")
 		List<String> dirList = Options.v().process_dir();
 		if(dirList.isEmpty()){
 			dirList = new ArrayList<String>();
@@ -52,7 +77,9 @@ public class SootBridge {
 		dirList.add(dirFile.getCanonicalPath());
 	}
 	
-	public void setAndroidJar(String jar){
+	public void setAndroidJar(String jar) throws IOException{
+		checkLocking(false, "SootBridge is already locked.");
+		
 		File jarFile = new File(jar);
 		if(!jar.endsWith(".jar"))
 			Assertions.UNREACHABLE("The file is not 'Jar' format.");
@@ -61,22 +88,13 @@ public class SootBridge {
 			Assertions.UNREACHABLE("The file does not exist.");
 		
 		Options.v().set_android_jars(jar);
-	}
-	
-	public void setJavaEnv(String jar){
-		jar = "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/charsets.jar";
-//		File jarFile = new File(jar);
-//		
-//		if(!jar.endsWith(".jar"))
-//			Assertions.UNREACHABLE("The file is not 'Jar' format.");
-//		
-//		if(!jarFile.exists())
-//			Assertions.UNREACHABLE("The file does not exist.");
 		
-		Options.v().set_soot_classpath(jar);
+		System.err.println("@AND_JAR: " + jarFile.getCanonicalPath());
 	}
 	
 	public void setTargetApk(String apk) throws IOException{
+		checkLocking(false, "SootBridge is already locked.");
+		
 		File apkFile = new File(apk);
 		
 		if(!apk.endsWith(".apk"))
@@ -91,20 +109,46 @@ public class SootBridge {
 			Options.v().set_process_dir(targets);
 		}
 		targets.add(apk);
-//		Options.v().set_soot_classpath(apkFile.getCanonicalPath());
+		
+		System.err.println("@APK_TARGET: " + apkFile.getCanonicalPath());
 	}
 	
-	public List<ValueBox> getHotspots(String methodName, int paramNum, int argIndex){
+	public void lock(){
+		if(isLocked == false){
+			System.err.println("CLASSPATH: " + Scene.v().getSootClassPath());
+			isLocked = true;
+			Scene.v().loadNecessaryClasses();
+			exclude();
+			PhantomClassManager.getInstance(Scene.v().getPhantomClasses()).setCommonSuperClass(Scene.v().getSootClass("java.lang.Object"));
+		}
+	}
+	
+	private void exclude(){
+		List<SootClass> appClasses = new ArrayList<SootClass>();
+		
+		for(SootClass cls : Scene.v().getApplicationClasses()){
+			for(String excludePack : excludeAppPacks)
+				if(!cls.getPackageName().startsWith(excludePack))
+					appClasses.add(cls);
+		}
+		
+		Scene.v().getApplicationClasses().clear();
+		for(SootClass cls : appClasses)
+			Scene.v().getApplicationClasses().add(cls);
+	}
+	
+	public List<ValueBox> getArgumentHotspots(ArgumentHotspot argHotspot){
+		checkLocking(true, "SootBridge must be locked before analysis.");
+		
+		String methodName = argHotspot.getMethodName();
+		int paramNum = argHotspot.getParamNum();
+		int argIndex = argHotspot.getArgIndex();
+		
 		if(paramNum < argIndex + 1)
 			Assertions.UNREACHABLE("Parameter number must be bigger than argument index + 1.");
 		
 		List<ValueBox> hotspots = new ArrayList<ValueBox>();
-		
-		if(!isClassLoaded){
-			isClassLoaded = true;
-			Scene.v().loadNecessaryClasses();
-		}
-		
+				
 		for(SootClass sootclass : Scene.v().getApplicationClasses()){
 			if(sootclass.getJavaPackageName().startsWith("android") || sootclass.getJavaPackageName().startsWith("google"))
 				continue;
@@ -116,8 +160,6 @@ public class SootBridge {
 							InvokeExpr invoke = stmt.getInvokeExpr();
 							if(invoke.getMethod().getName().equals(methodName) && invoke.getMethod().getParameterCount() == paramNum){
 								ValueBox hotspot = invoke.getArgBox(argIndex);
-								System.out.println("hotspot: " + invoke.getMethod().getSignature());
-								System.out.println("hotspot: " + hotspot);
 								hotspots.add(hotspot);
 							}
 						}
@@ -128,30 +170,32 @@ public class SootBridge {
 		return hotspots;
 	}
 	
-	private String[] convert2StrArray(List<String> list){
-		String[] strArray = new String[list.size()];
-		for(int i=0; i<list.size(); i++)
-			strArray[i] = list.get(i);
-		return strArray;
-	}
-	
 	public Chain<SootClass> getAllClasses(){
+		checkLocking(true, "SootBridge must be locked before analysis.");
 		return Scene.v().getClasses();
 	}
 	
 	public List<SootMethod> getAllMethod(SootClass c){
+		checkLocking(true, "SootBridge must be locked before analysis.");
 		return c.getMethods();
 	}
 	
 	public Body getMethodBody(SootMethod m){
+		checkLocking(true, "SootBridge must be locked before analysis.");
 		return m.retrieveActiveBody();
 	}
 	
 	public PatchingChain<Unit> getStmts(Body b){
+		checkLocking(true, "SootBridge must be locked before analysis.");
 		return b.getUnits();
 	}
 	
 	public PatchingChain<Unit> getStmts(SootMethod m){
 		return getMethodBody(m).getUnits();
+	}
+	
+	private void checkLocking(boolean check, String errMsg){
+		if(isLocked != check)
+			Assertions.UNREACHABLE(errMsg);
 	}
 }
