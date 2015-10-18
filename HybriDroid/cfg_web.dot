@@ -1,0 +1,258 @@
+digraph{
+88 [label="Node: < Primordial, Ljava/lang/AbstractStringBuilder, <init>()V > Context: CallStringContext: [ java.lang.StringBuilder.<init>(Ljava/lang/String;)V@1 ]"]
+1 [label="Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere"]
+54 [label="Node: < Primordial, Landroid/os/Handler, <init>()V > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.<init>(Lcom/example/webapptest/JSBridge;)V@2 ]"]
+8 [label="Node: < Application, Lcom/example/webapptest/MainActivity, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@7 ]"]
+75 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.String.valueOf(Ljava/lang/Object;)Ljava/lang/String;@6 ]"]
+36 [label="Node: < Primordial, Ljava/lang/StringBuilder, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@73 ]"]
+77 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.StringBuilder.append(Ljava/lang/String;)Ljava/lang/StringBuilder;@6 ]"]
+80 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.os.Message.getData()Landroid/os/Bundle;@6 ]"]
+48 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ com.example.webapptest.JSBridge.<init>(Landroid/widget/TextView;)V@0 ]"]
+12 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@12 ]"]
+52 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.String.<init>()V@10 ]"]
+50 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ java.lang.Throwable.<init>()V@1 ]"]
+2 [label="Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeWorldClinit()V > Context: Everywhere"]
+21 [label="Node: < Application, Lcom/example/webapptest/MainActivity, getStr()Ljava/lang/String; > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@25 ]"]
+23 [label="Node: < Primordial, Landroid/os/Message, <clinit>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@1 ]"]
+20 [label="Node: < Application, Lcom/example/webapptest/MainActivity, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@24 ]"]
+25 [label="Node: < Application, Lcom/example/webapptest/JSBridge$1, handleMessage(Landroid/os/Message;)V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@30 ]"]
+78 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.app.Activity.onResume()V@6 ]"]
+15 [label="Node: < Application, Lcom/example/webapptest/MainActivity$mWebViewClient, onLoadResource(Landroid/webkit/WebView;Ljava/lang/String;)V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@15 ]"]
+30 [label="Node: < Primordial, Landroid/app/Activity, setContentView(I)V > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@6 ]"]
+31 [label="Node: < Primordial, Landroid/app/Activity, findViewById(I)Landroid/view/View; > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@12 ]"]
+70 [label="Node: < Primordial, Ljava/lang/Exception, <init>()V > Context: CallStringContext: [ java.lang.RuntimeException.<init>(Ljava/lang/String;)V@1 ]"]
+84 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.content.ContextWrapper.<init>(Landroid/content/Context;)V@10 ]"]
+85 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.Throwable.<init>()V@10 ]"]
+44 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ java.lang.String.<init>()V@1 ]"]
+73 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.app.Activity.setContentView(I)V@6 ]"]
+74 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.app.Activity.findViewById(I)Landroid/view/View;@6 ]"]
+33 [label="Node: < Application, Lcom/example/webapptest/MainActivity$mWebViewClient, <init>(Lcom/example/webapptest/MainActivity;)V > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@45 ]"]
+41 [label="Node: < Primordial, Landroid/webkit/WebViewClient, <init>()V > Context: CallStringContext: [ com.example.webapptest.MainActivity$mWebViewClient.<init>(Lcom/example/webapptest/MainActivity;)V@2 ]"]
+27 [label="Node: < Primordial, Landroid/os/BaseBundle, <init>()V > Context: CallStringContext: [ android.os.Bundle.<init>()V@1 ]"]
+64 [label="Node: < Primordial, Landroid/os/Message, getData()Landroid/os/Bundle; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@56 ]"]
+35 [label="Node: < Primordial, Ljava/lang/String, valueOf(Ljava/lang/Object;)Ljava/lang/String; > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@69 ]"]
+83 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.AbstractStringBuilder.<init>()V@10 ]"]
+68 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.app.Activity.<init>()V@10 ]"]
+45 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ android.os.Handler.<init>()V@1 ]"]
+66 [label="Node: < Application, Lcom/example/webapptest/JSBridge, access$0(Lcom/example/webapptest/JSBridge;)Landroid/widget/TextView; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@79 ]"]
+58 [label="Node: < Application, Lcom/example/webapptest/JSBridge, access$0(Lcom/example/webapptest/JSBridge;)Landroid/widget/TextView; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@14 ]"]
+51 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ android.content.Context.<init>()V@1 ]"]
+10 [label="Node: < Primordial, Landroid/webkit/WebViewClient, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@10 ]"]
+32 [label="Node: < Primordial, Landroid/app/Activity, findViewById(I)Landroid/view/View; > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@23 ]"]
+46 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ android.os.Message.<init>()V@1 ]"]
+49 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ java.lang.AbstractStringBuilder.<init>()V@1 ]"]
+40 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ android.webkit.WebViewClient.<init>()V@1 ]"]
+39 [label="Node: < Primordial, Landroid/app/Activity, onResume()V > Context: CallStringContext: [ com.example.webapptest.MainActivity.onResume()V@0 ]"]
+14 [label="Node: < Primordial, Ljava/lang/String, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@14 ]"]
+26 [label="Node: < Primordial, Landroid/app/Activity, <init>()V > Context: CallStringContext: [ com.example.webapptest.MainActivity.<init>()V@0 ]"]
+28 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.os.Bundle.<init>()V@10 ]"]
+47 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ android.os.BaseBundle.<init>()V@1 ]"]
+91 [label="Node: < Primordial, Landroid/content/Context, <init>()V > Context: CallStringContext: [ android.content.ContextWrapper.<init>(Landroid/content/Context;)V@1 ]"]
+4 [label="Node: < Application, Lcom/example/webapptest/MainActivity, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@2 ]"]
+76 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.StringBuilder.<init>(Ljava/lang/String;)V@10 ]"]
+86 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.content.Context.<init>()V@10 ]"]
+17 [label="Node: < Primordial, Ljava/lang/Object, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@19 ]"]
+5 [label="Node: < Primordial, Landroid/os/Bundle, <clinit>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@1 ]"]
+13 [label="Node: < Primordial, Ljava/lang/String, <clinit>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@1 ]"]
+6 [label="Node: < Primordial, Landroid/os/Bundle, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@4 ]"]
+24 [label="Node: < Primordial, Landroid/os/Message, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@29 ]"]
+81 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.view.ContextThemeWrapper.<init>()V@14 ]"]
+62 [label="Node: < Primordial, Ljava/lang/String, valueOf(Ljava/lang/Object;)Ljava/lang/String; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@49 ]"]
+9 [label="Node: < Application, Lcom/example/webapptest/MainActivity, onResume()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@8 ]"]
+90 [label="Node: < Primordial, Ljava/lang/Throwable, <init>()V > Context: CallStringContext: [ java.lang.Exception.<init>()V@1 ]"]
+79 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.webkit.WebViewClient.onLoadResource(Landroid/webkit/WebView;Ljava/lang/String;)V@6 ]"]
+11 [label="Node: < Primordial, Landroid/view/View, <clinit>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@1 ]"]
+42 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.webkit.WebViewClient.<init>()V@10 ]"]
+37 [label="Node: < Application, Lcom/example/webapptest/MainActivity, getStr()Ljava/lang/String; > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@76 ]"]
+63 [label="Node: < Primordial, Ljava/lang/StringBuilder, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@53 ]"]
+67 [label="Node: < Primordial, Landroid/view/ContextThemeWrapper, <init>()V > Context: CallStringContext: [ android.app.Activity.<init>()V@1 ]"]
+53 [label="Node: < Primordial, Landroid/webkit/WebViewClient, onLoadResource(Landroid/webkit/WebView;Ljava/lang/String;)V > Context: CallStringContext: [ com.example.webapptest.MainActivity$mWebViewClient.onLoadResource(Landroid/webkit/WebView;Ljava/lang/String;)V@0 ]"]
+38 [label="Node: < Primordial, Ljava/lang/StringBuilder, append(Ljava/lang/String;)Ljava/lang/StringBuilder; > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@80 ]"]
+61 [label="Node: < Primordial, Ljava/lang/StringBuilder, append(Ljava/lang/String;)Ljava/lang/StringBuilder; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@41 ]"]
+18 [label="Node: < Primordial, Ljava/lang/String, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@21 ]"]
+55 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.os.Handler.<init>()V@10 ]"]
+65 [label="Node: < Primordial, Ljava/lang/StringBuilder, append(Ljava/lang/String;)Ljava/lang/StringBuilder; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@66 ]"]
+7 [label="Node: < Application, Lcom/example/webapptest/MainActivity, onCreate(Landroid/os/Bundle;)V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@5 ]"]
+82 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.Exception.<init>()V@10 ]"]
+69 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.os.BaseBundle.<init>()V@10 ]"]
+22 [label="Node: < Primordial, Landroid/os/Handler, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@27 ]"]
+87 [label="Node: < Application, Lcom/example/webapptest/JSBridge$1, <init>(Lcom/example/webapptest/JSBridge;)V > Context: CallStringContext: [ com.example.webapptest.JSBridge.<init>(Landroid/widget/TextView;)V@7 ]"]
+59 [label="Node: < Primordial, Ljava/lang/String, valueOf(Ljava/lang/Object;)Ljava/lang/String; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@32 ]"]
+43 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.Object.<init>()V@6 ]"]
+71 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ java.lang.RuntimeException.<init>(Ljava/lang/String;)V@10 ]"]
+57 [label="Node: < Application, Lcom/example/webapptest/JSBridge, access$0(Lcom/example/webapptest/JSBridge;)Landroid/widget/TextView; > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@2 ]"]
+89 [label="Node: < Primordial, Landroid/content/ContextWrapper, <init>(Landroid/content/Context;)V > Context: CallStringContext: [ android.view.ContextThemeWrapper.<init>()V@5 ]"]
+56 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.os.Message.<init>()V@10 ]"]
+29 [label="Node: < Primordial, Landroid/app/Activity, onCreate(Landroid/os/Bundle;)V > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@0 ]"]
+60 [label="Node: < Primordial, Ljava/lang/StringBuilder, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ com.example.webapptest.JSBridge$1.handleMessage(Landroid/os/Message;)V@36 ]"]
+72 [label="Node: < Primordial, Ljava/lang/RuntimeException, <init>(Ljava/lang/String;)V > Context: CallStringContext: [ android.app.Activity.onCreate(Landroid/os/Bundle;)V@6 ]"]
+19 [label="Node: < Application, Lcom/example/webapptest/MainActivity$mWebViewClient, onPageFinished(Landroid/webkit/WebView;Ljava/lang/String;)V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@22 ]"]
+34 [label="Node: < Application, Lcom/example/webapptest/JSBridge, <init>(Landroid/widget/TextView;)V > Context: CallStringContext: [ com.example.webapptest.MainActivity.onCreate(Landroid/os/Bundle;)V@57 ]"]
+3 [label="Node: < Primordial, Landroid/app/Activity, <clinit>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@1 ]"]
+16 [label="Node: < Primordial, Landroid/webkit/WebViewClient, <init>()V > Context: CallStringContext: [ com.ibm.wala.FakeRootClass.fakeRootMethod()V@17 ]"]
+1 -> 2
+1 -> 4
+1 -> 6
+1 -> 7
+1 -> 8
+1 -> 9
+1 -> 10
+1 -> 12
+1 -> 14
+1 -> 15
+1 -> 16
+1 -> 17
+1 -> 18
+1 -> 19
+1 -> 20
+1 -> 21
+1 -> 22
+1 -> 24
+1 -> 25
+2 -> 3
+2 -> 5
+2 -> 23
+2 -> 11
+2 -> 13
+4 -> 26
+6 -> 27
+6 -> 28
+7 -> 32
+7 -> 33
+7 -> 34
+7 -> 35
+7 -> 36
+7 -> 37
+7 -> 38
+7 -> 29
+7 -> 30
+7 -> 31
+8 -> 26
+9 -> 39
+10 -> 40
+10 -> 42
+12 -> 43
+14 -> 52
+14 -> 44
+15 -> 53
+16 -> 40
+16 -> 42
+17 -> 43
+18 -> 52
+18 -> 44
+20 -> 26
+22 -> 55
+22 -> 45
+24 -> 56
+24 -> 46
+25 -> 64
+25 -> 65
+25 -> 66
+25 -> 57
+25 -> 58
+25 -> 59
+25 -> 60
+25 -> 61
+25 -> 62
+25 -> 63
+26 -> 67
+26 -> 68
+27 -> 69
+27 -> 47
+28 -> 70
+28 -> 71
+29 -> 72
+30 -> 73
+31 -> 74
+32 -> 74
+33 -> 41
+34 -> 48
+34 -> 87
+35 -> 75
+36 -> 88
+36 -> 76
+38 -> 77
+39 -> 78
+40 -> 43
+41 -> 40
+41 -> 42
+42 -> 70
+42 -> 71
+43 -> 70
+43 -> 71
+44 -> 43
+45 -> 43
+46 -> 43
+47 -> 43
+48 -> 43
+49 -> 43
+50 -> 43
+51 -> 43
+52 -> 70
+52 -> 71
+53 -> 79
+54 -> 55
+54 -> 45
+55 -> 70
+55 -> 71
+56 -> 70
+56 -> 71
+59 -> 75
+60 -> 88
+60 -> 76
+61 -> 77
+62 -> 75
+63 -> 88
+63 -> 76
+64 -> 80
+65 -> 77
+67 -> 81
+67 -> 89
+68 -> 70
+68 -> 71
+69 -> 70
+69 -> 71
+70 -> 82
+70 -> 90
+71 -> 70
+71 -> 71
+72 -> 70
+72 -> 71
+73 -> 70
+73 -> 71
+74 -> 70
+74 -> 71
+75 -> 70
+75 -> 71
+76 -> 70
+76 -> 71
+77 -> 70
+77 -> 71
+78 -> 70
+78 -> 71
+79 -> 70
+79 -> 71
+80 -> 70
+80 -> 71
+81 -> 70
+81 -> 71
+82 -> 70
+82 -> 71
+83 -> 70
+83 -> 71
+84 -> 70
+84 -> 71
+85 -> 70
+85 -> 71
+86 -> 70
+86 -> 71
+87 -> 54
+88 -> 49
+88 -> 83
+89 -> 84
+89 -> 91
+90 -> 50
+90 -> 85
+91 -> 51
+91 -> 86
+}

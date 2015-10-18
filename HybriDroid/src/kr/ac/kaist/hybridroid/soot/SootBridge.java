@@ -3,9 +3,11 @@ package kr.ac.kaist.hybridroid.soot;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import kr.ac.kaist.hybridroid.preanalysis.spots.ArgumentHotspot;
+import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.hybridroid.soot.phantom.PhantomClassManager;
 import soot.Body;
 import soot.PatchingChain;
@@ -25,27 +27,56 @@ public class SootBridge {
 	
 	static private String JAVA_ENV = "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre/lib/jce.jar";
 	private boolean isLocked = false;
+	private Set<String> includedPacks;
 	
 	static private String[] excludeAppPacks = {
-		"android.support"	
+		"com.inmobi",
+		"com.google",
+		"com.mopub",
+		"com.nineoldandroids",
+		"com.millennialmedia",
+		"roboguice",
+		"com.actionbarsherlock",
+		"com.fasterxml",
+		"com.facebook",
+		"android",
+		"com.bolts",
+		"com.flurry",
+		"com.viewpagerindicator",
+		"com.jakewharton",
+		"bolts",
+		"com.ctrlplusz",
+		"org.slf4j",
+		"org.apache",
+		"com.makeramen",
+		"se.emilsjolander",
+		"com.sothree",
+		"com.crittercism",
+		"com.tonicartos",
+		"com.amazon",
+		"com.android",
+		"crittercism",
+		
+		
 	};
 	
 	public SootBridge(){
+		includedPacks = new HashSet<String>();
 		initJava();
 		Options.v().set_keep_line_number(true);
 		Options.v().set_whole_program(true);
         // LWG
-		Options.v().setPhaseOption("jb", "use-original-names:true");
-		Options.v().setPhaseOption("cg", "verbose:false");
-		Options.v().setPhaseOption("cg", "trim-clinit:true");
+//		Options.v().setPhaseOption("jb", "use-original-names:true");
+//		Options.v().setPhaseOption("cg", "verbose:false");
+//		Options.v().setPhaseOption("cg", "trim-clinit:true");
 		 //soot.options.Options.v().setPhaseOption("jb.tr", "ignore-wrong-staticness:true");
 		 				 		
 		 // don't optimize the program 
-		Options.v().setPhaseOption("wjop", "enabled:false");
+//		Options.v().setPhaseOption("wjop", "enabled:false");
 		 // allow for the absence of some classes
 		Options.v().set_allow_phantom_refs(true);
 		 
-		Options.v().set_ignore_resolution_errors(true);
+//		Options.v().set_ignore_resolution_errors(true);
 
 		Options.v().set_src_prec(Options.src_prec_apk);
 //		Options.v().set_verbose(true);
@@ -127,14 +158,25 @@ public class SootBridge {
 		List<SootClass> appClasses = new ArrayList<SootClass>();
 		
 		for(SootClass cls : Scene.v().getApplicationClasses()){
+			boolean isExcluded = false;
 			for(String excludePack : excludeAppPacks)
-				if(!cls.getPackageName().startsWith(excludePack))
-					appClasses.add(cls);
+				if(cls.getPackageName().startsWith(excludePack))
+					isExcluded = true;
+			if(!isExcluded){
+				appClasses.add(cls);
+				String packName = cls.getPackageName();
+				if(!includedPacks.contains(packName))
+					includedPacks.add(packName);
+			}
 		}
 		
 		Scene.v().getApplicationClasses().clear();
 		for(SootClass cls : appClasses)
 			Scene.v().getApplicationClasses().add(cls);
+		
+		for(String packName : includedPacks){
+			System.out.println("#Include: " + packName);
+		}
 	}
 	
 	public List<ValueBox> getArgumentHotspots(ArgumentHotspot argHotspot){

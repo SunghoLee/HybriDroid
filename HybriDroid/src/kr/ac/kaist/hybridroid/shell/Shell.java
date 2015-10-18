@@ -10,16 +10,19 @@ import java.util.Properties;
 
 import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
+import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
+import kr.ac.kaist.hybridroid.analysis.string.StringAnalysis;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
-import kr.ac.kaist.hybridroid.preanalysis.jsa.StringAnalysisWithJSA;
-import kr.ac.kaist.hybridroid.preanalysis.spots.ArgumentHotspot;
-import kr.ac.kaist.hybridroid.preanalysis.spots.Hotspot;
 import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
+import kr.ac.kaist.hybridroid.util.timer.Timer;
 
 import org.apache.commons.cli.ParseException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
 
+import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.properties.WalaProperties;
 import com.ibm.wala.util.CancelException;
@@ -84,19 +87,17 @@ public class Shell {
 		// Build Control-flow Graph.
 		if (cArgs.has(CommandArguments.CFG_ARG)) {
 			
-			StringAnalysisWithJSA strAnalyzer = new StringAnalysisWithJSA();
-			strAnalyzer.addAnalysisScope(LocalFileReader.androidJar(Shell.walaProperties).getPath());
+			AndroidStringAnalysis strAnalyzer = new AndroidStringAnalysis();
+			strAnalyzer.setupAndroidLibs(LocalFileReader.androidJar(Shell.walaProperties).getPath());
+			strAnalyzer.setExclusion(CallGraphTestUtil.REGRESSION_EXCLUSIONS);
+//			strAnalyzer.addAnalysisScope(LocalFileReader.androidJar(Shell.walaProperties).getPath());
 			strAnalyzer.addAnalysisScope(targetPath);
 			List<Hotspot> hotspots = new ArrayList<Hotspot>();
 			hotspots.add(new ArgumentHotspot("loadUrl", 1, 0));
+			Timer t = Timer.start();
 			strAnalyzer.analyze(hotspots);
-			for(Hotspot spot : hotspots){
-				List<Automaton> automatons = strAnalyzer.getAutomaton(spot);
-				for(Automaton automaton : automatons)
-					for(String str : automaton.getFiniteStrings())
-						System.out.println(str);
-			}
-			
+			System.out.println("END: " + (t.end()/1000.0));
+			System.exit(-1);
 //			strAnal
 			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
 					target, cArgs.has(CommandArguments.DROIDEL_ARG));

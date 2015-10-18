@@ -23,6 +23,7 @@ import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.ipa.callgraph.JavaScriptConstructTargetSelector;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
+import com.ibm.wala.classLoader.ClassLoaderFactoryImpl;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
@@ -135,7 +136,7 @@ public class HybridCFGAnalysis {
 	public void main(AndroidHybridAnalysisScope scope) throws IOException,
 			ClassHierarchyException, IllegalArgumentException, CancelException {
 		JSCallGraphUtil.setTranslatorFactory(new CAstRhinoTranslatorFactory());
-
+		
 		HybridClassLoaderFactory loaders = new HybridClassLoaderFactory();
 
 		AnalysisOptions options = new AnalysisOptions(scope, null);
