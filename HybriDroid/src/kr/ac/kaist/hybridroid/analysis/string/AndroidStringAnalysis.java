@@ -11,11 +11,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
 
+import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.Box;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.BoxVisitor;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintVisitor;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
+import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
+import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
+import kr.ac.kaist.hybridroid.util.data.Pair;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -37,6 +41,7 @@ import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
+import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFABuilder;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
@@ -122,19 +127,26 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	@Override
 	public void analyze(List<Hotspot> hotspots) throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException {
 		// TODO Auto-generated method stub
-		CallGraph cg = buildCG();
-//		WalaCGVisualizer vis = new WalaCGVisualizer();
-//		vis.visualize(cg, "cfg_web.dot");
+		Pair<CallGraph, PointerAnalysis> p = buildCG();
+		CallGraph cg = p.fst();
+		PointerAnalysis pa = p.snd();
+		WalaCGVisualizer vis = new WalaCGVisualizer();
+		vis.visualize(cg, "cfg_test.dot");
 		Set<Box> boxSet = findHotspots(cg, hotspots);
 		Box[] boxes = boxSet.toArray(new Box[0]);
 		for(Box box : boxes){
 			System.err.println("Spot: " + box);
 		}
-		
-		buildConstraintGraph(cg, boxes);
+		System.err.println("Field Def analysis...");
+		FieldDefAnalysis fda = new FieldDefAnalysis(cg, pa);
+		System.err.println("Build Constraint Graph...");
+		ConstraintGraph graph = buildConstraintGraph(cg, fda, boxes);
+		System.err.println("Print Constraint Graph...");
+		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
+		cgvis.visualize(graph, "const.dot", boxes);
 	}
 	
-	private CallGraph buildCG() throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
+	private Pair<CallGraph, PointerAnalysis> buildCG() throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
 		IClassHierarchy cha = ClassHierarchy.make(scope);
 		AnalysisOptions options = new AnalysisOptions();
 		IRFactory<IMethod> irFactory = new DexIRFactory();
@@ -145,7 +157,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		options.setSelector(new ClassHierarchyClassTargetSelector(cha));
 		options.setSelector(new ClassHierarchyMethodTargetSelector(cha));
 		CallGraphBuilder cgb = new nCFABuilder(1, cha, options, cache, null, null);
-		return cgb.makeCallGraph(options, null);
+		return Pair.make(cgb.makeCallGraph(options, null), cgb.getPointerAnalysis());
 	}
 	
 	private Iterable<Entrypoint> getEntrypoints(final IClassHierarchy cha, AnalysisScope scope, AnalysisOptions option, AnalysisCache cache){
@@ -227,21 +239,23 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		return false;
 	}
 	
-	private void buildConstraintGraph(CallGraph cg, Box... initials){
+	private ConstraintGraph buildConstraintGraph(CallGraph cg, FieldDefAnalysis fda, Box... initials){
 		ConstraintGraph graph = new ConstraintGraph();
-		BoxVisitor<Set<Box>> v = new ConstraintVisitor(cg, graph);
+		BoxVisitor<Set<Box>> v = new ConstraintVisitor(cg, fda, graph);
 		for(Box initial : initials)
 			worklist.add(initial);
 		
 		int iter = 1;
 		while(!worklist.isEmpty()){
 			Box box = worklist.pop();
-			System.out.println("#Iter(" + iter + ") " + box);
+			System.out.println("#Iter(" + (iter++) + ") " + box);
 			Set<Box> res = box.visit(v);
 			
 			for(Box next : res)
 				worklist.add(next);
 		}
+		
+		return graph;
 	}
 
 	class WorkList{

@@ -1,8 +1,11 @@
 package kr.ac.kaist.hybridroid.analysis.string.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import kr.ac.kaist.hybridroid.analysis.string.constraint.AppendOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.AssignOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.Box;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
@@ -11,8 +14,10 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 
-public class StringBufferClassModel implements StringModel{
+public class StringBufferClassModel implements ClassModel{
 	private static StringBufferClassModel instance;
+	
+	private Map<String, MethodModel> methodMap;
 	
 	public static StringBufferClassModel getInstance(){
 		if(instance == null)
@@ -20,14 +25,65 @@ public class StringBufferClassModel implements StringModel{
 		return instance;
 	}
 	
-	private StringBufferClassModel(){}
+	private StringBufferClassModel(){
+		methodMap = new HashMap<String, MethodModel>();
+		init();
+	}
 	
-	public Set<Box> toString(ConstraintGraph graph, Box def, CGNode caller, SSAInvokeInstruction invokeInst){
-		Set<Box> boxSet = new HashSet<Box>();
-		int useVar = invokeInst.getUse(0);
-		Box use = new VarBox(caller, invokeInst.iindex, useVar);
-		if(graph.addEdge(new AssignOpNode(), def, use))
-				boxSet.add(use);
-		return boxSet;
+	private void init(){
+		methodMap.put("toString", new ToString());
+		methodMap.put("append", new Append());
+	}
+	
+	@Override
+	public MethodModel getMethod(String methodName){
+		if(methodMap.containsKey(methodName))
+			return methodMap.get(methodName);
+		System.err.println("Unkwon 'StringBuffer' method: " + methodName);
+		return null;
+	}
+	
+	class ToString implements MethodModel<Set<Box>>{
+		@Override
+		public Set<Box> draw(ConstraintGraph graph, Box def, CGNode caller,
+				SSAInvokeInstruction invokeInst) {
+			Set<Box> boxSet = new HashSet<Box>();
+			int useVar = invokeInst.getUse(0);
+			Box use = new VarBox(caller, invokeInst.iindex, useVar);
+			if(graph.addEdge(new AssignOpNode(), def, use))
+					boxSet.add(use);
+			return boxSet;
+		}
+		
+		@Override
+		public String toString(){
+			return "Constraint Graph Method Model: StringBuffer.toString";
+		}
+	}
+	
+	class Append implements MethodModel<Set<Box>>{
+		@Override
+		public Set<Box> draw(ConstraintGraph graph, Box def, CGNode caller,
+				SSAInvokeInstruction invokeInst) {
+			// TODO Auto-generated method stub
+			Set<Box> boxSet = new HashSet<Box>();
+			int fstUseVar = invokeInst.getUse(0);
+			int sndUseVar = invokeInst.getUse(1);
+			Box fstUse = new VarBox(caller, invokeInst.iindex, fstUseVar);
+			Box sndUse = new VarBox(caller, invokeInst.iindex, sndUseVar);
+			if(graph.addEdge(new AppendOpNode(), def, fstUse, sndUse)){
+					boxSet.add(fstUse);
+					boxSet.add(sndUse);
+			}
+			return boxSet;
+		}
+		
+		@Override
+		public String toString(){
+			return "Constraint Graph Method Model: StringBuffer.append";
+		}
 	}
 }
+
+
+

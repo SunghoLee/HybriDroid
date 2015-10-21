@@ -1,5 +1,11 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
 public class AssignOpNode implements ConstraintNode {
-	public AssignOpNode(){}
+	public AssignOpNode(){
+	}
+	
+	@Override
+	public String toString(){
+		return "=";
+	}
 }

@@ -15,7 +15,7 @@ public class ParamBox implements Box {
 	public String toString(){
 		String str = "ParamBox[";
 		str += var;
-		str += "] of " + node;
+		str += "] of " + node.getMethod().getName().toString();
 		return str;
 	}
 	

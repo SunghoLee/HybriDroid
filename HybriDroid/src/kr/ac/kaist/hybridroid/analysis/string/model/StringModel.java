@@ -1,47 +1,57 @@
 package kr.ac.kaist.hybridroid.analysis.string.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.types.MethodReference;
 
-public interface StringModel {
+public class StringModel {
 	
-	static String[][] models = {
-		{"StringBuffer", "toString"}, 
-	};
+	private static Map<String, ClassModel> classMap;
 	
-	public static boolean isModeledTarget(SSAInvokeInstruction invokeInst){
-		MethodReference targetMR = invokeInst.getDeclaredTarget();
-		String className = targetMR.getDeclaringClass().getName().getClassName().toString();
-		String methodName = targetMR.getName().toString();
-		
-		for(String[] model : models){
-			String mClassName = model[0];
-			String mMethodName = model[1];
-			
-			if(className.equals(mClassName) && methodName.equals(mMethodName))
-				return true;
-		}
-		return false;
+	static{
+		classMap = new HashMap<String, ClassModel>();
+		init();
 	}
 	
-	public static StringModel getModeledClass(SSAInvokeInstruction invokeInst){
+	private static void init(){
+		classMap.put("String", StringClassModel.getInstance());
+		classMap.put("StringBuilder", StringBuilderClassModel.getInstance());
+		classMap.put("StringBuffer", StringBufferClassModel.getInstance());
+	}
+	
+	public static boolean isTargetClassModeled(SSAInvokeInstruction invokeInst){
+		MethodReference targetMR = invokeInst.getDeclaredTarget();
+		String className = targetMR.getDeclaringClass().getName().getClassName().toString();
+		return classMap.containsKey(className);
+	}
+	
+	public static boolean isClassModeled(String className){
+		return classMap.containsKey(className);
+	}
+	
+	public static ClassModel getModeledTargetClass(SSAInvokeInstruction invokeInst){
+		MethodReference targetMR = invokeInst.getDeclaredTarget();
+		String className = targetMR.getDeclaringClass().getName().getClassName().toString();
+		
+		return getModeledClass(className);
+	}
+	
+	public static ClassModel getModeledClass(String className){
+		if(isClassModeled(className))
+			return classMap.get(className);
+		return null;
+	}
+	
+	public static MethodModel getTargetMethod(SSAInvokeInstruction invokeInst){
 		MethodReference targetMR = invokeInst.getDeclaredTarget();
 		String className = targetMR.getDeclaringClass().getName().getClassName().toString();
 		String methodName = targetMR.getName().toString();
 		
-		for(String[] model : models){
-			String mClassName = model[0];
-			String mMethodName = model[1];
-			
-			if(className.equals(mClassName) && methodName.equals(mMethodName)){
-				switch(className){
-				case "StringBuffer":
-					return StringBufferClassModel.getInstance();
-				default:
-					return null;
-				}
-			}
-		}
+		ClassModel mClass = getModeledClass(className);
+		if(mClass != null)
+			return mClass.getMethod(methodName);
 		return null;
 	}
 }

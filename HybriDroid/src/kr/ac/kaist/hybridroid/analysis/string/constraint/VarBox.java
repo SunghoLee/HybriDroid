@@ -19,8 +19,8 @@ public class VarBox implements Box {
 		String str = "VarBox[";
 		SSAInstruction inst = node.getIR().getInstructions()[iindex];
 		str += var;
-		str += "] @ " + inst;
-		str += " in " + node;
+		str += "] ";//@ " + inst;
+		str += " in " + node.getMethod().getName().toString();
 		return str;
 	}
 	
@@ -28,6 +28,9 @@ public class VarBox implements Box {
 		return var;
 	}
 	
+	public int getIndex(){
+		return iindex;
+	}
 	@Override
 	public <T> T visit(BoxVisitor<T> v){
 		return v.visit(this);

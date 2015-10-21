@@ -16,9 +16,9 @@ public class ConstBox implements Box {
 	@Override
 	public String toString(){
 		String str = "ConstBox[value: ";
-		str += value;
+		str += value.toString().replace("\"", "\\\"");
 		str += ", type: " + type + "] declared in ";
-		str += node;
+		str += node.getMethod().getName().toString();
 		return str;
 	}
 	

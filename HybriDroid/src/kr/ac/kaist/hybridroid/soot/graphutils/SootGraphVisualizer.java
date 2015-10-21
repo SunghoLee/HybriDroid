@@ -15,6 +15,7 @@ public class SootGraphVisualizer {
 	
 	public File visualize(Application app, String out){
 		Visualizer vis = Visualizer.getInstance();
+		vis.clear();
 		vis.setType(GraphType.Digraph);
 		
 		for(Method m : app.getMethods()){

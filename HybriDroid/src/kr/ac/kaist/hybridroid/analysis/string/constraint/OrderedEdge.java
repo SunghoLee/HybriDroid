@@ -11,4 +11,9 @@ public class OrderedEdge extends AbstractConstraintEdge {
 	public int getOrder(){
 		return order;
 	}
+	
+	@Override
+	public String toString(){
+		return from() + " -> " + to() + " (order: " + order + ")";
+	}
 }

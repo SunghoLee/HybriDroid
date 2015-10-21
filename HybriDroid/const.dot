@@ -1,0 +1,51 @@
+digraph{
+23 [label="VarBox[2]  in getStr", shape=box, color=black]
+3 [label="=", shape=circle, color=black]
+22 [label="=", shape=circle, color=black]
+12 [label="VarBox[37]  in onCreate", shape=box, color=black]
+4 [label="=", shape=circle, color=black]
+14 [label="=", shape=circle, color=black]
+1 [label="VarBox[39]  in onCreate", shape=box, color=red]
+20 [label="VarBox[29]  in onCreate", shape=box, color=black]
+24 [label="VarBox[7]  in getStr", shape=box, color=black]
+8 [label="VarBox[3]  in getStr", shape=box, color=black]
+6 [label="ConstBox[value: /index3.html, type: String] declared in getStr", shape=box, color=black]
+11 [label="append", shape=circle, color=black]
+5 [label="VarBox[11]  in getStr", shape=box, color=black]
+21 [label="append", shape=circle, color=black]
+15 [label="VarBox[32]  in onCreate", shape=box, color=black]
+17 [label="=", shape=circle, color=black]
+2 [label="ConstBox[value: file:///android_asset/, type: String] declared in onCreate", shape=box, color=black]
+13 [label="=", shape=circle, color=black]
+18 [label="VarBox[35]  in onCreate", shape=box, color=black]
+25 [label="VarBox[30]  in onCreate", shape=box, color=black]
+10 [label="VarBox[5]  in getStr", shape=box, color=black]
+16 [label="=", shape=circle, color=black]
+19 [label="VarBox[9]  in getStr", shape=box, color=black]
+7 [label="=", shape=circle, color=black]
+9 [label="=", shape=circle, color=black]
+2 -> 3
+3 -> 20
+4 -> 5
+5 -> 17
+6 -> 7
+7 -> 24
+8 -> 9
+9 -> 10
+10 -> 13
+11 -> 12
+12 -> 14
+13 -> 23
+14 -> 1
+15 -> 16
+16 -> 25
+17 -> 18
+18 -> 11 [label="2"]
+19 -> 4
+20 -> 22
+21 -> 19
+22 -> 15
+23 -> 21 [label="1"]
+24 -> 21 [label="2"]
+25 -> 11 [label="1"]
+}
