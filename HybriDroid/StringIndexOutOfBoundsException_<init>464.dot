@@ -1,0 +1,27 @@
+digraph{
+2 [label="BB[SSA:0..1]1 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[0] null\l...\l[1] 6 = new <Primordial,Ljava/lang/StringBuilder>@1\l", shape=box, color=black]
+9 [label="BB[SSA:14..15]8 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[14] null\l...\l[15] 22 = invokevirtual < Primordial, Ljava/lang/StringBuilder, append(I)Ljava/lang/StringBuilder; > 20,4 @32 exception:21\l", shape=box, color=black]
+7 [label="BB[SSA:10..11]6 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[10] null\l...\l[11] 17 = invokevirtual < Primordial, Ljava/lang/StringBuilder, append(I)Ljava/lang/StringBuilder; > 15,3 @23 exception:16\l", shape=box, color=black]
+10 [label="BB[SSA:16..16]9 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[16] 24 = invokevirtual < Primordial, Ljava/lang/StringBuilder, toString()Ljava/lang/String; > 22 @35 exception:23\l...\l[16] 24 = invokevirtual < Primordial, Ljava/lang/StringBuilder, toString()Ljava/lang/String; > 22 @35 exception:23\l", shape=box, color=black]
+12 [label="BB[SSA:18..18]11 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[18] return\l...\l[18] return\l", shape=box, color=black]
+11 [label="BB[SSA:17..17]10 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[17] invokespecial < Primordial, Ljava/lang/IndexOutOfBoundsException, <init>(Ljava/lang/String;)V > 1,24 @38 exception:25\l...\l[17] invokespecial < Primordial, Ljava/lang/IndexOutOfBoundsException, <init>(Ljava/lang/String;)V > 1,24 @38 exception:25\l", shape=box, color=black]
+3 [label="BB[SSA:2..3]2 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[2] null\l...\l[3] invokespecial < Primordial, Ljava/lang/StringBuilder, <init>()V > 6 @5 exception:7\l", shape=box, color=black]
+8 [label="BB[SSA:12..13]7 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[12] null\l...\l[13] 20 = invokevirtual < Primordial, Ljava/lang/StringBuilder, append(Ljava/lang/String;)Ljava/lang/StringBuilder; > 17,18 @28 exception:19\l", shape=box, color=black]
+1 [label="BB[SSA:-1..-2]0 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\lentry\l[-1] null\l...\l[-2] null\l", shape=box, color=black]
+4 [label="BB[SSA:4..5]3 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[4] null\l...\l[5] 10 = invokevirtual < Primordial, Ljava/lang/StringBuilder, append(Ljava/lang/String;)Ljava/lang/StringBuilder; > 6,8 @10 exception:9\l", shape=box, color=black]
+13 [label="BB[SSA:-1..-2]12 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\lexit\l", shape=box, color=black]
+6 [label="BB[SSA:8..9]5 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[8] null\l...\l[9] 15 = invokevirtual < Primordial, Ljava/lang/StringBuilder, append(Ljava/lang/String;)Ljava/lang/StringBuilder; > 12,13 @19 exception:14\l", shape=box, color=black]
+5 [label="BB[SSA:6..7]4 - java.lang.StringIndexOutOfBoundsException.<init>(III)V\l[6] null\l...\l[7] 12 = invokevirtual < Primordial, Ljava/lang/StringBuilder, append(I)Ljava/lang/StringBuilder; > 10,2 @14 exception:11\l", shape=box, color=black]
+1 -> 2
+2 -> 3
+3 -> 4
+4 -> 5
+5 -> 6
+6 -> 7
+7 -> 8
+8 -> 9
+9 -> 10
+10 -> 11
+11 -> 12
+12 -> 13
+}

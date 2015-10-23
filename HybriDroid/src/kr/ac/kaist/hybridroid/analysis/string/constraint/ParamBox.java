@@ -7,6 +7,8 @@ public class ParamBox implements Box {
 	private int var;
 	
 	public ParamBox(CGNode node, int var){
+		if(var < 1)
+			throw new InternalError("parameter variable cannot be less than 1: var[" + var + "] in " + node);
 		this.node = node;
 		this.var = var;
 	}

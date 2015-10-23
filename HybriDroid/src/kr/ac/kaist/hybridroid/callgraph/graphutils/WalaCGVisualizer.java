@@ -1,17 +1,19 @@
 package kr.ac.kaist.hybridroid.callgraph.graphutils;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer;
 import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer.GraphType;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ssa.IR;
-import com.ibm.wala.ssa.SSAInstruction;
 
 public class WalaCGVisualizer {
 	
@@ -38,26 +40,43 @@ public class WalaCGVisualizer {
 		return outFile;
 	}
 	
+	private int index = 1;
+	
 	private String getLabel(CGNode node){
 		String label = "";
 		
 		if(labelMap.containsKey(node))
 			return labelMap.get(node);
 		
-		label += node.toString() + "\\l";
-		IR ir = node.getIR();
-		
-		if(ir == null){
-			label += "null";
-		}else{
-			for(SSAInstruction inst : ir.getInstructions()){
-				if(inst != null){
-					label += "[" + inst.iindex + "] " + inst + "\\l";
-				}
-			}
-		}
+//		label += node.toString() + "\\l";
+		label = (index++) + "";
+//		IR ir = node.getIR();
+//		
+//		if(ir == null){
+//			label += "null";
+//		}else{
+//			for(SSAInstruction inst : ir.getInstructions()){
+//				if(inst != null){
+//					label += "[" + inst.iindex + "] " + inst + "\\l";
+//				}
+//			}
+//		}
 		
 		labelMap.put(node, label);
 		return label;
+	}
+	
+	public void printLabel(String out){
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(out)));
+			for(Entry<CGNode, String> e : labelMap.entrySet()){
+				bw.write(e.getValue() + " -> " + e.getKey() + "\n");
+			}
+			bw.flush();
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

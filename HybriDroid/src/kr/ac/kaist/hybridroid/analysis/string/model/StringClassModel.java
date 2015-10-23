@@ -31,6 +31,7 @@ public class StringClassModel implements ClassModel{
 	
 	private void init(){
 		methodMap.put("valueOf", new ValueOf());
+		methodMap.put("replace", new Replace());
 	}
 	
 	@Override
@@ -57,6 +58,36 @@ public class StringClassModel implements ClassModel{
 		@Override
 		public String toString(){
 			return "Constraint Graph Method Model: String.valueOf";
+		}
+		
+	}
+	
+	class Replace implements MethodModel<Set<Box>>{
+
+		@Override
+		public Set<Box> draw(ConstraintGraph graph, Box def, CGNode caller,
+				SSAInvokeInstruction invokeInst) {
+			Set<Box> boxSet = new HashSet<Box>();
+			int strVar = invokeInst.getUse(0);
+			int toBeSubstedVar = invokeInst.getUse(1);
+			int toSubstVar = invokeInst.getUse(2);
+			
+			Box strBox = new VarBox(caller, invokeInst.iindex, strVar);
+			Box toBeSubstedBox = new VarBox(caller, invokeInst.iindex, toBeSubstedVar);
+			Box toSubstBox = new VarBox(caller, invokeInst.iindex, toSubstVar);
+			
+			if(graph.addEdge(new AssignOpNode(), def, strBox, toBeSubstedBox, toSubstBox)){
+				boxSet.add(strBox);
+				boxSet.add(toBeSubstedBox);
+				boxSet.add(toSubstBox);
+			}
+					
+			return boxSet;
+		}
+		
+		@Override
+		public String toString(){
+			return "Constraint Graph Method Model: String.replace";
 		}
 		
 	}

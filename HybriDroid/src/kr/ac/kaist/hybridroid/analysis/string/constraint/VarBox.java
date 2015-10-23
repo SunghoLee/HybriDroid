@@ -1,7 +1,6 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.SSAInstruction;
 
 public class VarBox implements Box {
 	private CGNode node;
@@ -9,6 +8,13 @@ public class VarBox implements Box {
 	private int var;
 	
 	public VarBox(CGNode node, int iindex, int var){
+		if(var < 1){
+			String msg = "variable cannot be less than 1: var[" + var + "] in " + node;
+			if(iindex > -1)
+				 msg += "\nat " + node.getIR().getInstructions()[iindex];
+			throw new InternalError(msg);
+		}
+		
 		this.node = node;
 		this.iindex = iindex;
 		this.var = var;
@@ -17,10 +23,10 @@ public class VarBox implements Box {
 	@Override
 	public String toString(){
 		String str = "VarBox[";
-		SSAInstruction inst = node.getIR().getInstructions()[iindex];
+//		SSAInstruction inst = node.getIR().getInstructions()[iindex];
 		str += var;
 		str += "] ";//@ " + inst;
-		str += " in " + node.getMethod().getName().toString();
+		str += " in " + node.getMethod().getName().toString() + " of " + node.getMethod().getDeclaringClass().getName().getClassName();
 		return str;
 	}
 	

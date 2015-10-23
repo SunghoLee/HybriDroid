@@ -132,6 +132,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		PointerAnalysis pa = p.snd();
 		WalaCGVisualizer vis = new WalaCGVisualizer();
 		vis.visualize(cg, "cfg_test.dot");
+		vis.printLabel("label.txt");
 		Set<Box> boxSet = findHotspots(cg, hotspots);
 		Box[] boxes = boxSet.toArray(new Box[0]);
 		for(Box box : boxes){

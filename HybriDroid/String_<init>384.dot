@@ -1,0 +1,44 @@
+digraph{
+13 [label="BB[SSA:20..20]11 - java.lang.String.<init>(Ljava/lang/String;)V\l[20] 20 = arraylength 19\l...\l[20] 20 = arraylength 19\l", shape=box, color=black]
+21 [label="BB[SSA:-1..-2]20 - java.lang.String.<init>(Ljava/lang/String;)V\lexit\l", shape=box, color=black]
+8 [label="BB[SSA:10..10]7 - java.lang.String.<init>(Ljava/lang/String;)V\l[10] null\l...\l[10] null\l", shape=box, color=black]
+7 [label="BB[SSA:8..9]6 - java.lang.String.<init>(Ljava/lang/String;)V\l[8] null\l...\l[9] 16 = getfield < Primordial, Ljava/lang/String, value, <Primordial,[C> > 2\l", shape=box, color=black]
+3 [label="BB[SSA:2..3]2 - java.lang.String.<init>(Ljava/lang/String;)V\l[2] null\l...\l[3] 5 = getfield < Primordial, Ljava/lang/String, value, <Primordial,[C> > 2\l", shape=box, color=black]
+19 [label="BB[SSA:29..30]17 - java.lang.String.<init>(Ljava/lang/String;)V\l[29] null\l...\l[30] 12 = invokevirtual < Primordial, Ljava/lang/String, length()I > 2 @54 exception:11\l", shape=box, color=black]
+18 [label="BB[SSA:27..28]16 - java.lang.String.<init>(Ljava/lang/String;)V\l[27] null\l...\l[28] 10 = getfield < Primordial, Ljava/lang/String, offset, <Primordial,I> > 2\l", shape=box, color=black]
+1 [label="BB[SSA:-1..-2]0 - java.lang.String.<init>(Ljava/lang/String;)V\lentry\l[-1] null\l...\l[-2] null\l", shape=box, color=black]
+6 [label="BB[SSA:7..7]5 - java.lang.String.<init>(Ljava/lang/String;)V\l[7] conditional branch(ne) 6,7\l...\l[7] conditional branch(ne) 6,7\l", shape=box, color=black]
+16 [label="BB[SSA:23..24]14 - java.lang.String.<init>(Ljava/lang/String;)V\l[23] null\l...\l[24] 8 = getfield < Primordial, Ljava/lang/String, value, <Primordial,[C> > 2\l", shape=box, color=black]
+11 [label="BB[SSA:14..16]9 - java.lang.String.<init>(Ljava/lang/String;)V\l[14] null\l...\l[16] putfield 1.< Primordial, Ljava/lang/String, offset, <Primordial,I> > = 18\l", shape=box, color=black]
+14 [label="BB[SSA:21..21]12 - java.lang.String.<init>(Ljava/lang/String;)V\l[21] putfield 1.< Primordial, Ljava/lang/String, count, <Primordial,I> > = 20\l...\l[21] putfield 1.< Primordial, Ljava/lang/String, count, <Primordial,I> > = 20\l", shape=box, color=black]
+9 [label="BB[SSA:33..34]19 - java.lang.String.<init>(Ljava/lang/String;)V\l[33] null\l...\l[34] goto (from iindex= 34 to iindex = 11)\l", shape=box, color=black]
+5 [label="BB[SSA:5..6]4 - java.lang.String.<init>(Ljava/lang/String;)V\l[5] null\l...\l[6] 7 = getfield < Primordial, Ljava/lang/String, count, <Primordial,I> > 2\l", shape=box, color=black]
+17 [label="BB[SSA:25..26]15 - java.lang.String.<init>(Ljava/lang/String;)V\l[25] null\l...\l[26] 9 = getfield < Primordial, Ljava/lang/String, offset, <Primordial,I> > 2\l", shape=box, color=black]
+2 [label="BB[SSA:0..1]1 - java.lang.String.<init>(Ljava/lang/String;)V\l[0] null\l...\l[1] invokespecial < Primordial, Ljava/lang/Object, <init>()V > 1 @1 exception:4\l", shape=box, color=black]
+4 [label="BB[SSA:4..4]3 - java.lang.String.<init>(Ljava/lang/String;)V\l[4] 6 = arraylength 5\l...\l[4] 6 = arraylength 5\l", shape=box, color=black]
+10 [label="BB[SSA:11..13]8 - java.lang.String.<init>(Ljava/lang/String;)V\l[11] null\l...\l[13] putfield 1.< Primordial, Ljava/lang/String, value, <Primordial,[C> > = 17\l", shape=box, color=black]
+12 [label="BB[SSA:17..19]10 - java.lang.String.<init>(Ljava/lang/String;)V\l[17] null\l...\l[19] 19 = getfield < Primordial, Ljava/lang/String, value, <Primordial,[C> > 1\l", shape=box, color=black]
+15 [label="BB[SSA:22..22]13 - java.lang.String.<init>(Ljava/lang/String;)V\l[22] return\l...\l[22] return\l", shape=box, color=black]
+20 [label="BB[SSA:31..32]18 - java.lang.String.<init>(Ljava/lang/String;)V\l[31] 13 = binaryop(add) 10 , 12\l...\l[32] 15 = invokestatic < Primordial, Ljava/util/Arrays, copyOfRange([CII)[C > 8,9,13 @58 exception:14\l", shape=box, color=black]
+1 -> 2
+2 -> 3
+3 -> 4
+4 -> 5
+5 -> 6
+6 -> 16
+6 -> 7
+7 -> 8
+8 -> 10
+9 -> 10
+10 -> 11
+11 -> 12
+12 -> 13
+13 -> 14
+14 -> 15
+15 -> 21
+16 -> 17
+17 -> 18
+18 -> 19
+19 -> 20
+20 -> 9
+}

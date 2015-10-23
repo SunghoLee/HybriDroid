@@ -1,5 +1,6 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
@@ -14,6 +16,7 @@ import kr.ac.kaist.hybridroid.analysis.string.model.MethodModel;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
 import kr.ac.kaist.hybridroid.util.data.Pair;
 
+import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
@@ -24,6 +27,7 @@ import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.ssa.SSAUnaryOpInstruction;
@@ -83,8 +87,11 @@ public class ConstraintVisitor implements BoxVisitor<Set<Box>> {
 		for(SSAInstruction inst : insts){
 			if(inst == null)
 				continue;
-			if(inst instanceof SSAInvokeInstruction)
-				callList.add((SSAInvokeInstruction)inst);
+			if(inst instanceof SSAInvokeInstruction){
+				CallSiteReference csr = ((SSAInvokeInstruction) inst).getCallSite();
+				if(cg.getPossibleTargets(caller, csr).contains(target))
+					callList.add((SSAInvokeInstruction)inst);
+			}
 		}
 		
 		callInstCache.put(nodePair, callList);
@@ -117,8 +124,8 @@ public class ConstraintVisitor implements BoxVisitor<Set<Box>> {
 						for(SSAReturnInstruction retInst : getReturnInstructions(target)){
 							if(retInst.getNumberOfUses() > 0){
 								VarBox retBox = new VarBox(target, retInst.iindex, retInst.getUse(0));
-								graph.addEdge(new AssignOpNode(), b, retBox);
-								res.add(retBox);
+								if(graph.addEdge(new AssignOpNode(), b, retBox))
+									res.add(retBox);
 							}
 						}
 					}
@@ -129,13 +136,23 @@ public class ConstraintVisitor implements BoxVisitor<Set<Box>> {
 				System.out.println("Binary: " + defInst);
 			}else if(defInst instanceof SSAGetInstruction){
 				SSAGetInstruction getInst = (SSAGetInstruction) defInst;
+				System.out.println("\tNode: " + node);
+				System.out.println("\tInst: " + getInst);
+//				try {
+//					System.in.read();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 				Set<Pair<CGNode, Set<SSAPutInstruction>>> defSet = fda.getFSFieldDefInstructions(cg, node, getInst);
 				for(Pair<CGNode, Set<SSAPutInstruction>> p : defSet){
-					System.out.println("GetInst: " + p);
+					CGNode defNode = p.fst();
+					for(SSAPutInstruction defPutInst : p.snd()){
+						VarBox putBox = new VarBox(defNode, defPutInst.iindex, defPutInst.getUse(1));
+						if(graph.addEdge(new AssignOpNode(), b, putBox))
+							res.add(putBox);
+					}					
 				}
-				
-			}else if(defInst instanceof SSAPutInstruction){
-				System.out.println("PutInst: " + defInst);
 			}else if(defInst instanceof SSANewInstruction){
 				SSANewInstruction newInst = (SSANewInstruction) defInst;
 				String className = newInst.getConcreteType().getName().getClassName().toString();
@@ -145,6 +162,14 @@ public class ConstraintVisitor implements BoxVisitor<Set<Box>> {
 				SSAInvokeInstruction initCall = getInitInst(node, defVar);
 				MethodModel<Set<Box>> m = StringModel.getTargetMethod(initCall);
 				res.addAll(m.draw(graph, b, node, initCall));
+			}else if(defInst instanceof SSAPhiInstruction){
+				SSAPhiInstruction phiInst = (SSAPhiInstruction) defInst;
+
+				for(int i=0; i<phiInst.getNumberOfUses(); i++){					
+					VarBox varBox = new VarBox(node, phiInst.iindex, phiInst.getUse(i));
+					if(graph.addEdge(new AssignOpNode(), b, varBox))
+						res.add(varBox);
+				}
 			}else{
 				throw new InternalError("not defined instruction: " + defInst);
 			}

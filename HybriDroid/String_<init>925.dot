@@ -1,0 +1,11 @@
+digraph{
+2 [label="BB[SSA:0..4]1 - java.lang.String.<init>([C)V\l[0] null\l...\l[4] 5 = arraylength 2\l", shape=box, color=black]
+4 [label="BB[SSA:6..6]3 - java.lang.String.<init>([C)V\l[6] return\l...\l[6] return\l", shape=box, color=black]
+1 [label="BB[SSA:-1..-2]0 - java.lang.String.<init>([C)V\lentry\l[-1] null\l...\l[-2] null\l", shape=box, color=black]
+3 [label="BB[SSA:5..5]2 - java.lang.String.<init>([C)V\l[5] invokespecial < Primordial, Ljava/lang/String, <init>([CII)V > 1,2,4,5 @5 exception:6\l...\l[5] invokespecial < Primordial, Ljava/lang/String, <init>([CII)V > 1,2,4,5 @5 exception:6\l", shape=box, color=black]
+5 [label="BB[SSA:-1..-2]4 - java.lang.String.<init>([C)V\lexit\l", shape=box, color=black]
+1 -> 2
+2 -> 3
+3 -> 4
+4 -> 5
+}

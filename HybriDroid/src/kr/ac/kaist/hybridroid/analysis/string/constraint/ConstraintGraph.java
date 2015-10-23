@@ -69,9 +69,6 @@ public class ConstraintGraph implements Iterable<ConstraintNode>{
 			indexNodeMap.put(nodeNum++, to);
 		}
 		
-		if(op instanceof AssignOpNode){
-			System.out.println("ALREADY? " + nodeIndexMap.containsKey(op));
-		}
 		if(!nodeIndexMap.containsKey(op)){
 			nodeIndexMap.put(op, nodeNum);
 			indexNodeMap.put(nodeNum++, op);
@@ -89,6 +86,10 @@ public class ConstraintGraph implements Iterable<ConstraintNode>{
 			if(relations.contains(Pair.make(from, toIndex))){
 				return false;
 			}
+		}
+		
+		for(ConstraintNode from : froms){
+			System.err.println(from + " --> " + to);
 		}
 		
 		int opToEdge = edgeNum++;

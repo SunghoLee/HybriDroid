@@ -1,0 +1,22 @@
+digraph{
+4 [label="BB[SSA:6..7]3 - java.util.Locale.toString()Ljava/lang/String;\l[6] null\l...\l[7] 5 = getfield < Primordial, Ljava/util/Locale, languageCode, <Primordial,Ljava/lang/String> > 1\l", shape=box, color=black]
+1 [label="BB[SSA:-1..-2]0 - java.util.Locale.toString()Ljava/lang/String;\lentry\l[-1] null\l...\l[-2] null\l", shape=box, color=black]
+10 [label="BB[SSA:-1..-2]9 - java.util.Locale.toString()Ljava/lang/String;\lexit\l", shape=box, color=black]
+8 [label="BB[SSA:13..16]7 - java.util.Locale.toString()Ljava/lang/String;\l[13] null\l...\l[16] putfield 1.< Primordial, Ljava/util/Locale, cachedToStringResult, <Primordial,Ljava/lang/String> > = 9\l", shape=box, color=black]
+6 [label="BB[SSA:10..11]5 - java.util.Locale.toString()Ljava/lang/String;\l[10] null\l...\l[11] 7 = getfield < Primordial, Ljava/util/Locale, variantCode, <Primordial,Ljava/lang/String> > 1\l", shape=box, color=black]
+2 [label="BB[SSA:0..1]1 - java.util.Locale.toString()Ljava/lang/String;\l[0] null\l...\l[1] 3 = getfield < Primordial, Ljava/util/Locale, cachedToStringResult, <Primordial,Ljava/lang/String> > 1\l", shape=box, color=black]
+9 [label="BB[SSA:17..18]8 - java.util.Locale.toString()Ljava/lang/String;\l[17] null\l...\l[18] return 10\l", shape=box, color=black]
+3 [label="BB[SSA:2..5]2 - java.util.Locale.toString()Ljava/lang/String;\l[2] null\l...\l[5] conditional branch(ne) 3,4\l", shape=box, color=black]
+5 [label="BB[SSA:8..9]4 - java.util.Locale.toString()Ljava/lang/String;\l[8] null\l...\l[9] 6 = getfield < Primordial, Ljava/util/Locale, countryCode, <Primordial,Ljava/lang/String> > 1\l", shape=box, color=black]
+7 [label="BB[SSA:12..12]6 - java.util.Locale.toString()Ljava/lang/String;\l[12] 9 = invokestatic < Primordial, Ljava/util/Locale, toNewString(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; > 5,6,7 @21 exception:8\l...\l[12] 9 = invokestatic < Primordial, Ljava/util/Locale, toNewString(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; > 5,6,7 @21 exception:8\l", shape=box, color=black]
+1 -> 2
+2 -> 3
+3 -> 4
+3 -> 9
+4 -> 5
+5 -> 6
+6 -> 7
+7 -> 8
+8 -> 9
+9 -> 10
+}

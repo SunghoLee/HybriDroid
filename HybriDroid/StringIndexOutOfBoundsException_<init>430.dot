@@ -1,0 +1,11 @@
+digraph{
+5 [label="BB[SSA:-1..-2]4 - java.lang.StringIndexOutOfBoundsException.<init>(Ljava/lang/String;II)V\lexit\l", shape=box, color=black]
+1 [label="BB[SSA:-1..-2]0 - java.lang.StringIndexOutOfBoundsException.<init>(Ljava/lang/String;II)V\lentry\l[-1] null\l...\l[-2] null\l", shape=box, color=black]
+4 [label="BB[SSA:6..6]3 - java.lang.StringIndexOutOfBoundsException.<init>(Ljava/lang/String;II)V\l[6] return\l...\l[6] return\l", shape=box, color=black]
+3 [label="BB[SSA:3..5]2 - java.lang.StringIndexOutOfBoundsException.<init>(Ljava/lang/String;II)V\l[3] null\l...\l[5] invokespecial < Primordial, Ljava/lang/StringIndexOutOfBoundsException, <init>(III)V > 1,7,3,4 @7 exception:8\l", shape=box, color=black]
+2 [label="BB[SSA:0..2]1 - java.lang.StringIndexOutOfBoundsException.<init>(Ljava/lang/String;II)V\l[0] null\l...\l[2] 7 = invokevirtual < Primordial, Ljava/lang/String, length()I > 2 @2 exception:6\l", shape=box, color=black]
+1 -> 2
+2 -> 3
+3 -> 4
+4 -> 5
+}
