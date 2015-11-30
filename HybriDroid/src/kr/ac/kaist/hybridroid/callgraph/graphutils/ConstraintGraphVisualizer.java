@@ -2,10 +2,10 @@ package kr.ac.kaist.hybridroid.callgraph.graphutils;
 
 import java.io.File;
 
-import kr.ac.kaist.hybridroid.analysis.string.constraint.Box;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintEdge;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IConstraintEdge;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintNode;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IConstraintNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.OrderedEdge;
 import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer;
 import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer.BoxColor;
@@ -16,24 +16,24 @@ public class ConstraintGraphVisualizer {
 	public ConstraintGraphVisualizer(){
 	}
 	
-	public File visualize(ConstraintGraph graph, String out, Box... spots){
+	public File visualize(ConstraintGraph graph, String out, IBox... spots){
 		Visualizer vis = Visualizer.getInstance();
 		vis.clear();
 		vis.setType(GraphType.Digraph);
 		
-		for(Box spot : spots)
+		for(IBox spot : spots)
 			vis.setColor(spot, BoxColor.RED);
 		
-		for(ConstraintNode from : graph){
-			if(from instanceof Box){
+		for(IConstraintNode from : graph){
+			if(from instanceof IBox){
 				vis.setShape(from, BoxType.RECT);
 			}else{
 				vis.setShape(from, BoxType.CIRCLE);
 			}
-			for(ConstraintEdge outEdge : graph.getOutEdges(from)){
-				ConstraintNode to = outEdge.to();
+			for(IConstraintEdge outEdge : graph.getOutEdges(from)){
+				IConstraintNode to = outEdge.to();
 				
-				if(to instanceof Box){
+				if(to instanceof IBox){
 					vis.setShape(to, BoxType.RECT);
 				}else{
 					vis.setShape(to, BoxType.CIRCLE);

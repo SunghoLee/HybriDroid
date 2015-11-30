@@ -2,7 +2,7 @@ package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 
-public class VarBox implements Box {
+public class VarBox implements IBox {
 	private CGNode node;
 	private int iindex;
 	private int var;
@@ -26,7 +26,7 @@ public class VarBox implements Box {
 //		SSAInstruction inst = node.getIR().getInstructions()[iindex];
 		str += var;
 		str += "] ";//@ " + inst;
-		str += " in " + node.getMethod().getName().toString() + " of " + node.getMethod().getDeclaringClass().getName().getClassName();
+		str += " in " + node /*.getMethod().getName().toString()*/ + " of " + node.getMethod().getDeclaringClass().getName().getClassName();
 		return str;
 	}
 	
@@ -38,7 +38,7 @@ public class VarBox implements Box {
 		return iindex;
 	}
 	@Override
-	public <T> T visit(BoxVisitor<T> v){
+	public <T> T visit(IBoxVisitor<T> v){
 		return v.visit(this);
 	}
 
@@ -46,5 +46,20 @@ public class VarBox implements Box {
 	public CGNode getNode() {
 		// TODO Auto-generated method stub
 		return node;
+	}
+	
+	@Override
+	public int hashCode(){
+		return node.hashCode() + var;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof VarBox){
+			VarBox v = (VarBox)o;
+			if(node.equals(v.getNode()) && var == v.getVar())
+				return true;
+		}
+		return false;
 	}
 }

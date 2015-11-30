@@ -2,7 +2,7 @@ package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 
-public class ParamBox implements Box {
+public class ParamBox implements IBox {
 	private CGNode node;
 	private int var;
 	
@@ -26,7 +26,7 @@ public class ParamBox implements Box {
 	}
 	
 	@Override
-	public <T> T visit(BoxVisitor<T> v){
+	public <T> T visit(IBoxVisitor<T> v){
 		return v.visit(this);
 	}
 
@@ -34,5 +34,20 @@ public class ParamBox implements Box {
 	public CGNode getNode() {
 		// TODO Auto-generated method stub
 		return node;
+	}
+	
+	@Override
+	public int hashCode(){
+		return node.hashCode() + var;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof ParamBox){
+			ParamBox v = (ParamBox)o;
+			if(node.equals(v.getNode()) && var == v.getVar())
+				return true;
+		}
+		return false;
 	}
 }

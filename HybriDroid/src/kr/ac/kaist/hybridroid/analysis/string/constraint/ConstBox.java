@@ -2,7 +2,7 @@ package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 
-public class ConstBox implements Box {
+public class ConstBox implements IBox {
 	private CGNode node;
 	private Object value;
 	private ConstType type;
@@ -31,7 +31,7 @@ public class ConstBox implements Box {
 	}
 	
 	@Override
-	public <T> T visit(BoxVisitor<T> v){
+	public <T> T visit(IBoxVisitor<T> v){
 		return v.visit(this);
 	}
 
@@ -39,5 +39,20 @@ public class ConstBox implements Box {
 	public CGNode getNode() {
 		// TODO Auto-generated method stub
 		return node;
+	}
+	
+	@Override
+	public int hashCode(){
+		return node.hashCode() + value.hashCode() + type.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof ConstBox){
+			ConstBox v = (ConstBox)o;
+			if(node.equals(v.getNode()) && value.equals(v.getValue()) && type.equals(v.getType()))
+				return true;
+		}
+		return false;
 	}
 }

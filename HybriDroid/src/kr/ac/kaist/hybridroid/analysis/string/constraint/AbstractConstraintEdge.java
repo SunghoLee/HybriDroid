@@ -1,21 +1,21 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
-public class AbstractConstraintEdge implements ConstraintEdge{
-	private ConstraintNode from;
-	private ConstraintNode to;
+public class AbstractConstraintEdge implements IConstraintEdge{
+	private IConstraintNode from;
+	private IConstraintNode to;
 	
-	protected AbstractConstraintEdge(ConstraintNode from, ConstraintNode to){
+	protected AbstractConstraintEdge(IConstraintNode from, IConstraintNode to){
 		this.from = from;
 		this.to = to;
 	}
 	
 	@Override
-	public ConstraintNode from(){
+	public IConstraintNode from(){
 		return from;
 	}
 	
 	@Override
-	public ConstraintNode to(){
+	public IConstraintNode to(){
 		return to;
 	}
 }

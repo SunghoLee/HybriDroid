@@ -1,7 +1,7 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
 public class PropagationEdge extends AbstractConstraintEdge {
-	public PropagationEdge(ConstraintNode from, ConstraintNode to){
+	public PropagationEdge(IConstraintNode from, IConstraintNode to){
 		super(from, to);
 	}		
 	

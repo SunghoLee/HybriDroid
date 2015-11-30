@@ -1,6 +1,6 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
-public class AppendOpNode implements ConstraintNode {
+public class AppendOpNode implements IConstraintNode {
 	public AppendOpNode(){}
 	
 	@Override

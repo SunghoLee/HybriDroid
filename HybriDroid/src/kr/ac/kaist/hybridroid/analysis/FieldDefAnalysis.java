@@ -48,6 +48,8 @@ public class FieldDefAnalysis {
 	private Map<CGNode, Set<PointerKey>> localNodeToFields;
 	//map from a field to CGNode set. 
 	private Map<PointerKey, Set<CGNode>> localFieldToNodes;
+	private Map<PointerKey, Set<Pair<CGNode, SSAPutInstruction>>> localFieldToNodesTest;
+	private Map<PointerKey, Set<CGNode>> closureFieldToNodes;
 	
 	//CallGraph used for finding closure information in this analysis.
 	private CallGraph cg;
@@ -60,7 +62,8 @@ public class FieldDefAnalysis {
 //		test(cg);
 		localFieldToNodes = new HashMap<PointerKey, Set<CGNode>>();
 		localNodeToFields = new HashMap<CGNode, Set<PointerKey>>();
-
+		localFieldToNodesTest = new HashMap<PointerKey, Set<Pair<CGNode, SSAPutInstruction>>>();
+		closureFieldToNodes = new HashMap<PointerKey, Set<CGNode>>();
 		for(CGNode node : cg){
 			Set<PointerKey> fields = getLocalFieldDef(pa, node);
 			addFieldToNodesMap(localFieldToNodes, node, fields);
@@ -74,49 +77,67 @@ public class FieldDefAnalysis {
 	 */
 	private void test(CallGraph cg){
 		int index = 1;
-		for(CGNode node : cg){
-			IMethod m = node.getMethod();
-			IClass c = node.getMethod().getDeclaringClass();
-			if(m.getName().toString().equals("toString") && c.getName().getClassName().toString().equals("Locale")){
-//					m.getName().toString().equals("failedBoundsCheck") && c.getName().getClassName().toString().equals("String") ||
-//					m.getName().toString().equals("<init>") && c.getName().getClassName().toString().equals("StringIndexOutOfBoundsException") ||
-//					m.getName().toString().equals("toString") && c.getName().getClassName().toString().equals("StringBuilder") ||
-//					m.getName().toString().equals("toString") && c.getName().getClassName().toString().equals("AbstractStringBuilder") ||
-//					m.getName().toString().equals("arraycopy") && c.getName().getClassName().toString().equals("System")){
-				if(node.getIR()!=null){
-					WalaCFGVisualizer vis = new WalaCFGVisualizer();
-					vis.visualize(node.getIR().getControlFlowGraph(), c.getName().getClassName().toString() + "_" + m.getName().toString() + (index++) + ".dot");
-				}
+		
+		for(CGNode t : cg){
+			if(t.toString().contains("Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere")){
+		System.out.println(t);
+		IR ir = t.getIR();
+		for(SSAInstruction inst : ir.getInstructions()){
+			System.out.println("(" + (index++) + ") " + inst);
+		}
 			}
 		}
+//		for(CGNode node : cg){
+//			IMethod m = node.getMethod();
+//			IClass c = node.getMethod().getDeclaringClass();
+//			if(m.getName().toString().equals("toString") && c.getName().getClassName().toString().equals("Locale")){
+////					m.getName().toString().equals("failedBoundsCheck") && c.getName().getClassName().toString().equals("String") ||
+////					m.getName().toString().equals("<init>") && c.getName().getClassName().toString().equals("StringIndexOutOfBoundsException") ||
+////					m.getName().toString().equals("toString") && c.getName().getClassName().toString().equals("StringBuilder") ||
+////					m.getName().toString().equals("toString") && c.getName().getClassName().toString().equals("AbstractStringBuilder") ||
+////					m.getName().toString().equals("arraycopy") && c.getName().getClassName().toString().equals("System")){
+//				if(node.getIR()!=null){
+//					WalaCFGVisualizer vis = new WalaCFGVisualizer();
+//					vis.visualize(node.getIR().getControlFlowGraph(), c.getName().getClassName().toString() + "_" + m.getName().toString() + (index++) + ".dot");
+//				}
+//			}
+//		}
 		System.out.println("Test is done.");
 		System.exit(-1);
 	}
 	
 	private Set<CGNode> getFieldDefNodesClosure(Set<PointerKey> fields){
 		Set<CGNode> nodes = new HashSet<CGNode>();
-		Set<CGNode> localNodes = new HashSet<CGNode>();
 		
-		for(PointerKey field : fields){
-			localNodes.addAll(localFieldToNodes.get(field));
+		for(PointerKey field : fields){			
+			nodes.addAll(getFieldDefNodesClosure(field));
 		}
-		
-		
-		Queue<CGNode> queue = new LinkedBlockingQueue<CGNode>();
-		queue.addAll(localNodes);
-		
-		while(!queue.isEmpty()){
-			CGNode target = queue.poll();
-			if(!nodes.contains(target)){
-				if(nodes.add(target)){
-					Iterator<CGNode> iPred = cg.getPredNodes(target);
-					while(iPred.hasNext()){
-						CGNode pred = iPred.next();
-						queue.add(pred);
+		return nodes;
+	}
+	
+	private Set<CGNode> getFieldDefNodesClosure(PointerKey field){
+		Set<CGNode> nodes = new HashSet<CGNode>();
+					
+		if(!closureFieldToNodes.containsKey(field)){
+			Set<CGNode> fieldNodes = new HashSet<CGNode>();
+			Queue<CGNode> queue = new LinkedBlockingQueue<CGNode>();
+			queue.addAll(localFieldToNodes.get(field));
+			
+			while(!queue.isEmpty()){
+				CGNode target = queue.poll();
+				if(!fieldNodes.contains(target)){
+					if(fieldNodes.add(target)){
+						Iterator<CGNode> iPred = cg.getPredNodes(target);
+						while(iPred.hasNext()){
+							CGNode pred = iPred.next();
+							queue.add(pred);
+						}
 					}
 				}
 			}
+			closureFieldToNodes.put(field, fieldNodes);
 		}
+		nodes.addAll(closureFieldToNodes.get(field));
 		
 		return nodes;
 	}
@@ -158,13 +179,21 @@ public class FieldDefAnalysis {
 					FieldReference fr = putInst.getDeclaredField();
 					
 					if(putInst.isStatic()){
+						PointerKey pk = pa.getHeapModel().getPointerKeyForStaticField(cha.resolveField(fr));
+						if(!localFieldToNodesTest.containsKey(pk))
+							localFieldToNodesTest.put(pk, new HashSet<Pair<CGNode, SSAPutInstruction>>());
+						localFieldToNodesTest.get(pk).add(Pair.make(node, putInst));
 						fields.add(pa.getHeapModel().getPointerKeyForStaticField(cha.resolveField(fr)));
 					}else{
 						int owner = putInst.getUse(0);
 						
 						PointerKey ownerPK = pa.getHeapModel().getPointerKeyForLocal(node, owner);
 						for(InstanceKey ownerIK : (OrdinalSet<InstanceKey>)pa.getPointsToSet(ownerPK)){
-							fields.add(pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, cha.resolveField(fr)));
+							PointerKey pk = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, cha.resolveField(fr));
+							if(!localFieldToNodesTest.containsKey(pk))
+								localFieldToNodesTest.put(pk, new HashSet<Pair<CGNode, SSAPutInstruction>>());
+							localFieldToNodesTest.get(pk).add(Pair.make(node, putInst));
+							fields.add(pk);
 						}
 					}
 				}
@@ -193,7 +222,7 @@ public class FieldDefAnalysis {
 		
 		WalaCFGVisualizer vis = new WalaCFGVisualizer();
 		vis.visualize(cfg, node.getMethod().getName().toString() + ".dot");
-		System.out.println("--> " + targets);
+//		System.out.println("--> FOUND: " + targets);
 		while(!queue.isEmpty()){
 			int bb = queue.poll();
 			if(!visited.add(bb)){
@@ -246,6 +275,13 @@ public class FieldDefAnalysis {
 		return false;
 	}
 	
+	private boolean hasClosureDefs(CGNode node, PointerKey field){
+		Set<CGNode> nodes = getFieldDefNodesClosure(field);
+		if(nodes.contains(node))
+			return true;
+		return false;
+	}
+	
 	private Set<Pair<CGNode, Set<SSAPutInstruction>>> getForwardFieldDefInstructions(CallGraph cg, CGNode node, Set<PointerKey> fields){
 		IR ir = node.getIR();
 		if(ir == null)
@@ -265,8 +301,10 @@ public class FieldDefAnalysis {
 			alreadyFields.addAll(fields);
 		}
 		
+//		System.out.println("Forward: " +node);
+		
 		forwardVisited.put(node, setCopy(fields));
-		System.out.println("-Forward: " + node + ", " + fields);
+//		System.out.println("-Forward: " + node + ", " + fields);
 		boolean hasDef = false;
 		for(PointerKey field : fields){
 			if(hasLocalDef(node, field)){
@@ -275,150 +313,267 @@ public class FieldDefAnalysis {
 		}
 		Set<SSAPutInstruction> putInsts = new HashSet<SSAPutInstruction>();
 		SSAInstruction[] insts = ir.getInstructions();
-		
-		for(int i = insts.length-1; i >= 0; i--){
+		Map<PointerKey, Set<Integer>> defIndexes = new HashMap<PointerKey, Set<Integer>>();
+		for(int i = insts.length-1; i >= 0 && !fields.isEmpty(); i--){
 			SSAInstruction inst = insts[i];
 			
 			if(inst == null)
 				continue;
 			
-			if(hasDef){
-				if(inst instanceof SSAPutInstruction){
-					SSAPutInstruction putInst = (SSAPutInstruction) inst;
-					Set<PointerKey> accFields = getFieldPK(node, putInst);
-								
-					for(PointerKey field : accFields){
-						if(fields.contains(field)){
-							putInsts.add(putInst);
+			if(hasDef && inst instanceof SSAPutInstruction){
+				SSAPutInstruction putInst = (SSAPutInstruction) inst;
+				Set<PointerKey> accFields = getFieldPK(node, putInst);
 							
-							int[] putIndexes = new int[putInsts.size()+1];
-							int index = 1;
-							putIndexes[0] = putInst.iindex;
-							for(SSAPutInstruction prePutInst : putInsts){
-								putIndexes[index++] = prePutInst.iindex;
-							}
-
-							if(isFallThrough(node, EXIT, putIndexes)){
-								fields.remove(field);
-							}
+				for(PointerKey field : accFields){
+					if(fields.contains(field)){
+						putInsts.add(putInst);
+						System.out.println("FOUND--("+(foundNum++)+"): " + field);
+						System.out.println("\tNode: " + node);
+						System.out.println("\tInst: " + putInst);
+						if(!defIndexes.containsKey(field))
+							defIndexes.put(field, new HashSet<Integer>());
+						
+						defIndexes.get(field).add(putInst.iindex);
+						
+						Set<Integer> defSet = defIndexes.get(field);
+						int[] defs = new int[defSet.size()];
+						int index = 0;
+						for(int def : defSet){
+							defs[index++] = def;
 						}
-					}	
+						
+						if(isFallThrough(node, EXIT, defs))
+							fields.remove(field);	
+					}
 				}
-			}
-			
-			if(inst instanceof SSAInvokeInstruction){
+			}else if(inst instanceof SSAInvokeInstruction){
 				SSAInvokeInstruction invokeInst = (SSAInvokeInstruction) inst;
 				CallSiteReference csr = invokeInst.getCallSite();
-				Set<PointerKey> remains = new HashSet<PointerKey>();
-				boolean didBranched = false;
+					
+				Set<PointerKey> remainsFieldsInSuccs = new HashSet<PointerKey>();
 				
-				for(CGNode target : cg.getPossibleTargets(node, csr)){
-					if(!hasClosureDefsAtLeastOne(target, fields))
-						continue;
-					didBranched = true;
-//					System.out.println("#T: " + cg.getPossibleTargets(node, csr).size());
-//					System.out.println("F: " + fields);
-//					System.out.println("N: " + target);
-					Set<PointerKey> propaFields = setCopy(fields);
-					res.addAll(getForwardFieldDefInstructions(cg, target, propaFields));
-					remains.addAll(propaFields);
+				for(CGNode succ : cg.getPossibleTargets(node, csr)){
+					Set<PointerKey> toFindFieldsInSucc = new HashSet<PointerKey>();
+					for(PointerKey targetField : fields){
+						if(hasClosureDefs(succ, targetField))
+							toFindFieldsInSucc.add(targetField);
+						else
+							remainsFieldsInSuccs.add(targetField);
+					}
+					
+					if(!toFindFieldsInSucc.isEmpty()){
+						res.addAll(getForwardFieldDefInstructions(cg, succ, toFindFieldsInSucc));
+						remainsFieldsInSuccs.addAll(toFindFieldsInSucc);
+					}
 				}
-				if(didBranched){
-					fields.clear();
-					fields.addAll(remains);
-				}
-				hasDef = false;
-				for(PointerKey field : fields){
-					if(hasLocalDef(node, field)){
-						hasDef = true;
+				
+				for(PointerKey field : setCopy(fields)){
+					if(!remainsFieldsInSuccs.contains(field)){
+						if(!defIndexes.containsKey(field))
+							defIndexes.put(field, new HashSet<Integer>());
+						
+						defIndexes.get(field).add(invokeInst.iindex);
+						
+						Set<Integer> defSet = defIndexes.get(field);
+						int[] defs = new int[defSet.size()];
+						int index = 0;
+						for(int def : defSet){
+							defs[index++] = def;
+						}
+						
+						if(isFallThrough(node, EXIT, defs))
+							fields.remove(field);		
 					}
 				}
 			}
 		}
+		
 		if(!putInsts.isEmpty())
 			res.add(Pair.make(node, putInsts));
 		return res;
 	}
 	
 	private Map<CGNode, Set<PointerKey>> forwardVisited;
-	
+	private int foundNum = 0;
 	public Set<Pair<CGNode, Set<SSAPutInstruction>>> getFSFieldDefInstructions(CallGraph cg, CGNode node, SSAGetInstruction inst){
 		Set<Pair<CGNode, Set<SSAPutInstruction>>> res = new HashSet<Pair<CGNode, Set<SSAPutInstruction>>>();
-		Set<CGNode> nodes = new HashSet<CGNode>();
 		Set<PointerKey> fieldKeys = getFieldPK(node, inst);
 		forwardVisited = new HashMap<CGNode, Set<PointerKey>>();
-//		for(PointerKey field : fieldKeys)
-//			nodes.addAll(closureFieldToNodes.get(field));
-		
-		nodes = getFieldDefNodesClosure(fieldKeys);
-		System.out.println("To Find #Nodes: " + getFieldDefNodesLocal(fieldKeys).size());
-		Queue<Pair<Pair<CGNode, Integer>, Set<PointerKey>>> toVisit = new LinkedBlockingQueue<Pair<Pair<CGNode, Integer>, Set<PointerKey>>>();
-		toVisit.add(Pair.make(Pair.make(node, inst.iindex), fieldKeys));
-		
-		System.out.println("\tPK: " + fieldKeys);
-		Set<Integer> checked = new HashSet<Integer>();
-		
-		while(!toVisit.isEmpty()){
-			Pair<Pair<CGNode, Integer>, Set<PointerKey>> p = toVisit.poll(); 
-			CGNode target = p.fst().fst();
-			int lastIndex = p.fst().snd();
-			Set<PointerKey> targetFields = p.snd();
-			if(checked.contains(cg.getNumber(target))){
-				continue;
-			}
-			
-			if(!nodes.contains(target)){
-				for(Pair<CGNode, Integer> pred : getAllPreds(cg, target)){
-					toVisit.add(Pair.make(pred, setCopy(targetFields)));
+		int defNum = 0;
+		foundNum = 0;
+//		System.out.println("---- To find ----");
+//		for(PointerKey field : fieldKeys){
+//			if(localFieldToNodesTest.containsKey(field))
+//			for(Pair<CGNode, SSAPutInstruction> p : localFieldToNodesTest.get(field)){
+//				defNum++;
+//				System.out.println("NODE: " + p.fst());
+//				System.out.println("INST: " + p.snd());
+//				System.out.println("--");
+//			}
+//			else
+//				System.out.println("Unknown Field: " + field);
+//		}
+//		System.out.println("-----------------");
+//		System.out.println("#Total Def Inst: " + defNum);
+		// flow-insensitive! 
+		//TODO: make flow sensitive using ICFG!
+		boolean allContains = true;
+		for(PointerKey field : fieldKeys){
+			if(localFieldToNodesTest.containsKey(field)){
+				Set<Pair<CGNode, SSAPutInstruction>> pSet = localFieldToNodesTest.get(field);
+				Map<CGNode, Set<SSAPutInstruction>> map = new HashMap<CGNode, Set<SSAPutInstruction>>();
+				for(Pair<CGNode, SSAPutInstruction> p : pSet){
+					CGNode tn = p.fst();
+					SSAPutInstruction ti = p.snd();
+					if(!map.containsKey(tn))
+						map.put(tn, new HashSet<SSAPutInstruction>());
+					map.get(tn).add(ti);
 				}
-				continue;
-			}
-			
-			IR ir = target.getIR();
-			SSAInstruction[] insts = ir.getInstructions();
-			
-			Set<SSAPutInstruction> putInsts = new HashSet<SSAPutInstruction>();
-			for(int i = lastIndex - 1; i >= 0; i--){
-				SSAInstruction preInst = insts[i];
-
-				if(preInst != null){
-					if(preInst instanceof SSAPutInstruction){
-						SSAPutInstruction putInst = (SSAPutInstruction) preInst;
-						Set<PointerKey> accFields = getFieldPK(target, putInst);
-						boolean fallThrough = isFallThrough(target, inst.iindex, putInst.iindex);
-						//TODO: Do I have to check 'fallthrough' from a first instruction to the put instruction? 
-						for(PointerKey field : accFields){
-							System.out.println("\t\t=> " + field);
-							if(targetFields.contains(field))
-								putInsts.add(putInst);
-							if(fallThrough)
-								targetFields.remove(field);								
-						}
-					}else if(preInst instanceof SSAInvokeInstruction){
-						SSAInvokeInstruction invokeInst = (SSAInvokeInstruction) preInst;
-						CallSiteReference csr = invokeInst.getCallSite();
-						for(CGNode succ : cg.getPossibleTargets(target, csr)){
-							if(hasClosureDefsAtLeastOne(succ, fieldKeys)){
-								res.addAll(getForwardFieldDefInstructions(cg, succ, fieldKeys));
-							}
-						}
-					}
+				for(CGNode n : map.keySet()){
+					res.add(Pair.make(n, map.get(n)));
 				}
-			}
-			
-			if(!putInsts.isEmpty())
-				res.add(Pair.make(target, putInsts));
-			
-			if(!targetFields.isEmpty()){
-				for(Pair<CGNode, Integer> pred : getAllPreds(cg, target)){
-					toVisit.add(Pair.make(pred, setCopy(targetFields)));
-				}
-			}
+			} else
+				allContains = false;
 		}
-		forwardVisited.clear();
-		forwardVisited = null;
-		System.out.println("\t" + inst + " => " + res.size());
-		return res;
+		if(allContains){
+//			System.out.println("all contains!");
+			return res;
+		}else{
+			System.out.println("fail contains!");
+			return res;
+		}
+		//
+//		Queue<Pair<Pair<CGNode, Integer>, Set<PointerKey>>> toVisit = new LinkedBlockingQueue<Pair<Pair<CGNode, Integer>, Set<PointerKey>>>();
+//		toVisit.add(Pair.make(Pair.make(node, inst.iindex), fieldKeys));
+//		
+//		System.out.println("\tPK: " + fieldKeys);
+//		Map<Integer, Set<PointerKey>> checked = new HashMap<Integer, Set<PointerKey>>();
+//		
+//		while(!toVisit.isEmpty()){
+//			Pair<Pair<CGNode, Integer>, Set<PointerKey>> p = toVisit.poll(); 
+//			CGNode target = p.fst().fst();
+//			int lastIndex = p.fst().snd();
+//			Set<PointerKey> targetFields = p.snd();
+//			Set<PointerKey> toFindFields = new HashSet<PointerKey>();
+//			
+////			System.out.println("FS: " +target);
+//			
+//			if(checked.containsKey(cg.getNumber(target))){
+//				Set<PointerKey> checkedFields =checked.get(cg.getNumber(target));
+//				if(checkedFields.containsAll(targetFields))
+//					continue;
+//				for(PointerKey checkedField : checkedFields)
+//					if(targetFields.contains(checkedField))
+//						targetFields.remove(checkedField);
+//			}else
+//				checked.put(cg.getNumber(target), targetFields);
+//			
+//			Set<PointerKey> remainsFields = setCopy(targetFields);
+//			Map<PointerKey, Set<Integer>> defIndexes = new HashMap<PointerKey, Set<Integer>>();
+//			
+//			boolean hasDef = false;
+//			for(PointerKey targetField : targetFields){
+//				if(hasClosureDefs(target, targetField)){
+//					toFindFields.add(targetField);
+//					if(hasLocalDef(target, targetField))
+//						hasDef = true;
+//				}
+//			}
+//			
+//			remainsFields.removeAll(toFindFields);
+//			
+//			IR ir = target.getIR();
+//			SSAInstruction[] insts = ir.getInstructions();
+//			
+//			Set<SSAPutInstruction> putInsts = new HashSet<SSAPutInstruction>();
+//			for(int i = lastIndex - 1; i >= 0 && !toFindFields.isEmpty(); i--){
+//				SSAInstruction preInst = insts[i];
+//
+//				if(preInst != null){
+//					if(hasDef && preInst instanceof SSAPutInstruction){
+//						SSAPutInstruction putInst = (SSAPutInstruction) preInst;
+//						Set<PointerKey> accFields = getFieldPK(target, putInst);
+//						//TODO: Do I have to check 'fallthrough' from a first instruction to the put instruction? 
+//						for(PointerKey field : accFields){
+//							System.out.println("\t\t=> " + field);
+//							if(toFindFields.contains(field)){
+//								putInsts.add(putInst);
+//								System.out.println("FOUND--("+(foundNum++)+"): " + field);
+//								System.out.println("\tNode: " + target);
+//								System.out.println("\tInst: " + putInst);
+//								if(!defIndexes.containsKey(field))
+//									defIndexes.put(field, new HashSet<Integer>());
+//								
+//								defIndexes.get(field).add(putInst.iindex);
+//								
+//								Integer[] defArray = defIndexes.get(field).toArray(new Integer[0]);
+//								int[] defs = new int[defArray.length];
+//								for(int defi=0; defi<defArray.length; defi++){
+//									defs[defi] = defArray[defi];
+//								}
+//								
+//								if(isFallThrough(target, lastIndex, defs))
+//									toFindFields.remove(field);								
+//							}
+//						}
+//					}else if(preInst instanceof SSAInvokeInstruction){
+//						SSAInvokeInstruction invokeInst = (SSAInvokeInstruction) preInst;
+//						CallSiteReference csr = invokeInst.getCallSite();
+//						Set<PointerKey> remainsFieldsInSuccs = new HashSet<PointerKey>();
+//						
+//						for(CGNode succ : cg.getPossibleTargets(target, csr)){
+//							Set<PointerKey> toFindFieldsInSucc = new HashSet<PointerKey>();
+//							for(PointerKey targetField : toFindFields){
+//								if(hasClosureDefs(succ, targetField))
+//									toFindFieldsInSucc.add(targetField);
+//								else
+//									remainsFieldsInSuccs.add(targetField);
+//							}
+//							
+//							if(!toFindFieldsInSucc.isEmpty()){
+//								res.addAll(getForwardFieldDefInstructions(cg, succ, toFindFieldsInSucc));
+//								remainsFieldsInSuccs.addAll(toFindFieldsInSucc);
+//							}
+//						}
+//						
+//						for(PointerKey field : setCopy(toFindFields)){
+//							if(!remainsFieldsInSuccs.contains(field)){
+//								if(!defIndexes.containsKey(field))
+//									defIndexes.put(field, new HashSet<Integer>());
+//								
+//								defIndexes.get(field).add(invokeInst.iindex);
+//								
+//								Set<Integer> defSet = defIndexes.get(field);
+//								int[] defs = new int[defSet.size()];
+//								int index = 0;
+//								for(int def : defSet){
+//									defs[index++] = def;
+//								}
+//								
+//								if(isFallThrough(target, lastIndex, defs))
+//									toFindFields.remove(field);		
+//							}
+//						}
+//					}
+//				}
+//			}
+//			
+//			remainsFields.addAll(toFindFields);
+//			
+//			if(!putInsts.isEmpty())
+//				res.add(Pair.make(target, putInsts));
+//			
+//			if(!remainsFields.isEmpty()){
+//				for(Pair<CGNode, Integer> pred : getAllPreds(cg, target)){
+//					toVisit.add(Pair.make(pred, setCopy(remainsFields)));
+//				}
+//			}
+//		}
+//		forwardVisited.clear();
+//		forwardVisited = null;
+//		System.out.println("\t" + inst + " => " + res.size());
+////		System.exit(-1);
+//		return res;
 	}
 	
 	private Set<Pair<CGNode, Integer>> getAllPreds(CallGraph cg, CGNode node){

@@ -12,11 +12,12 @@ import java.util.Set;
 import java.util.jar.JarFile;
 
 import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.Box;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.BoxVisitor;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintVisitor;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.InteractionConstraintMonitor;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
+import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
 import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
 import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
 import kr.ac.kaist.hybridroid.util.data.Pair;
@@ -42,7 +43,7 @@ import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFABuilder;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -133,18 +134,30 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		WalaCGVisualizer vis = new WalaCGVisualizer();
 		vis.visualize(cg, "cfg_test.dot");
 		vis.printLabel("label.txt");
-		Set<Box> boxSet = findHotspots(cg, hotspots);
-		Box[] boxes = boxSet.toArray(new Box[0]);
-		for(Box box : boxes){
+		Set<IBox> boxSet = findHotspots(cg, hotspots);
+		IBox[] boxes = boxSet.toArray(new IBox[0]);
+		for(IBox box : boxes){
 			System.err.println("Spot: " + box);
 		}
 		System.err.println("Field Def analysis...");
 		FieldDefAnalysis fda = new FieldDefAnalysis(cg, pa);
 		System.err.println("Build Constraint Graph...");
-		ConstraintGraph graph = buildConstraintGraph(cg, fda, boxes);
+		
+		IBox[] targets = new IBox[]{boxes[14]};
+//		Box[] targets = boxes;
+		ConstraintGraph graph = buildConstraintGraph(cg, fda, targets);
 		System.err.println("Print Constraint Graph...");
 		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
-		cgvis.visualize(graph, "const.dot", boxes);
+		cgvis.visualize(graph, "const14.dot", targets);
+		graph.optimize();
+		ConstraintGraphVisualizer cgvis2 = new ConstraintGraphVisualizer();
+		cgvis.visualize(graph, "const_op14.dot", targets);
+		
+		System.out.println("--- String modeling warning ---");
+		for(String warning : StringModel.getWarnings()){
+			System.out.println("[Warning] " + warning);
+		}
+		System.out.println("------------");
 	}
 	
 	private Pair<CallGraph, PointerAnalysis> buildCG() throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
@@ -157,7 +170,8 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		options.setEntrypoints(getEntrypoints(cha, scope, options, cache));
 		options.setSelector(new ClassHierarchyClassTargetSelector(cha));
 		options.setSelector(new ClassHierarchyMethodTargetSelector(cha));
-		CallGraphBuilder cgb = new nCFABuilder(1, cha, options, cache, null, null);
+//		CallGraphBuilder cgb = new nCFABuilder(0, cha, options, cache, null, null);
+		CallGraphBuilder cgb = ZeroXCFABuilder.make(cha, options, cache, null, null, 0);
 		return Pair.make(cgb.makeCallGraph(options, null), cgb.getPointerAnalysis());
 	}
 	
@@ -201,8 +215,8 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		return entrypoints;
 	}
 	
-	private Set<Box> findHotspots(CallGraph cg, List<Hotspot> hotspots){
-		Set<Box> boxes = new HashSet<Box>();
+	private Set<IBox> findHotspots(CallGraph cg, List<Hotspot> hotspots){
+		Set<IBox> boxes = new HashSet<IBox>();
 		for(CGNode node : cg){
 			IR ir = node.getIR();
 			
@@ -240,44 +254,61 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		return false;
 	}
 	
-	private ConstraintGraph buildConstraintGraph(CallGraph cg, FieldDefAnalysis fda, Box... initials){
+	private ConstraintGraph buildConstraintGraph(CallGraph cg, FieldDefAnalysis fda, IBox... initials){
+		for(IBox box : initials){
+			System.err.println("TargetSpot: " + box);
+		}
+		
 		ConstraintGraph graph = new ConstraintGraph();
-		BoxVisitor<Set<Box>> v = new ConstraintVisitor(cg, fda, graph);
-		for(Box initial : initials)
+		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new InteractionConstraintMonitor(cg, InteractionConstraintMonitor.CLASSTYPE_ALL, InteractionConstraintMonitor.NODETYPE_NONE));
+		for(IBox initial : initials)
 			worklist.add(initial);
 		
 		int iter = 1;
 		while(!worklist.isEmpty()){
-			Box box = worklist.pop();
-			System.out.println("#Iter(" + (iter++) + ") " + box);
-			Set<Box> res = box.visit(v);
+			IBox box = worklist.pop();
+			System.out.println("#Iter(" + (iter++) + ", size: " + worklist.size() + ") " + box);
+			Set<IBox> res = box.visit(v);
 			
-			for(Box next : res)
+			for(IBox next : res)
 				worklist.add(next);
 		}
+		System.out.println("--- constraint visitor warning ---");
+		for(String str : v.getWarnings()){
+			System.out.println("[Warning] " + str);
+		}
+		System.out.println("----------");
 		
 		return graph;
 	}
 
 	class WorkList{
-		private List<Box> list;
-		
+		private List<IBox> list;
+		private Set<IBox> visited;
 		public WorkList(){
-			list = new ArrayList<Box>();
+			list = new ArrayList<IBox>();
+			visited = new HashSet<IBox>();
 		}
 		
-		public void add(Box box){
-			list.add(box);
+		public void add(IBox box){
+			if(!visited.contains(box)){
+				list.add(box);
+				visited.add(box);
+			}
 		}
 		
-		public Box pop(){
-			Box box = list.get(0);
+		public IBox pop(){
+			IBox box = list.get(0);
 			list.remove(0);
 			return box;
 		}
 		
 		public boolean isEmpty(){
 			return list.isEmpty();
+		}
+		
+		public int size(){
+			return list.size();
 		}
 	}
 }
