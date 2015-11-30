@@ -1,9 +1,0 @@
-digraph{
-2 [label="BB[SSA:0..0]1 - java.lang.String.failedBoundsCheck(III)Ljava/lang/StringIndexOutOfBoundsException;\l[0] 6 = new <Primordial,Ljava/lang/StringIndexOutOfBoundsException>@0\l...\l[0] 6 = new <Primordial,Ljava/lang/StringIndexOutOfBoundsException>@0\l", shape=box, color=black]
-4 [label="BB[SSA:6..6]3 - java.lang.String.failedBoundsCheck(III)Ljava/lang/StringIndexOutOfBoundsException;\l[6] throw 6\l...\l[6] throw 6\l", shape=box, color=black]
-3 [label="BB[SSA:1..5]2 - java.lang.String.failedBoundsCheck(III)Ljava/lang/StringIndexOutOfBoundsException;\l[1] null\l...\l[5] invokespecial < Primordial, Ljava/lang/StringIndexOutOfBoundsException, <init>(III)V > 6,2,3,4 @7 exception:7\l", shape=box, color=black]
-1 [label="BB[SSA:-1..-2]0 - java.lang.String.failedBoundsCheck(III)Ljava/lang/StringIndexOutOfBoundsException;\lentry\l[-1] null\l...\l[-2] null\l", shape=box, color=black]
-1 -> 2
-2 -> 3
-3 -> 4
-}
