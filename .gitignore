@@ -2,9 +2,12 @@
 *.class
 *.out
 *.swp
+*.dot
+*.svg
 */bin/
 */bin/*
 *~
+HybriDroid/tmp/
 .metadata/
 com.ibm.wala.cast.java.jdt.test/
 com.ibm.wala.cast.java.polyglot/lib/

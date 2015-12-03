@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.resource.model.ContextClassModel;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -15,10 +16,15 @@ public class StringModel {
 	
 	private static Map<String, IClassModel> classMap;
 	private static Set<String> warnings;
+	
 	static{
 		warnings = new HashSet<String>();
 		classMap = new HashMap<String, IClassModel>();
 		init();
+	}
+	
+	public static void setResourceAnalysis(AndroidResourceAnalysis ra, String region){
+		classMap.put("Context", ContextClassModel.getInstance(ra, region));
 	}
 	
 	public static void setWarning(String msg, boolean print){

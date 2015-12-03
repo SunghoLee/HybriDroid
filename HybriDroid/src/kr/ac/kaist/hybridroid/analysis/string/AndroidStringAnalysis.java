@@ -12,9 +12,10 @@ import java.util.Set;
 import java.util.jar.JarFile;
 
 import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintVisitor;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.InteractionConstraintMonitor;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
@@ -73,6 +74,11 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	public AndroidStringAnalysis(){
 		scopeInit();
 		worklist = new WorkList();
+	}
+	
+	public AndroidStringAnalysis(AndroidResourceAnalysis ra){
+		this();
+		StringModel.setResourceAnalysis(ra, null);
 	}
 	
 	private void scopeInit(){
@@ -143,15 +149,15 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		FieldDefAnalysis fda = new FieldDefAnalysis(cg, pa);
 		System.err.println("Build Constraint Graph...");
 		
-		IBox[] targets = new IBox[]{boxes[14]};
+		IBox[] targets = new IBox[]{boxes[0]};
 //		Box[] targets = boxes;
 		ConstraintGraph graph = buildConstraintGraph(cg, fda, targets);
 		System.err.println("Print Constraint Graph...");
 		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
-		cgvis.visualize(graph, "const14.dot", targets);
+		cgvis.visualize(graph, "const0.dot", targets);
 		graph.optimize();
 		ConstraintGraphVisualizer cgvis2 = new ConstraintGraphVisualizer();
-		cgvis.visualize(graph, "const_op14.dot", targets);
+		cgvis.visualize(graph, "const_op0.dot", targets);
 		
 		System.out.println("--- String modeling warning ---");
 		for(String warning : StringModel.getWarnings()){

@@ -9,9 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.Box;
-
 import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.model.IMethodModel;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
 import kr.ac.kaist.hybridroid.util.data.Pair;
@@ -44,6 +43,7 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 	private ConstraintGraph graph;
 	private Set<String> warnings;
 	private IConstraintMonitor monitor;
+	
 	private int iter = 0;
 	public ConstraintVisitor(CallGraph cg, FieldDefAnalysis fda, ConstraintGraph graph, IConstraintMonitor monitor){
 		this.cg = cg;

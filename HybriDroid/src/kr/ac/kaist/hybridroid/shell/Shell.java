@@ -10,10 +10,10 @@ import java.util.Properties;
 
 import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
-import kr.ac.kaist.hybridroid.analysis.string.StringAnalysis;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
 import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
@@ -27,8 +27,6 @@ import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.properties.WalaProperties;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
-
-import dk.brics.automaton.Automaton;
 
 /**
  * HybriDroid is a framework to analyze Android hybrid applications. It is
@@ -86,8 +84,9 @@ public class Shell {
 		 */
 		// Build Control-flow Graph.
 		if (cArgs.has(CommandArguments.CFG_ARG)) {
+			AndroidResourceAnalysis ra = new AndroidResourceAnalysis(targetPath);
 			
-			AndroidStringAnalysis strAnalyzer = new AndroidStringAnalysis();
+			AndroidStringAnalysis strAnalyzer = new AndroidStringAnalysis(ra);
 			strAnalyzer.setupAndroidLibs(LocalFileReader.androidJar(Shell.walaProperties).getPath());
 			strAnalyzer.setExclusion(CallGraphTestUtil.REGRESSION_EXCLUSIONS);
 //			strAnalyzer.addAnalysisScope(LocalFileReader.androidJar(Shell.walaProperties).getPath());

@@ -9,6 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.test"/>
-	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/junit-4.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
