@@ -7,10 +7,10 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/jericho-html-3.2.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/junit-4.11.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/org.osgi.core-4.2.0.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/apache-ant-1.8.2.jar"/>
+	<classpathentry kind="lib" path="libs/apache-ant-1.8.2.jar"/>
+	<classpathentry kind="lib" path="libs/jericho-html-3.2.jar"/>
+	<classpathentry kind="lib" path="libs/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="libs/org.eclipse.core.runtime-3.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/org.osgi.core-4.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

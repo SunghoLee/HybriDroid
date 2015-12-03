@@ -9,6 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.rhino"/>
-	<classpathentry kind="lib" path="/Users/LeeSH/Documents/project/WALA/libs/htmlparser-1.4.jar"/>
+	<classpathentry kind="lib" path="libs/htmlparser-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

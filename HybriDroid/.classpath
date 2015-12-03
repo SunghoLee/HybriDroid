@@ -13,13 +13,13 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/HybriDroid.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.test"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/automaton.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/dexlib-1.3.4-dev.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/jsa_droidsafe.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/junit-4.11.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/soot_modified.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/apktool_2.0.2.jar"/>
+	<classpathentry kind="lib" path="libs/automaton.jar"/>
+	<classpathentry kind="lib" path="libs/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="libs/dexlib-1.3.4-dev.jar"/>
+	<classpathentry kind="lib" path="libs/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="libs/jsa_droidsafe.jar"/>
+	<classpathentry kind="lib" path="libs/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="libs/soot_modified.jar"/>
+	<classpathentry kind="lib" path="libs/apktool_2.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

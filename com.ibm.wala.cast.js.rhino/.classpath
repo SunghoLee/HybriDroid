@@ -7,8 +7,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/org.osgi.core-4.2.0.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/rhino-1.7.3.1.jar"/>
+	<classpathentry kind="lib" path="libs/org.eclipse.core.runtime-3.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/org.osgi.core-4.2.0.jar"/>
+	<classpathentry kind="lib" path="libs/rhino-1.7.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

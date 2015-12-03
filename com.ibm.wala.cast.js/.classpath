@@ -8,12 +8,12 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/commons-compiler-2.6.1.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/commons-lang3-3.1.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/jericho-html-3.2.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-	<classpathentry kind="lib" path="/Users/leesh/Documents/plrg/projects/WALA/libs/org.osgi.core-4.2.0.jar"/>
+	<classpathentry kind="lib" path="libs/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="libs/commons-compiler-2.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="libs/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="libs/jericho-html-3.2.jar"/>
+	<classpathentry kind="lib" path="libs/org.eclipse.core.runtime-3.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/org.osgi.core-4.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
