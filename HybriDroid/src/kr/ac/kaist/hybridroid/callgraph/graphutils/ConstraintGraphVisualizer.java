@@ -2,22 +2,22 @@ package kr.ac.kaist.hybridroid.callgraph.graphutils;
 
 import java.io.File;
 
+import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IConstraintEdge;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IConstraintNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.OrderedEdge;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer.BoxColor;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer.BoxType;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer.GraphType;
+import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS.BoxColor;
+import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS.BoxType;
+import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS.GraphType;
+import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS;
 
 public class ConstraintGraphVisualizer {
 	public ConstraintGraphVisualizer(){
 	}
 	
 	public File visualize(ConstraintGraph graph, String out, IBox... spots){
-		Visualizer vis = Visualizer.getInstance();
+		VisualizerGS vis = VisualizerGS.getInstance();
 		vis.clear();
 		vis.setType(GraphType.Digraph);
 		

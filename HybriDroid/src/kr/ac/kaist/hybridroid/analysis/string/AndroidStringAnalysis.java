@@ -149,15 +149,15 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		FieldDefAnalysis fda = new FieldDefAnalysis(cg, pa);
 		System.err.println("Build Constraint Graph...");
 		
-		IBox[] targets = new IBox[]{boxes[0]};
+		int targetN = 6;
+		IBox[] targets = new IBox[]{boxes[targetN]};
 //		Box[] targets = boxes;
 		ConstraintGraph graph = buildConstraintGraph(cg, fda, targets);
 		System.err.println("Print Constraint Graph...");
 		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
-		cgvis.visualize(graph, "const0.dot", targets);
+//		cgvis.visualize(graph, "const0.dot", targets);
 		graph.optimize();
-		ConstraintGraphVisualizer cgvis2 = new ConstraintGraphVisualizer();
-		cgvis.visualize(graph, "const_op0.dot", targets);
+		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
 		
 		System.out.println("--- String modeling warning ---");
 		for(String warning : StringModel.getWarnings()){

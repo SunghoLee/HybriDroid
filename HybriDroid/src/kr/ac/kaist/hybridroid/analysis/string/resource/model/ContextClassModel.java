@@ -118,8 +118,10 @@ public class ContextClassModel implements IClassModel {
 			int useVar = invokeInst.getUse(1);
 			String value = getString(caller, useVar);
 			IBox useBox = new ConstBox(caller, value, ConstType.STRING);
-			if (graph.addEdge(new AssignOpNode(), def, useBox))
+			System.out.println("" + useBox);
+			if (graph.addEdge(new AssignOpNode(), def, useBox)){
 				boxSet.add(useBox);
+			}
 			return boxSet;
 		}
 		

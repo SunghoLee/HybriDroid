@@ -20,6 +20,10 @@ import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
 import kr.ac.kaist.hybridroid.util.timer.Timer;
 
 import org.apache.commons.cli.ParseException;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.view.Viewer;
 import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
@@ -55,9 +59,8 @@ public class Shell {
 	public static void main(String[] args) throws IOException,
 			ClassHierarchyException, IllegalArgumentException, CancelException,
 			ParseException, Invalid {
-
 		CommandArguments cArgs = new CommandArguments(args);
-
+		
 		// Load wala property. Now, 'PROP_ARG' is essential option, so else
 		// branch cannot be reached.
 		if (cArgs.has(CommandArguments.PROP_ARG)) {
