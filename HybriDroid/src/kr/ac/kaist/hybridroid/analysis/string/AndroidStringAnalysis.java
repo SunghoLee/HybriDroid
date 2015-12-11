@@ -15,11 +15,10 @@ import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintVisitor;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.GraphicalDebugMornitor;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.InteractionConstraintMonitor;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
-import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
 import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
 import kr.ac.kaist.hybridroid.util.data.Pair;
 
@@ -154,10 +153,10 @@ public class AndroidStringAnalysis implements StringAnalysis{
 //		Box[] targets = boxes;
 		ConstraintGraph graph = buildConstraintGraph(cg, fda, targets);
 		System.err.println("Print Constraint Graph...");
-		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
+//		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
 //		cgvis.visualize(graph, "const0.dot", targets);
 		graph.optimize();
-		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
+//		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
 		
 		System.out.println("--- String modeling warning ---");
 		for(String warning : StringModel.getWarnings()){
@@ -266,7 +265,9 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		}
 		
 		ConstraintGraph graph = new ConstraintGraph();
-		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new InteractionConstraintMonitor(cg, InteractionConstraintMonitor.CLASSTYPE_ALL, InteractionConstraintMonitor.NODETYPE_NONE));
+//		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new InteractionConstraintMonitor(cg, InteractionConstraintMonitor.CLASSTYPE_ALL, InteractionConstraintMonitor.NODETYPE_NONE));
+		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new GraphicalDebugMornitor(initials));
+		
 		for(IBox initial : initials)
 			worklist.add(initial);
 		

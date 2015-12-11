@@ -13,16 +13,17 @@ import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS.GraphType;
 import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS;
 
 public class ConstraintGraphVisualizer {
+	private VisualizerGS vis;
 	public ConstraintGraphVisualizer(){
 	}
 	
 	public File visualize(ConstraintGraph graph, String out, IBox... spots){
-		VisualizerGS vis = VisualizerGS.getInstance();
+		vis = VisualizerGS.getInstance();
 		vis.clear();
 		vis.setType(GraphType.Digraph);
-		
-		for(IBox spot : spots)
-			vis.setColor(spot, BoxColor.RED);
+		if(spots != null)
+			for(IBox spot : spots)
+				vis.setColor(spot, BoxColor.RED);
 		
 		for(IConstraintNode from : graph){
 			if(from instanceof IBox){
@@ -48,5 +49,9 @@ public class ConstraintGraphVisualizer {
 		vis.printGraph(out);
 		File outFile = new File(out);
 		return outFile;
+	}
+	
+	public void display(){
+		vis.display();
 	}
 }

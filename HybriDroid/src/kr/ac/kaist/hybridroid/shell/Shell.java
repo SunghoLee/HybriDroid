@@ -20,10 +20,6 @@ import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
 import kr.ac.kaist.hybridroid.util.timer.Timer;
 
 import org.apache.commons.cli.ParseException;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.view.Viewer;
 import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
@@ -99,19 +95,19 @@ public class Shell {
 			Timer t = Timer.start();
 			strAnalyzer.analyze(hotspots);
 			System.out.println("END: " + (t.end()/1000.0));
-			System.exit(-1);
+//			System.exit(-1);
 //			strAnal
-			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
-					target, cArgs.has(CommandArguments.DROIDEL_ARG));
-
-			// Using manifest analysis? Not give any improvement now.
-			if (cArgs.has(CommandArguments.MANIFEST_ARG)) {
-				XMLManifestReader mr = new XMLManifestReader(targetPath);
-				System.out.println(mr.rootProperty());
-			}
-
-			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			cfgAnalysis.main(scopeBuilder.makeScope());
+//			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
+//					target, cArgs.has(CommandArguments.DROIDEL_ARG));
+//
+//			// Using manifest analysis? Not give any improvement now.
+//			if (cArgs.has(CommandArguments.MANIFEST_ARG)) {
+//				XMLManifestReader mr = new XMLManifestReader(targetPath);
+//				System.out.println(mr.rootProperty());
+//			}
+//
+//			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
+//			cfgAnalysis.main(scopeBuilder.makeScope());
 		} else {
 			// TODO: support several functions
 		}

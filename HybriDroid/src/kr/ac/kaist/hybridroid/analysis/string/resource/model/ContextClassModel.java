@@ -61,10 +61,18 @@ public class ContextClassModel implements IClassModel {
 		SymbolTable symTab = node.getIR().getSymbolTable();
 		if(ra != null && symTab.isConstant(var)){
 			int addr = (Integer)symTab.getConstantValue(var);
+			String value = null;
 			if(region != null)
-				return ra.getRegionString(addr, region);
+				value = ra.getRegionString(addr, region);
 			else
-				return ra.getCommonString(addr);
+				value = ra.getCommonString(addr);
+			
+			if(value != null)
+				return value;
+			else{
+				System.err.println("[Warning] the undefined string resource for " + addr);
+				return "RESOURCE";
+			}
 		}
 		
 		System.err.println("" + (ra != null));

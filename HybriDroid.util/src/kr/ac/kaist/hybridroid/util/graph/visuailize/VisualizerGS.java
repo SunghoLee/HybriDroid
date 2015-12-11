@@ -1,5 +1,6 @@
 package kr.ac.kaist.hybridroid.util.graph.visuailize;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,10 +8,10 @@ import java.util.Set;
 
 import kr.ac.kaist.hybridroid.util.data.Pair;
 
+import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.view.Viewer;
 
 public class VisualizerGS {
 	static private VisualizerGS instance;
@@ -21,6 +22,7 @@ public class VisualizerGS {
 	private Map<Pair<Integer, Integer>, String> edgeLabelMap;
 	private Map<Integer, String> shapeMap;
 	private Map<Integer, String> colorMap;
+	private Graph graph;
 	
 	public enum GraphType{
 		Digraph,
@@ -46,11 +48,14 @@ public class VisualizerGS {
 	
 	private VisualizerGS(){
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+		
 		indexMap = new HashMap<Object, Integer>();
 		fromTo = new HashMap<Integer, Set<Integer>>();
 		edgeLabelMap = new HashMap<Pair<Integer, Integer>, String>();
 		shapeMap = new HashMap<Integer, String>();
 		colorMap = new HashMap<Integer, String>();
+		graph = new SingleGraph("ttt");
+		graph.addAttribute("ui.stylesheet", "graph { fill-color: red;}node {size: 10px, 15px;shape: box;fill-color: green;stroke-mode: plain;stroke-color: yellow;}node#A {fill-color: blue;}node:clicked {fill-color: red;}");
 	}
 	
 	public void setShape(Object node, BoxType shape){
@@ -121,6 +126,7 @@ public class VisualizerGS {
 		edgeLabelMap.clear();
 		type = null;
 		nodeIndex = 1;
+		graph.clear();
 	}
 	
 	public void setType(GraphType type){
@@ -130,7 +136,6 @@ public class VisualizerGS {
 	public void printGraph(String out){
 		String path = out;
 		String edge = "";
-		Graph graph = new SingleGraph(out);
 		if(type == null){
 			System.err.println("Default graph type is an undirected graph.");
 			type = GraphType.Undigraph;
@@ -148,36 +153,43 @@ public class VisualizerGS {
 		//print all node labels
 		for(Object node : indexMap.keySet()){
 			int index = indexMap.get(node);
-			Node n = graph.addNode(index+"");
-			n.addAttribute("ui.label", node);
-			if(colorMap.containsKey(index)){
-				switch(colorMap.get(index)){
-				case "RED":
-					n.addAttribute("ui.color", 0);
-					break;
-				case "BLUE":
-					n.addAttribute("ui.color", 1);
-					break;
-				case "BLACK":
-					break;
+			String id = "node"+index;
+			if(graph.getNode(id) == null){
+				Node n = graph.addNode(id);
+				n.addAttribute("ui.label", node);
+				if(colorMap.containsKey(index)){
+					switch(colorMap.get(index)){
+					case "red":
+						System.out.println("-RED-");
+						n.addAttribute("ui.color", Color.RED);
+						break;
+					case "blue":
+						n.addAttribute("ui.color", Color.BLUE);
+						break;
+					}
 				}
 			}
 		}
 
 
-		int edgeNum = 0;
 		for(int from : fromTo.keySet()){
 			Set<Integer> toSet = fromTo.get(from);			
 			for(int to : toSet){
-				graph.addEdge(String.valueOf((edgeNum++)), String.valueOf(from), String.valueOf(to));
+				try{
+					String id = "edge" + from + "->" + to;
+					String fromid = "node" + from;
+					String toid = "node" + to;
+					if(graph.getEdge(id) == null)
+						graph.addEdge(id, fromid, toid, true);
+				}catch(EdgeRejectedException e){
+					System.err.println("[Warning] an edge already exist between " + from +" and " + to);
+				}
 			}
 		}			
-		
-		System.out.println("GS_Graph");
-		
-		Viewer viewer = graph.display();
-        
-		clear();
+	}
+	
+	public void display(){
+		graph.display();
 	}
 	
 	private void addEdge(int a, int b){
