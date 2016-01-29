@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Set;
 
 import kr.ac.kaist.hybridroid.analysis.string.constraint.AppendOpNode;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.AssignOpNode;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -62,7 +62,7 @@ public class StringBufferClassModel implements IClassModel{
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int useVar = invokeInst.getUse(0);
 			IBox use = new VarBox(caller, invokeInst.iindex, useVar);
-			if(graph.addEdge(new AssignOpNode(), def, use))
+			if(graph.addEdge(new ToStringOpNode(), def, use))
 					boxSet.add(use);
 			return boxSet;
 		}

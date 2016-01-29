@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
 import kr.ac.kaist.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
 import kr.ac.kaist.hybridroid.callgraph.AndroidHybridMethodTargetSelector;
@@ -23,7 +24,6 @@ import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.ipa.callgraph.JavaScriptConstructTargetSelector;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
-import com.ibm.wala.classLoader.ClassLoaderFactoryImpl;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
@@ -133,7 +133,7 @@ public class HybridCFGAnalysis {
 	 * @throws IllegalArgumentException
 	 * @throws CancelException
 	 */
-	public void main(AndroidHybridAnalysisScope scope) throws IOException,
+	public void main(AndroidHybridAnalysisScope scope, AndroidStringAnalysis asa) throws IOException,
 			ClassHierarchyException, IllegalArgumentException, CancelException {
 		JSCallGraphUtil.setTranslatorFactory(new CAstRhinoTranslatorFactory());
 		
@@ -157,7 +157,7 @@ public class HybridCFGAnalysis {
 		addHybridDispatchLogic(options, scope, cha);
 
 		AndroidHybridCallGraphBuilder b = new AndroidHybridCallGraphBuilder(
-				cha, options, cache, HybridAPIMisusesChecker.getInstance());
+				cha, options, cache, HybridAPIMisusesChecker.getInstance(), asa);
 
 		CallGraph cg = b.makeCallGraph(options);
 

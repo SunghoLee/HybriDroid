@@ -10,7 +10,21 @@
 	<classpathentry kind="lib" path="libs/jsa_droidsafe.jar"/>
 	<classpathentry kind="lib" path="libs/soot_modified.jar"/>
 	<classpathentry kind="lib" path="libs/apktool_2.0.2.jar"/>
-	<classpathentry kind="lib" path="libs/wala.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/HybriDroid.util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java.test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java.test.data"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.rhino"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.testdata"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.dalvik"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.ide.jdt.test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

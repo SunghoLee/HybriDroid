@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.analysis.string.constraint.AssignOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -61,7 +61,7 @@ public class ObjectClassModel implements IClassModel{
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int objVar = invokeInst.getUse(0);
 			IBox objBox = new VarBox(caller, invokeInst.iindex, objVar);
-			if(graph.addEdge(new AssignOpNode(), def, objBox)){
+			if(graph.addEdge(new ToStringOpNode(), def, objBox)){
 					boxSet.add(objBox);
 			}
 			return boxSet;

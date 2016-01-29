@@ -9,8 +9,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.VisualizerGS.GraphType;
+import kr.ac.kaist.hybridroid.util.graph.visualize.VisualizerGS;
+import kr.ac.kaist.hybridroid.util.graph.visualize.VisualizerGS.GraphTypeGS;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
@@ -26,7 +26,7 @@ public class WalaCGVisualizerGS{
 	public File visualize(CallGraph cg, String out){
 		VisualizerGS vis = VisualizerGS.getInstance();
 		vis.clear();
-		vis.setType(GraphType.Digraph);
+		vis.setType(GraphTypeGS.Digraph);
 		
 		for(CGNode node : cg){
 			Iterator<CGNode> iPredNodes = cg.getPredNodes(node);

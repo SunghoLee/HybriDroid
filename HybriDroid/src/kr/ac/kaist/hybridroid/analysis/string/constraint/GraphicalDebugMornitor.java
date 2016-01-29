@@ -6,12 +6,13 @@ import java.io.InputStreamReader;
 import java.util.Set;
 
 import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
+import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizerGS;
 
 public class GraphicalDebugMornitor implements IConstraintMonitor {
-	private ConstraintGraphVisualizer cgvis;
+	private ConstraintGraphVisualizerGS cgvis;
 	private IBox[] hotspots;
 	public GraphicalDebugMornitor(){
-		cgvis = new ConstraintGraphVisualizer();
+		cgvis = new ConstraintGraphVisualizerGS();
 	}
 	
 	public GraphicalDebugMornitor(IBox... hotspots){

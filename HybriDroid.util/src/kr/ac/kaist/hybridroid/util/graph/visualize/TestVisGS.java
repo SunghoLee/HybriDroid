@@ -1,4 +1,4 @@
-package kr.ac.kaist.hybridroid.util.graph.visuailize;
+package kr.ac.kaist.hybridroid.util.graph.visualize;
 
 public class TestVisGS {
 	private static String[] nodes = {

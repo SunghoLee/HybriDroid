@@ -6,10 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.analysis.string.constraint.AssignOpNode;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.ReplaceOpNode;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.UriCodecDecodeOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -70,7 +69,7 @@ public class UriCodecClassModel implements IClassModel{
 			IBox charsetBox = new VarBox(caller, invokeInst.iindex, charsetVar);
 			IBox throwBox = new VarBox(caller, invokeInst.iindex, throwVar);
 			
-			if(graph.addEdge(new AssignOpNode(), def, stringBox, convertPlusBox, charsetBox, throwBox)){
+			if(graph.addEdge(new UriCodecDecodeOpNode(), def, stringBox, convertPlusBox, charsetBox, throwBox)){
 					boxSet.add(stringBox);
 					boxSet.add(convertPlusBox);
 					boxSet.add(charsetBox);

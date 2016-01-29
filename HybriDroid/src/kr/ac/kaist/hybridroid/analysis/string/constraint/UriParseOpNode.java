@@ -1,6 +1,6 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
-public class UriParseOpNode implements IConstraintNode {
+public class UriParseOpNode implements IOperatorNode {
 	public UriParseOpNode(){}
 	
 	@Override

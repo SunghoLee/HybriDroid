@@ -12,6 +12,7 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstType;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ReplaceOpNode;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -341,7 +342,7 @@ public class StringClassModel implements IClassModel{
 			int strVar = invokeInst.getUse(0);
 			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
 			
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox)){
+			if(graph.addEdge(new ToStringOpNode(), def, strBox)){
 				boxSet.add(strBox);
 			}
 			

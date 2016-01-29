@@ -1,6 +1,7 @@
 package kr.ac.kaist.hybridroid.analysis.resource;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,6 +12,7 @@ public class AndroidResourceAnalysis {
 	private String apk;
 	private String decompPath;
 	private Map<String, Map<Integer, String>> strRes;
+	private String dirPath;
 	
 	public AndroidResourceAnalysis(String apk){
 		this.apk = apk;
@@ -26,6 +28,12 @@ public class AndroidResourceAnalysis {
 		if(!dir.exists() && !dir.isDirectory())
 			throw new InternalError("decompile path is wrong: " + decompPath);
 		
+		try {
+			dirPath = dir.getCanonicalPath();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		File smaliDir = null;
 		Set<File> valueDirs = new HashSet<File>();
 		
@@ -80,10 +88,14 @@ public class AndroidResourceAnalysis {
 				strRes.put(region, matchResource(rRes, xmlRes));
 		}
 		
-		rm(dir);
+//		rm(dir);
 	}
 	
-	private void rm(File f){
+	public String getDir(){
+		return dirPath;
+	}
+	
+	public void rm(File f){
 		if(f.isDirectory()){
 			for(File subF : f.listFiles())
 				rm(subF);

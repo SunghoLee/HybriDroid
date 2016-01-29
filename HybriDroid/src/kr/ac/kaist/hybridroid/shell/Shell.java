@@ -5,8 +5,11 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
@@ -14,10 +17,11 @@ import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
+import kr.ac.kaist.hybridroid.js.merger.JSScriptMerger;
 import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
-import kr.ac.kaist.hybridroid.util.timer.Timer;
 
 import org.apache.commons.cli.ParseException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
@@ -84,30 +88,37 @@ public class Shell {
 		// Build Control-flow Graph.
 		if (cArgs.has(CommandArguments.CFG_ARG)) {
 			AndroidResourceAnalysis ra = new AndroidResourceAnalysis(targetPath);
+			String dirPath = ra.getDir();
 			
-			AndroidStringAnalysis strAnalyzer = new AndroidStringAnalysis(ra);
-			strAnalyzer.setupAndroidLibs(LocalFileReader.androidJar(Shell.walaProperties).getPath());
-			strAnalyzer.setExclusion(CallGraphTestUtil.REGRESSION_EXCLUSIONS);
-//			strAnalyzer.addAnalysisScope(LocalFileReader.androidJar(Shell.walaProperties).getPath());
-			strAnalyzer.addAnalysisScope(targetPath);
+			AndroidStringAnalysis asa = new AndroidStringAnalysis(ra);
+			asa.setupAndroidLibs(LocalFileReader.androidJar(Shell.walaProperties).getPath());
+			asa.setExclusion(CallGraphTestUtil.REGRESSION_EXCLUSIONS);
+			asa.addAnalysisScope(targetPath);
 			List<Hotspot> hotspots = new ArrayList<Hotspot>();
 			hotspots.add(new ArgumentHotspot("loadUrl", 1, 0));
-			Timer t = Timer.start();
-			strAnalyzer.analyze(hotspots);
-			System.out.println("END: " + (t.end()/1000.0));
-//			System.exit(-1);
-//			strAnal
-//			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
-//					target, cArgs.has(CommandArguments.DROIDEL_ARG));
-//
-//			// Using manifest analysis? Not give any improvement now.
-//			if (cArgs.has(CommandArguments.MANIFEST_ARG)) {
-//				XMLManifestReader mr = new XMLManifestReader(targetPath);
-//				System.out.println(mr.rootProperty());
-//			}
-//
-//			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-//			cfgAnalysis.main(scopeBuilder.makeScope());
+			asa.analyze(hotspots);
+			JSScriptMerger jssm = new JSScriptMerger();
+			Map<IBox, Set<String>> loadPages = asa.getSpotString();
+			
+			Set<File> jsFiles = new HashSet<File>();
+			
+			for(Set<String> pageSet : loadPages.values()){
+				for(String page : pageSet){
+					jsFiles.add(jssm.merge(dirPath, page));
+				}
+			}
+			
+			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
+					target, cArgs.has(CommandArguments.DROIDEL_ARG));
+			
+			// Using manifest analysis? Not give any improvement now.
+			if (cArgs.has(CommandArguments.MANIFEST_ARG)) {
+				XMLManifestReader mr = new XMLManifestReader(targetPath);
+				System.out.println(mr.rootProperty());
+			}
+
+			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
+			cfgAnalysis.main(scopeBuilder.makeScope(), asa);
 		} else {
 			// TODO: support several functions
 		}

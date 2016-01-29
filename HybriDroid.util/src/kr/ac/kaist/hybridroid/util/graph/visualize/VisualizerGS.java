@@ -1,4 +1,4 @@
-package kr.ac.kaist.hybridroid.util.graph.visuailize;
+package kr.ac.kaist.hybridroid.util.graph.visualize;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -17,24 +17,24 @@ public class VisualizerGS {
 	static private VisualizerGS instance;
 	private Map<Object, Integer> indexMap;
 	private Map<Integer, Set<Integer>> fromTo;
-	private GraphType type;
+	private GraphTypeGS type;
 	private int nodeIndex = 1;
 	private Map<Pair<Integer, Integer>, String> edgeLabelMap;
 	private Map<Integer, String> shapeMap;
 	private Map<Integer, String> colorMap;
 	private Graph graph;
 	
-	public enum GraphType{
+	public enum GraphTypeGS{
 		Digraph,
 		Undigraph
 	}
 	
-	public enum BoxType{
+	public enum BoxTypeGS{
 		RECT,
 		CIRCLE
 	}
 	
-	public enum BoxColor{
+	public enum BoxColorGS{
 		BLACK,
 		RED,
 		BLUE
@@ -47,7 +47,8 @@ public class VisualizerGS {
 	}
 	
 	private VisualizerGS(){
-		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+		System.setProperty("org.graphstream.ui.renderer", "kr.ac.kaist.hybridroid.util.graph.visualizer"
+				+ "");
 		
 		indexMap = new HashMap<Object, Integer>();
 		fromTo = new HashMap<Integer, Set<Integer>>();
@@ -58,7 +59,7 @@ public class VisualizerGS {
 		graph.addAttribute("ui.stylesheet", "graph { fill-color: red;}node {size: 10px, 15px;shape: box;fill-color: green;stroke-mode: plain;stroke-color: yellow;}node#A {fill-color: blue;}node:clicked {fill-color: red;}");
 	}
 	
-	public void setShape(Object node, BoxType shape){
+	public void setShape(Object node, BoxTypeGS shape){
 		int nodeIndex;
 		
 		if(hasIndex(node))
@@ -76,7 +77,7 @@ public class VisualizerGS {
 		}
 	}
 	
-	public void setColor(Object node, BoxColor color){
+	public void setColor(Object node, BoxColorGS color){
 		int nodeIndex;
 		
 		if(hasIndex(node))
@@ -129,7 +130,7 @@ public class VisualizerGS {
 		graph.clear();
 	}
 	
-	public void setType(GraphType type){
+	public void setType(GraphTypeGS type){
 		this.type = type;
 	}
 	
@@ -138,7 +139,7 @@ public class VisualizerGS {
 		String edge = "";
 		if(type == null){
 			System.err.println("Default graph type is an undirected graph.");
-			type = GraphType.Undigraph;
+			type = GraphTypeGS.Undigraph;
 		}
 		else
 			switch(type){
@@ -214,7 +215,7 @@ public class VisualizerGS {
 		return indexMap.containsKey(node);
 	}
 	
-	private String typeToString(GraphType type){
+	private String typeToString(GraphTypeGS type){
 		switch(type){
 		case Digraph:
 			return "digraph";

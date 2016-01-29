@@ -1,4 +1,4 @@
-package kr.ac.kaist.hybridroid.util.graph.visuailize;
+package kr.ac.kaist.hybridroid.util.graph.visualize;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -11,14 +11,12 @@ import java.util.Set;
 import kr.ac.kaist.hybridroid.util.data.Pair;
 
 public class Visualizer {
-	static private Visualizer instance;
-	private Map<Object, Integer> indexMap;
-	private Map<Integer, Set<Integer>> fromTo;
-	private GraphType type;
-	private int nodeIndex = 1;
-	private Map<Pair<Integer, Integer>, String> edgeLabelMap;
-	private Map<Integer, String> shapeMap;
-	private Map<Integer, String> colorMap;
+	
+	public enum BoxColor{
+		BLACK,
+		RED,
+		BLUE
+	}
 	
 	public enum GraphType{
 		Digraph,
@@ -30,11 +28,14 @@ public class Visualizer {
 		CIRCLE
 	}
 	
-	public enum BoxColor{
-		BLACK,
-		RED,
-		BLUE
-	}
+	static private Visualizer instance;
+	private Map<Object, Integer> indexMap;
+	private Map<Integer, Set<Integer>> fromTo;
+	private GraphType type;
+	private int nodeIndex = 1;
+	private Map<Pair<Integer, Integer>, String> edgeLabelMap;
+	private Map<Integer, String> shapeMap;
+	private Map<Integer, String> colorMap;
 	
 	static public Visualizer getInstance(){
 		if(instance == null)

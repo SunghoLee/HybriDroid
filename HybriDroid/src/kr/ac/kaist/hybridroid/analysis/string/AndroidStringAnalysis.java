@@ -5,9 +5,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 
@@ -15,10 +17,16 @@ import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintVisitor;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.GraphicalDebugMornitor;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IConstraintNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.ForwardSetSolver;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IStringValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
+import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
 import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
 import kr.ac.kaist.hybridroid.util.data.Pair;
 
@@ -42,6 +50,7 @@ import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
@@ -69,10 +78,14 @@ import com.ibm.wala.util.strings.Atom;
 public class AndroidStringAnalysis implements StringAnalysis{
 	private AnalysisScope scope;
 	private WorkList worklist;
+	private List<Hotspot> hotspots;
+	private Set<IBox> spotBoxSet;
+	private Map<IConstraintNode, Set<String>> result;
 	
 	public AndroidStringAnalysis(){
 		scopeInit();
 		worklist = new WorkList();
+		result = new HashMap<IConstraintNode, Set<String>>();
 	}
 	
 	public AndroidStringAnalysis(AndroidResourceAnalysis ra){
@@ -130,16 +143,35 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void solve(ConstraintGraph cg){
+		ForwardSetSolver fss = new ForwardSetSolver();
+		Map<IConstraintNode, IValue> res = fss.solve(cg);
+		System.out.println("--- String Analysis Results ---");
+		for(IConstraintNode n : result.keySet()){
+			IValue v = res.get(n);
+			System.out.println("#N: " + n);
+			System.out.println("\t#V: " + v);
+			System.out.println();
+			if(v instanceof IStringValue && (v instanceof StringTopValue) == false && (v instanceof StringBotValue) == false){
+				result.put(n, (Set<String>)v.getDomain().getOperator().gamma(v));
+			}
+		}
+		System.out.println("-------------------------------");
+	}
+	
 	@Override
 	public void analyze(List<Hotspot> hotspots) throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException {
 		// TODO Auto-generated method stub
-		Pair<CallGraph, PointerAnalysis> p = buildCG();
+		this.hotspots = hotspots;
+		Pair<CallGraph, PointerAnalysis<InstanceKey>> p = buildCG();
 		CallGraph cg = p.fst();
-		PointerAnalysis pa = p.snd();
+		PointerAnalysis<InstanceKey> pa = p.snd();
 		WalaCGVisualizer vis = new WalaCGVisualizer();
 		vis.visualize(cg, "cfg_test.dot");
 		vis.printLabel("label.txt");
 		Set<IBox> boxSet = findHotspots(cg, hotspots);
+		this.spotBoxSet = boxSet;
 		IBox[] boxes = boxSet.toArray(new IBox[0]);
 		for(IBox box : boxes){
 			System.err.println("Spot: " + box);
@@ -149,23 +181,71 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		System.err.println("Build Constraint Graph...");
 		
 		int targetN = 6;
-		IBox[] targets = new IBox[]{boxes[targetN]};
+//		IBox[] targets = new IBox[]{boxes[targetN]};
+		IBox[] targets = boxes;
 //		Box[] targets = boxes;
 		ConstraintGraph graph = buildConstraintGraph(cg, fda, targets);
 		System.err.println("Print Constraint Graph...");
-//		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
+		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
 //		cgvis.visualize(graph, "const0.dot", targets);
 		graph.optimize();
-//		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
+		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
 		
 		System.out.println("--- String modeling warning ---");
 		for(String warning : StringModel.getWarnings()){
 			System.out.println("[Warning] " + warning);
 		}
 		System.out.println("------------");
+		
+		solve(graph);
 	}
 	
-	private Pair<CallGraph, PointerAnalysis> buildCG() throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
+	public List<Hotspot> getSpots(){
+		return hotspots;
+	}
+	
+	public Map<IBox, Set<String>> getSpotString(){
+		Map<IBox, Set<String>> res = new HashMap<IBox, Set<String>>();
+		for(IBox b : spotBoxSet){
+			VarBox var = (VarBox) b;
+			Object v = getValue(var.getNode(), var.getVar());
+			if(v != null){
+				if(v instanceof String){
+					Set<String> ss = new HashSet<String>();
+					ss.add((String)v);
+					res.put(b, ss);
+				}else
+					res.put(b, (Set<String>)v);
+			}
+		}
+		return res;
+	}
+	
+	public boolean isSolvedString(CGNode node, int var){
+		IR ir = node.getIR();
+		if(ir != null && ir.getSymbolTable().isConstant(var))
+			return true;
+		
+		VarBox box = new VarBox(node, -1, var);
+		if(result.containsKey(box))
+			return true;
+		
+		return false;
+	}
+	
+	public Object getValue(CGNode node, int var){
+		IR ir = node.getIR();
+		if(ir != null && ir.getSymbolTable().isConstant(var))
+			return ir.getSymbolTable().getConstantValue(var);
+		
+		VarBox box = new VarBox(node, -1, var);
+		if(result.containsKey(box))
+			return result.get(box);
+		
+		return null;
+	}
+	
+	private Pair<CallGraph, PointerAnalysis<InstanceKey>> buildCG() throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
 		IClassHierarchy cha = ClassHierarchy.make(scope);
 		AnalysisOptions options = new AnalysisOptions();
 		IRFactory<IMethod> irFactory = new DexIRFactory();
@@ -266,7 +346,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		
 		ConstraintGraph graph = new ConstraintGraph();
 //		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new InteractionConstraintMonitor(cg, InteractionConstraintMonitor.CLASSTYPE_ALL, InteractionConstraintMonitor.NODETYPE_NONE));
-		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new GraphicalDebugMornitor(initials));
+		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, null);//new GraphicalDebugMornitor(initials));
 		
 		for(IBox initial : initials)
 			worklist.add(initial);

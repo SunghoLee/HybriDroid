@@ -30,6 +30,25 @@ public class ConstraintGraph implements Iterable<IConstraintNode>{
 		relations = new HashSet<Pair<Integer, Integer>>();
 	}
 		
+	public int getIndex(IConstraintNode n){
+		return nodeIndexMap.get(n);
+	}
+	public Set<IConstraintNode> getPredecessors(IConstraintNode n){
+		Set<IConstraintEdge> edges = this.getInEdges(n);
+		Set<IConstraintNode> predecessors = new HashSet<IConstraintNode>();
+		for(IConstraintEdge e : edges)
+			predecessors.add(e.from());
+		return predecessors;
+	}
+	
+	public Set<IConstraintNode> getSuccessors(IConstraintNode n){
+		Set<IConstraintEdge> edges = this.getOutEdges(n);
+		Set<IConstraintNode> successors = new HashSet<IConstraintNode>();
+		for(IConstraintEdge e : edges)
+			successors.add(e.to());
+		return successors;
+	}
+	
 	public IConstraintNode getNode(int index){
 		return indexNodeMap.get(index);
 	}
@@ -38,6 +57,25 @@ public class ConstraintGraph implements Iterable<IConstraintNode>{
 		return indexEdgeMap.get(index);
 	}
 	
+	public Set<IConstraintNode> getInnermostNodes(){
+		Set<IConstraintNode> nodes = new HashSet<IConstraintNode>();
+		for(IConstraintNode node : nodeIndexMap.keySet()){
+			int index = nodeIndexMap.get(node);
+			if(outEdges.containsKey(index) && !inEdges.containsKey(index))
+				nodes.add(node);
+		}
+		return nodes;
+	}
+	
+	public Set<IConstraintNode> getOuttermodeNodes(){
+		Set<IConstraintNode> nodes = new HashSet<IConstraintNode>();
+		for(IConstraintNode node : nodeIndexMap.keySet()){
+			int index = nodeIndexMap.get(node);
+			if(!outEdges.containsKey(index) && inEdges.containsKey(index))
+				nodes.add(node);
+		}
+		return nodes;
+	}
 	
 	public Set<IConstraintEdge> getOutEdges(IConstraintNode node){
 		Set<IConstraintEdge> edges = new HashSet<IConstraintEdge>();

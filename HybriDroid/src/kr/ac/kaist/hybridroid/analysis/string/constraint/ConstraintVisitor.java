@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
-import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.model.IMethodModel;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
 import kr.ac.kaist.hybridroid.util.data.Pair;
@@ -23,6 +22,7 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.SSAArrayLoadInstruction;
 import com.ibm.wala.ssa.SSABinaryOpInstruction;
 import com.ibm.wala.ssa.SSAConversionInstruction;
 import com.ibm.wala.ssa.SSAGetInstruction;
@@ -188,6 +188,12 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 						}else
 							klass = klass.getSuperclass();
 					}
+					if(m == null){
+						StringModel.setWarning("the method does not have a body: " + defInst, true);
+						ConstBox box = new ConstBox(node, "", ConstType.STRING_TOP);
+						if(graph.addEdge(new AssignOpNode(), b, box))
+							res.add(box);
+					}
 				}
 			}else if(defInst instanceof SSAUnaryOpInstruction){
 				System.out.println("Unary: " + defInst);
@@ -195,31 +201,7 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				System.out.println("Binary: " + defInst);
 			}else if(defInst instanceof SSAGetInstruction){
 				SSAGetInstruction getInst = (SSAGetInstruction) defInst;
-//				try {
-//					System.in.read();
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
 				Set<Pair<CGNode, Set<SSAPutInstruction>>> defSet = fda.getFSFieldDefInstructions(cg, node, getInst);
-				
-//				if(getInst.toString().contains("3 = getfield < Primordial, Ljava/util/Locale, cachedToStringResult, <Primordial,Ljava/lang/String> > 1")){
-//					for(Pair<CGNode, Set<SSAPutInstruction>> ppp : defSet){
-//						CGNode nnn = ppp.fst();
-//						System.err.println("##" + nnn);
-//						System.err.println("-----");
-//						IR rrr = nnn.getIR();
-//						int jjj = 1;
-//						for(SSAInstruction ijij : rrr.getInstructions()){
-//							System.err.println("(" + (jjj++) +") " + ijij);
-//						}
-//						System.err.println("-----");
-//						
-//						for(SSAPutInstruction iii : ppp.snd()){
-//							System.err.println("\t" + iii);
-//						}
-//					}
-//				}
 				for(Pair<CGNode, Set<SSAPutInstruction>> p : defSet){
 					CGNode defNode = p.fst();
 					for(SSAPutInstruction defPutInst : p.snd()){
@@ -271,6 +253,21 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				VarBox varBox = new VarBox(node, defInst.iindex, use);
 				if(graph.addEdge(new AssignOpNode(), b, varBox))
 					res.add(varBox);
+			}else if(defInst instanceof SSAArrayLoadInstruction){
+				SSAArrayLoadInstruction loadInst = (SSAArrayLoadInstruction) defInst;
+				ConstBox box = null;
+				
+				System.out.println("load: " + loadInst.getElementType().getName().getClassName().toString());
+				switch(loadInst.getElementType().getName().getClassName().toString()){
+				case "String":
+					box = new ConstBox(node, "", ConstType.STRING_TOP);
+					break;
+				default:
+					box = new ConstBox(node, "", ConstType.UNKNOWN);
+					break;
+				}
+				if(graph.addEdge(new AssignOpNode(), b, box))
+					res.add(box);
 			}else{
 //				throw new InternalError("not defined instruction: " + defInst);
 				setWarning("not defined instruction: " + defInst, true);
@@ -356,7 +353,7 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 		else if(v instanceof Double)
 			return ConstType.DOUBLE;
 		
-		setWarning("Unknown type: " + v, true);
+		setWarning("Unknown type: " + v + "(" + v.getClass().getName() + ")", true);
 		return ConstType.UNKNOWN;
 	}
 	

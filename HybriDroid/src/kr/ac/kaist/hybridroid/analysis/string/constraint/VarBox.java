@@ -37,6 +37,7 @@ public class VarBox implements IBox {
 	public int getIndex(){
 		return iindex;
 	}
+	
 	@Override
 	public <T> T visit(IBoxVisitor<T> v){
 		return v.visit(this);

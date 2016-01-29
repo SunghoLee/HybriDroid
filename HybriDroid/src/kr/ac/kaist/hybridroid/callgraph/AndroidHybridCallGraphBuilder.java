@@ -3,6 +3,7 @@ package kr.ac.kaist.hybridroid.callgraph;
 import java.util.Collection;
 import java.util.Set;
 
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
@@ -70,12 +71,14 @@ public class AndroidHybridCallGraphBuilder extends
 	private static final Atom interfAnnotationName = Atom
 			.findOrCreateAsciiAtom("JavascriptInterface");
 	private HybridAPIMisusesChecker typeChecker;
+	private AndroidStringAnalysis asa;
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
-			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker) {
+			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa) {
 		super(cha, options, cache);
 		// TODO Auto-generated constructor stub
 		this.typeChecker = typeChecker;
+		this.asa = asa;
 	}
 
 	private FilteredPointerKey getFilteredPointerKeyForInterfParams(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode node, int valueNumber, IClass filter){

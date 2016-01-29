@@ -1,6 +1,6 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
-public class UriGetQueryParameterOpNode implements IConstraintNode {
+public class UriGetQueryParameterOpNode implements IOperatorNode {
 	public UriGetQueryParameterOpNode(){}
 	
 	@Override
