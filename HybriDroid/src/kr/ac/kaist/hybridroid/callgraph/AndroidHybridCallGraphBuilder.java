@@ -272,9 +272,9 @@ public class AndroidHybridCallGraphBuilder extends
 									caller.getMethod(), newSite, wClass);
 							AndroidHybridAppModel.addJSInterface(name, objKey);
 							
-							System.err.println("#InterfaceName: " + name);
-							System.err.println("#InterfaceClass: "
-									+ wClass.getName().getClassName());
+//							System.err.println("#InterfaceName: " + name);
+//							System.err.println("#InterfaceClass: "
+//									+ wClass.getName().getClassName());
 
 							/*
 							 * make mock-up object for Android Java methods of
@@ -294,13 +294,13 @@ public class AndroidHybridCallGraphBuilder extends
 							
 							for (IMethod method : methods) {
 								if (hasJavascriptInterfaceAnnotation(method)) {
-									System.err.println("\t#method: " + method);
+//									System.err.println("\t#method: " + method);
 									wClass.addMethodAsField(method);
 									String mname = method.getName().toString();
 									IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
 									
 									PointerKey constantPK = builder.getPointerKeyForInstanceField(objKey, f);
-									System.err.println("\t#CK: " + constantPK);
+//									System.err.println("\t#CK: " + constantPK);
 									InstanceKey ik = makeMockupInstanceKey(method);
 									
 									system.findOrCreateIndexForInstanceKey(ik);

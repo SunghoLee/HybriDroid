@@ -172,6 +172,51 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
     return scope;
   }
 
+  /**
+	 * Make AnalysisScope for Android hybrid application. If you want to use
+	 * DROIDEL as front-end, use setUpDroidelAnalysisScope method instead of
+	 * this.
+	 * 
+	 * @param classpath the target apk file uri.
+	 * @param jsFiles JavaScript files contained in the scope.
+	 * @param exclusions the exclusion file.
+	 * @param androidLib the Android framework directory uri.
+	 * @return AnalysisScope for Android hybrid application.
+	 * @throws IOException
+	 */
+public static AndroidHybridAnalysisScope setUpAndroidHybridAnalysisScope(URI classpath, Set<File> jsFiles, String exclusions, URI... androidLib)
+    throws IOException {
+  AndroidHybridAnalysisScope scope;
+
+  scope = new AndroidHybridAnalysisScope();
+
+  File exclusionsFile = new File(exclusions);
+  InputStream fs = exclusionsFile.exists() ? new FileInputStream(exclusionsFile) : FileProvider.class.getClassLoader()
+      .getResourceAsStream(exclusionsFile.getName());
+  scope.setExclusions(new FileOfClasses(fs));
+  
+  scope.setLoaderImpl(ClassLoaderReference.Primordial, "com.ibm.wala.dalvik.classLoader.WDexClassLoaderImpl");
+  
+  for (URI al : androidLib) {
+	  if(al.getPath().endsWith(".dex"))
+		  scope.addToScope(ClassLoaderReference.Primordial, DexFileModule.make(new File(al)));
+	  else if(al.getPath().endsWith(".jar"))
+		  scope.addToScope(ClassLoaderReference.Primordial, new JarFileModule(new JarFile(new File(al))));
+	  else
+		  throw new InternalError("Android library must be either dex or jar file: " + al.getPath());
+  }
+  
+  scope.setLoaderImpl(ClassLoaderReference.Application, "com.ibm.wala.dalvik.classLoader.WDexClassLoaderImpl");
+  
+  scope.addToScope(ClassLoaderReference.Application, DexFileModule.make(new File(classpath)));
+  
+  scope = setUpJsAnalysisScope(scope, jsFiles);
+  
+  fs.close();
+  
+  return scope;
+}
+
 	/**
 	 * Add JavaScript AnalysisScope for Android hybrid application.
 	 * 
@@ -202,6 +247,23 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 	    	    
 	    return scope;
   }
+  
+  private static AndroidHybridAnalysisScope setUpJsAnalysisScope(AndroidHybridAnalysisScope scope, Set<File> jsFiles) throws IllegalArgumentException, IOException{
+	    scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
+
+	    //TODO: support HTML file
+	    for (File jsFile : jsFiles) {
+			URL script = jsFile.toURI().toURL();
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
+		}
+//			for (int i = 0; i < jsScopeReader.getHTMLList().size(); i++) {
+//				System.out.println("@file: "+jsScopeReader.getHTMLList().get(i));
+//				URL script = new File(jsScopeReader.getHTMLList().get(i)).toURI().toURL();
+//				scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
+//			}
+	    	    
+	    return scope;
+}
   
   public ClassLoaderReference getJavaScriptLoader() {
     return getLoader(JavaScriptTypes.jsLoaderName);

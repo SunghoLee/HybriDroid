@@ -3,32 +3,30 @@ package kr.ac.kaist.hybridroid.analysis;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
+
+import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
+import com.ibm.wala.properties.WalaProperties;
 
 import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
 import kr.ac.kaist.hybridroid.shell.Shell;
 import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
 import kr.ac.kaist.hybridroid.util.print.AsyncPrinter;
 
-import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
-import com.ibm.wala.properties.WalaProperties;
-
 public class AnalysisScopeBuilder {
 	private File target;
 	private boolean flag;
+	private Set<File> jsFiles;
 	
-	static public AnalysisScopeBuilder build(File target, boolean droidelFlag){
-		return ((droidelFlag)? buildDroidelAnalysisScopeBuilder(target) : new AnalysisScopeBuilder(target));
+	static public AnalysisScopeBuilder build(File target, boolean droidelFlag, Set<File> jsFiles){
+		return ((droidelFlag)? buildDroidelAnalysisScopeBuilder(target, jsFiles) : new AnalysisScopeBuilder(target, jsFiles));
 	}
 	
-	private AnalysisScopeBuilder(File target){
+	private AnalysisScopeBuilder(File target, Set<File> jsFiles){
 		this.target = target;
+		this.jsFiles = jsFiles;
 	}
-	
-	private AnalysisScopeBuilder(File target, boolean flag){
-		this.target = target;
-		this.flag = flag;
-	}
-	
+		
 	private static void removeDestinationFolder(String path){
 		File folder = new File(path);
 		if(folder.exists() && folder.isDirectory()){
@@ -61,7 +59,7 @@ public class AnalysisScopeBuilder {
 		}
 	}
 	
-	private static AnalysisScopeBuilder buildDroidelAnalysisScopeBuilder(File target){
+	private static AnalysisScopeBuilder buildDroidelAnalysisScopeBuilder(File target, Set<File> jsFiles){
 		System.err.println("[DROIDEL] transforming " + target.getName());
 		String droidel_path = Shell.walaProperties.getProperty(WalaProperties.DROIDEL_TOOL);
 		System.err.println("#DROIDEL path: " + droidel_path);
@@ -97,7 +95,7 @@ public class AnalysisScopeBuilder {
 		}
 		System.err.println("[DROIDEL] done.");
 		
-		return new AnalysisScopeBuilder(target);
+		return new AnalysisScopeBuilder(target, jsFiles);
 	}
 		
 	public AndroidHybridAnalysisScope makeScope() throws IOException{
@@ -106,8 +104,10 @@ public class AnalysisScopeBuilder {
 			return AndroidHybridAnalysisScope.setUpDroidelAnalysisScope(target.toURI(),
 					CallGraphTestUtil.REGRESSION_EXCLUSIONS, targetpath.substring(0, targetpath.lastIndexOf("/")), LocalFileReader.androidDexLibs(Shell.walaProperties));
 		}else{
-			return AndroidHybridAnalysisScope.setUpAndroidAnalysisScope(target.toURI(),
+			return AndroidHybridAnalysisScope.setUpAndroidHybridAnalysisScope(target.toURI(), jsFiles, 
 					CallGraphTestUtil.REGRESSION_EXCLUSIONS, LocalFileReader.androidDexLibs(Shell.walaProperties));
+//			return AndroidHybridAnalysisScope.setUpAndroidAnalysisScope(target.toURI(),
+//					CallGraphTestUtil.REGRESSION_EXCLUSIONS, LocalFileReader.androidDexLibs(Shell.walaProperties));
 		}
 	}
 }

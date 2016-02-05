@@ -3387,7 +3387,12 @@ public abstract class AstTranslator extends CAstVisitor<AstTranslator.WalkContex
     return new UnwindContext(n, context, visitor);
   }
 
-  private Map<CAstEntity, Set<String>> entity2ExposedNames;
+  /**
+   * Change visibility by Lee: private -> protected.
+   * Because of MultipleJSAstTranslator which overrides translate method.
+   */
+  protected Map<CAstEntity, Set<String>> entity2ExposedNames;
+  
   protected int processFunctionExpr(CAstNode n, WalkContext context) {
     CAstEntity fn = (CAstEntity) n.getChild(0).getValue();
     declareFunction(fn, context);

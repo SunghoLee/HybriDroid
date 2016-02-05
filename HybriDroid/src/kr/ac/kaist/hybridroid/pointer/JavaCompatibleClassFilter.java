@@ -33,7 +33,7 @@ import com.ibm.wala.util.intset.MutableIntSet;
  */
 
 public class JavaCompatibleClassFilter implements TypeFilter {
-	final private static boolean DEBUG_CLASS_FILTER = true;
+	final private static boolean DEBUG_CLASS_FILTER = false;
 	
 	final private CGNode caller;
 	final private SSAAbstractInvokeInstruction inst;
@@ -90,7 +90,7 @@ public class JavaCompatibleClassFilter implements TypeFilter {
 						int newX = system.findOrCreateIndexForInstanceKey(convertedKey);
 						
 						MutableIntSet set = (MutableIntSet)system.getInstanceKeysForClass(jsClass);
-						System.err.println("\t=>" + convertedKey.getConcreteType());
+//						System.err.println("\t=>" + convertedKey.getConcreteType());
 						set.add(newX);
 						xs.add(newX);
 					}else if(DEBUG_CLASS_FILTER){
@@ -125,7 +125,7 @@ public class JavaCompatibleClassFilter implements TypeFilter {
 				f = system.getInstanceKeysForClass(pClass);
 			else
 				f = f.union(system.getInstanceKeysForClass(pClass));
-			System.err.println("#class: " + pClass);
+//			System.err.println("#class: " + pClass);
 		}
 		
 		if(DEBUG_CLASS_FILTER){

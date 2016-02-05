@@ -110,7 +110,7 @@ public abstract class CAstAbstractModuleLoader extends CAstAbstractLoader {
         xlatorToIR.translate(p.fst, p.snd);
       }
     }
-
+    
     if (DEBUG) {
       for (Iterator ts = types.keySet().iterator(); ts.hasNext();) {
         TypeName tn = (TypeName) ts.next();

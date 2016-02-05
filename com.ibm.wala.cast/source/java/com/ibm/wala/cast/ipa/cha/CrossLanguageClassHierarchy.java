@@ -263,6 +263,7 @@ public class CrossLanguageClassHierarchy implements IClassHierarchy {
   public static CrossLanguageClassHierarchy make(AnalysisScope scope, ClassLoaderFactory factory)
       throws ClassHierarchyException {
     Set<Language> languages = scope.getBaseLanguages();
+    
     Map<Atom, IClassHierarchy> hierarchies = HashMapFactory.make();
     for (Iterator ls = languages.iterator(); ls.hasNext();) {
       Language L = (Language) ls.next();

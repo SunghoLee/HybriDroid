@@ -7,8 +7,6 @@
 	<classpathentry kind="lib" path="libs/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="libs/dexlib-1.3.4-dev.jar"/>
 	<classpathentry kind="lib" path="libs/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="libs/jsa_droidsafe.jar"/>
-	<classpathentry kind="lib" path="libs/soot_modified.jar"/>
 	<classpathentry kind="lib" path="libs/apktool_2.0.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/HybriDroid.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
@@ -26,5 +24,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.ide.jdt.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
+	<classpathentry kind="lib" path="libs/soot_modified.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

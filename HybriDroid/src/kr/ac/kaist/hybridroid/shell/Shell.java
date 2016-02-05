@@ -109,7 +109,7 @@ public class Shell {
 			}
 			
 			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
-					target, cArgs.has(CommandArguments.DROIDEL_ARG));
+					target, cArgs.has(CommandArguments.DROIDEL_ARG), jsFiles);
 			
 			// Using manifest analysis? Not give any improvement now.
 			if (cArgs.has(CommandArguments.MANIFEST_ARG)) {

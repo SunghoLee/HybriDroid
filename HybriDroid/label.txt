@@ -128,6 +128,7 @@
 1057 -> Node: < Primordial, Ljava/lang/Class, isLocalClass()Z > Context: Everywhere
 504 -> Node: < Primordial, Ljava/util/ArrayList, set(ILjava/lang/Object;)Ljava/lang/Object; > Context: Everywhere
 316 -> Node: < Primordial, Ljava/nio/ByteArrayBuffer, <init>(I[BIZ)V > Context: Everywhere
+2 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeWorldClinit()V > Context: Everywhere
 314 -> Node: < Primordial, Llibcore/reflect/AnnotationAccess, indexToMethod(Ljava/lang/Class;Lcom/android/dex/Dex;I)Ljava/lang/reflect/AccessibleObject; > Context: Everywhere
 235 -> Node: < Primordial, Ljava/util/AbstractList, <init>()V > Context: Everywhere
 146 -> Node: < Primordial, Ljava/util/ComparableTimSort, <init>([Ljava/lang/Object;)V > Context: Everywhere
@@ -424,6 +425,7 @@
 755 -> Node: < Primordial, Ljava/lang/ClassLoader$SystemClassLoader, <clinit>()V > Context: Everywhere
 832 -> Node: < Primordial, Landroid/animation/Keyframe$IntKeyframe, <init>(F)V > Context: Everywhere
 12 -> Node: < Primordial, Landroid/os/Parcel, obtain()Landroid/os/Parcel; > Context: Everywhere
+1 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere
 175 -> Node: < Primordial, Llibcore/reflect/AnnotationMember, equalArrayValue(Ljava/lang/Object;)Z > Context: Everywhere
 745 -> Node: < Primordial, Ljava/util/ArrayList, iterator()Ljava/util/Iterator; > Context: Everywhere
 842 -> Node: < Primordial, Ljava/util/ArrayList, newCapacity(I)I > Context: Everywhere
@@ -466,7 +468,6 @@
 530 -> Node: < Primordial, Ljava/util/HashMap, doubleCapacity()[Ljava/util/HashMap$HashMapEntry; > Context: Everywhere
 1016 -> Node: < Primordial, Landroid/animation/AnimatorSet$AnimatorSetListener, onAnimationStart(Landroid/animation/Animator;)V > Context: Everywhere
 719 -> Node: < Primordial, Ljava/nio/charset/Charset, isValidCharsetNameStart(C)Z > Context: Everywhere
-1 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere
 1234 -> Node: < Primordial, Ljava/lang/Boolean, booleanValue()Z > Context: Everywhere
 125 -> Node: < Primordial, Ljava/lang/Throwable, <init>(Ljava/lang/String;Ljava/lang/Throwable;)V > Context: Everywhere
 192 -> Node: < Primordial, Landroid/app/FragmentManagerImpl, restoreAllState(Landroid/os/Parcelable;Ljava/util/ArrayList;)V > Context: Everywhere
@@ -787,7 +788,6 @@
 770 -> Node: < Primordial, Landroid/animation/ValueAnimator, setInterpolator(Landroid/animation/TimeInterpolator;)V > Context: Everywhere
 1216 -> Node: < Primordial, Ljava/nio/Buffer, limit()I > Context: Everywhere
 131 -> Node: < Primordial, Landroid/view/Choreographer$CallbackQueue, <init>(Landroid/view/Choreographer;)V > Context: Everywhere
-2 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeWorldClinit()V > Context: Everywhere
 286 -> Node: < Primordial, Landroid/app/FragmentManagerImpl, getFragment(Landroid/os/Bundle;Ljava/lang/String;)Landroid/app/Fragment; > Context: Everywhere
 980 -> Node: < Primordial, Ljava/util/concurrent/locks/ReentrantReadWriteLock$FairSync, writerShouldBlock()Z > Context: Everywhere
 1297 -> Node: < Primordial, Ljava/util/Arrays, hashCode([I)I > Context: Everywhere
