@@ -3,15 +3,11 @@ package kr.ac.kaist.hybridroid.models;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
-import kr.ac.kaist.hybridroid.util.data.None;
-import kr.ac.kaist.hybridroid.util.data.Option;
-import kr.ac.kaist.hybridroid.util.data.Some;
 
 import com.ibm.wala.cast.js.ipa.callgraph.JavaScriptEntryPoints;
 import com.ibm.wala.classLoader.IClass;
@@ -33,6 +29,11 @@ import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.strings.Atom;
+
+import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
+import kr.ac.kaist.hybridroid.util.data.None;
+import kr.ac.kaist.hybridroid.util.data.Option;
+import kr.ac.kaist.hybridroid.util.data.Some;
 
 public class AndroidHybridAppModel {
 	
@@ -66,8 +67,7 @@ public class AndroidHybridAppModel {
 	}
 	
 	static public ComposedEntrypoints getEntrypoints(final IClassHierarchy cha, AndroidHybridAnalysisScope scope, AnalysisOptions option, AnalysisCache cache){
-		Iterable<Entrypoint> jsRoots = new JavaScriptEntryPoints(cha,
-				cha.getLoader(scope.getJavaScriptLoader()));
+		Iterable<Entrypoint> jsRoots = new JavaScriptEntryPoints(cha, cha.getLoader(scope.getJavaScriptLoader()));
 		Iterable<Entrypoint> entrypoints = null;
 		
 		if(cha.lookupClass(TypeReference.findOrCreate(ClassLoaderReference.Primordial, "Lgeneratedharness/GeneratedAndroidHarness")) == null){

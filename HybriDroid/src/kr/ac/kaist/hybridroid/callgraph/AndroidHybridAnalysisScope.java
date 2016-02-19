@@ -7,7 +7,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 
@@ -24,6 +27,7 @@ import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.io.FileProvider;
+import com.ibm.wala.util.strings.Atom;
 
 /**
  * AnalysisScope for Android Hybrid application. This class supports DROIDEL Dex
@@ -35,17 +39,21 @@ import com.ibm.wala.util.io.FileProvider;
 public class AndroidHybridAnalysisScope extends AnalysisScope {
   private static final Set<Language> languages;
 
+  static private Set<Atom> jsFileNames;
+  
   static {
     languages = HashSetFactory.make();
 
     languages.add(Language.JAVA);
     languages.add(JavaScriptLoader.JS);
+    
+    jsFileNames = HashSetFactory.make();
   }
-
+  
   public AndroidHybridAnalysisScope() {
     super(languages);
     this.initForJava();
-
+    jsLoaderMap = new HashMap<Atom, ClassLoaderReference>();
     ClassLoaderReference jsLoader = JavaScriptTypes.jsLoader;
     loadersByName.put(JavaScriptTypes.jsLoaderName, jsLoader);
   }
@@ -248,25 +256,30 @@ public static AndroidHybridAnalysisScope setUpAndroidHybridAnalysisScope(URI cla
 	    return scope;
   }
   
+  
   private static AndroidHybridAnalysisScope setUpJsAnalysisScope(AndroidHybridAnalysisScope scope, Set<File> jsFiles) throws IllegalArgumentException, IOException{
 	    scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
-
+	  
 	    //TODO: support HTML file
 	    for (File jsFile : jsFiles) {
+	    	jsFileNames.add(Atom.findOrCreateAsciiAtom(jsFile.getName()));
 			URL script = jsFile.toURI().toURL();
 			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
 		}
-//			for (int i = 0; i < jsScopeReader.getHTMLList().size(); i++) {
-//				System.out.println("@file: "+jsScopeReader.getHTMLList().get(i));
-//				URL script = new File(jsScopeReader.getHTMLList().get(i)).toURI().toURL();
-//				scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(script));
-//			}
-	    	    
 	    return scope;
-}
+  }
+  
+  private Map<Atom, ClassLoaderReference> jsLoaderMap;
+  
+  public Collection<ClassLoaderReference> getJavaScriptLoaders(){
+	  return jsLoaderMap.values();
+  }
   
   public ClassLoaderReference getJavaScriptLoader() {
     return getLoader(JavaScriptTypes.jsLoaderName);
   }
-
+  
+  public Set<Atom> getJavaScriptNames(){
+	  return jsFileNames;
+  }
 }

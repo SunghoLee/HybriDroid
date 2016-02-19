@@ -11,6 +11,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.cli.ParseException;
+import org.omg.CORBA.DynAnyPackage.Invalid;
+
+import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
+import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.properties.WalaProperties;
+import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.WalaException;
+
 import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
@@ -21,16 +30,7 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
 import kr.ac.kaist.hybridroid.js.merger.JSScriptMerger;
-import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
-
-import org.apache.commons.cli.ParseException;
-import org.omg.CORBA.DynAnyPackage.Invalid;
-
-import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
-import com.ibm.wala.ipa.cha.ClassHierarchyException;
-import com.ibm.wala.properties.WalaProperties;
-import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.WalaException;
+import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 
 /**
  * HybriDroid is a framework to analyze Android hybrid applications. It is

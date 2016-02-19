@@ -1,24 +1,35 @@
 package kr.ac.kaist.hybridroid.callgraph;
 
+import java.io.File;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
-import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
-import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
-import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
-import kr.ac.kaist.hybridroid.pointer.InterfaceClass;
-import kr.ac.kaist.hybridroid.pointer.JSCompatibleClassFilter;
-import kr.ac.kaist.hybridroid.pointer.JavaCompatibleClassFilter;
-import kr.ac.kaist.hybridroid.pointer.MockupInstanceKey;
-import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
-import kr.ac.kaist.hybridroid.util.print.IRPrinter;
-
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
+import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder.AstPointerAnalysisImpl;
+import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder.AstPointerAnalysisImpl.AstImplicitPointsToSetVisitor;
+import com.ibm.wala.cast.ipa.callgraph.CrossLanguageSSAPropagationCallGraphBuilder;
+import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
 import com.ibm.wala.cast.ipa.callgraph.ReflectedFieldPointerKey;
+import com.ibm.wala.cast.ir.ssa.AstGlobalRead;
+import com.ibm.wala.cast.ir.ssa.AstGlobalWrite;
+import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSConstraintVisitor;
+import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSPointerAnalysisImpl;
+import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSPointerAnalysisImpl.JSImplicitPointsToSetVisitor;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
+import com.ibm.wala.cast.js.ssa.JavaScriptCheckReference;
+import com.ibm.wala.cast.js.ssa.JavaScriptInstanceOf;
+import com.ibm.wala.cast.js.ssa.JavaScriptInvoke;
+import com.ibm.wala.cast.js.ssa.JavaScriptPropertyRead;
+import com.ibm.wala.cast.js.ssa.JavaScriptPropertyWrite;
+import com.ibm.wala.cast.js.ssa.JavaScriptTypeOfInstruction;
+import com.ibm.wala.cast.js.ssa.JavaScriptWithRegion;
+import com.ibm.wala.cast.js.ssa.PrototypeLookup;
+import com.ibm.wala.cast.js.ssa.SetPrototype;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
+import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.util.TargetLanguageSelector;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
@@ -28,13 +39,20 @@ import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.ContextKey;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSite;
 import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
 import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKeyFactory;
+import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory;
+import com.ibm.wala.ipa.callgraph.propagation.PointsToMap;
+import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationSystem;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -52,7 +70,21 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.debug.Assertions;
+import com.ibm.wala.util.intset.IntSet;
+import com.ibm.wala.util.intset.MutableMapping;
+import com.ibm.wala.util.intset.MutableSparseIntSet;
+import com.ibm.wala.util.intset.OrdinalSet;
 import com.ibm.wala.util.strings.Atom;
+
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
+import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
+import kr.ac.kaist.hybridroid.pointer.InterfaceClass;
+import kr.ac.kaist.hybridroid.pointer.JSCompatibleClassFilter;
+import kr.ac.kaist.hybridroid.pointer.JavaCompatibleClassFilter;
+import kr.ac.kaist.hybridroid.pointer.MockupInstanceKey;
+import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 
 /**
  * Specialized pointer analysis constraint generation for Hybrid Android
@@ -76,11 +108,21 @@ public class AndroidHybridCallGraphBuilder extends
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
 			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa) {
 		super(cha, options, cache);
-		// TODO Auto-generated constructor stub
+
+		if((options.getAnalysisScope() instanceof AndroidHybridAnalysisScope) == false)
+			Assertions.UNREACHABLE("AndroidHybridCallGraphBuilder must receive AndroidHybridAnalysisScope as a scope. current: " + options.getAnalysisScope().getClass().getName());
+		
 		this.typeChecker = typeChecker;
 		this.asa = asa;
+		jsGlobalMap = new HashMap<Atom, GlobalObjectKey>();
+		globalInit(((AndroidHybridAnalysisScope)options.getAnalysisScope()).getJavaScriptNames());
 	}
 
+	private void globalInit(Set<Atom> files){
+		for(Atom file : files)
+			jsGlobalMap.put(file, new GlobalObjectKey(cha.lookupClass(JavaScriptTypes.Root)));
+	}
+	
 	private FilteredPointerKey getFilteredPointerKeyForInterfParams(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode node, int valueNumber, IClass filter){
 		if(AndroidJavaJavaScriptTypeMap.isJava2JsTypeCompatible(filter.getReference())){	
 			return getFilteredPointerKeyForLocal(node, valueNumber, JSCompatibleClassFilter.make(caller, inst, node, valueNumber, typeChecker, filter));
@@ -199,7 +241,8 @@ public class AndroidHybridCallGraphBuilder extends
 				
 				processHybridCallingConstraints(caller, instruction, target,
 						constParams, uniqueCatchKey);
-			} else
+			} else 
+//				JSSSAPropagationCallGraphBuilder.processCallingConstraintsInternal(this, caller, instruction, target, constParams, uniqueCatchKey);
 				super.processCallingConstraints(caller, instruction, target,
 						constParams, uniqueCatchKey);
 		} else {
@@ -310,16 +353,29 @@ public class AndroidHybridCallGraphBuilder extends
 								}
 							}
 
+							
+							/*
+							 * there could be multiple global objects, because a
+							 * webview has a global ojbect repectively. the
+							 * global objects are seperated by javascript file
+							 * name.
+							 */
+//							AndroidStringAnalysis.SpotSpec spec = asa.getSpotSpec();
+//							asa.get
+//							node.getMethod().getReference().toString()
+							
 							/*
 							 * attach the Android Java interface object to
 							 * JavaScript global object. the attached object is
 							 * used when finding the receiver at a JavaScript
-							 * call site
+							 * call site.
 							 */
-							InstanceKey globalObj = ((AstSSAPropagationCallGraphBuilder) builder)
-									.getGlobalObject(JavaScriptTypes.jsName);
-							system.findOrCreateIndexForInstanceKey(globalObj);
+//							InstanceKey globalObj = ((AstSSAPropagationCallGraphBuilder) builder)
+//									.getGlobalObject(JavaScriptTypes.jsName);
+//							system.findOrCreateIndexForInstanceKey(globalObj);
 
+							Collection<GlobalObjectKey> globalObjs = getGlobalObjects(JavaScriptTypes.jsName);
+							
 							FieldReference field = FieldReference.findOrCreate(
 									JavaScriptTypes.jsLoader, "LRoot",
 									"global " + name, "LRoot");
@@ -333,10 +389,17 @@ public class AndroidHybridCallGraphBuilder extends
 
 							IField f = getClassHierarchy().resolveField(field);
 
-							PointerKey fieldPtr = builder
-									.getPointerKeyForInstanceField(globalObj, f);
-
-							system.newConstraint(fieldPtr, objKey);
+//							PointerKey fieldPtr = builder
+//									.getPointerKeyForInstanceField(globalObj, f);
+//
+//							system.newConstraint(fieldPtr, objKey);
+							
+							for(InstanceKey globalObj : globalObjs){
+								PointerKey fieldPtr = builder
+										.getPointerKeyForInstanceField(globalObj, f);
+	
+								system.newConstraint(fieldPtr, objKey);							
+							}
 						} else {
 							// TODO: Support non-constant string value
 							System.err.println("-------");
@@ -364,7 +427,7 @@ public class AndroidHybridCallGraphBuilder extends
 			@Override
 			public ConstraintVisitor get(Atom language, CGNode construct) {
 				if (JavaScriptTypes.jsName.equals(language)) {
-					return new JSConstraintVisitor(
+					return new AndroidHybridJSConstraintVisitor(
 							AndroidHybridCallGraphBuilder.this, construct);
 				} else {
 					return new HybridJavaConstraintVisitor(
@@ -468,7 +531,7 @@ public class AndroidHybridCallGraphBuilder extends
 			msg += "\tlocal creation? no\n";
 			msg += "-------\n";
 				
-			msg += IRPrinter.getPrintableInstructios(node);
+//			msg += IRPrinter.getPrintableInstructios(node);
 
 			return msg;
 		}
@@ -480,4 +543,267 @@ public class AndroidHybridCallGraphBuilder extends
 		}
 		
 	}
+//	
+//	@Override
+//	  public JSConstraintVisitor makeVisitor(CGNode node) {
+//	    return new AndroidHybridJSConstraintVisitor(this, node);
+//	  }
+//	
+	private Map<Atom, GlobalObjectKey> jsGlobalMap;
+	
+	public Collection<GlobalObjectKey> getGlobalObjects(Atom language){
+		assert language.equals(JavaScriptTypes.jsName);
+		
+		return jsGlobalMap.values();
+	}
+	
+	public GlobalObjectKey getGlobalObject(Atom language, Atom file){
+		assert language.equals(JavaScriptTypes.jsName);
+		
+		if(!jsGlobalMap.containsKey(file))
+			Assertions.UNREACHABLE("the file is not in the scope: " + file);
+		
+		System.out.println("#Map: " + jsGlobalMap);
+		System.out.println("#File: " + file);
+		System.out.println("#Global: " + jsGlobalMap.get(file));
+		
+		return jsGlobalMap.get(file);
+	}
+	
+	private static FieldReference makeNonGlobalFieldReference(FieldReference field) {
+	    String nonGlobalFieldName = field.getName().toString().substring(7);
+	    field = FieldReference.findOrCreate(JavaScriptTypes.Root, Atom.findOrCreateUnicodeAtom(nonGlobalFieldName),
+	        JavaScriptTypes.Root);
+	    return field;
+	  }
+	
+	private static boolean directGlobalObjectRef(FieldReference field) {
+	    return field.getName().toString().endsWith(JSSSAPropagationCallGraphBuilder.GLOBAL_OBJ_VAR_NAME);
+	  }
+	
+	@Override
+	  protected PropagationSystem makeSystem(AnalysisOptions options) {
+	    return new PropagationSystem(callGraph, pointerKeyFactory, instanceKeyFactory) {
+	      @Override
+	      public PointerAnalysis<InstanceKey> makePointerAnalysis(PropagationCallGraphBuilder builder) {
+	        assert builder == AndroidHybridCallGraphBuilder.this;
+	        return new AndroidHybridPointerAnalysisImple(AndroidHybridCallGraphBuilder.this, cg, pointsToMap,
+	            instanceKeys, pointerKeyFactory, instanceKeyFactory);
+	      }
+	    };
+	  }
+	
+	protected class AndroidHybridPointerAnalysisImple extends CrossLanguagePointerAnalysisImpl{
+		protected AndroidHybridPointerAnalysisImple(CrossLanguageSSAPropagationCallGraphBuilder builder, CallGraph cg,
+				PointsToMap pointsToMap, MutableMapping<InstanceKey> instanceKeys, PointerKeyFactory pointerKeys,
+				InstanceKeyFactory iKeyFactory) {
+			super(builder, cg, pointsToMap, instanceKeys, pointerKeys, iKeyFactory);
+			// TODO Auto-generated constructor stub
+		}
+	}
+	
+	@Override
+	  protected TargetLanguageSelector<AstImplicitPointsToSetVisitor, LocalPointerKey> makeImplicitVisitorSelector(
+	      CrossLanguagePointerAnalysisImpl analysis) {
+	    return new TargetLanguageSelector<AstImplicitPointsToSetVisitor, LocalPointerKey>() {
+	      @Override
+	      public AstImplicitPointsToSetVisitor get(Atom language, LocalPointerKey construct) {
+	        if (JavaScriptTypes.jsName.equals(language)) {
+	          return new JSImplicitPointsToSetVisitor((AstPointerAnalysisImpl) getPointerAnalysis(), construct);
+	        } else {
+	          return new AstImplicitPointsToSetVisitor((AstPointerAnalysisImpl) getPointerAnalysis(), construct);
+	        }
+	      }
+	    };
+	  }
+	
+	class AndroidHybridJSConstraintVisitor extends JSConstraintVisitor{
+		public AndroidHybridJSConstraintVisitor(AstSSAPropagationCallGraphBuilder builder, CGNode node) {
+			super(builder, node);
+		}
+
+		@Override
+		public void visitAstGlobalRead(AstGlobalRead instruction) {
+			// TODO Auto-generated method stub
+			int lval = instruction.getDef();
+			FieldReference field = makeNonGlobalFieldReference(instruction.getDeclaredField());
+			PointerKey def = getPointerKeyForLocal(lval);
+			assert def != null;
+			IField f = getClassHierarchy().resolveField(field);
+			assert f != null : "could not resolve referenced global " + field;
+			if (hasNoInterestingUses(lval)) {
+				system.recordImplicitPointsToSet(def);
+			} else {
+				AndroidHybridCallGraphBuilder builder = (AndroidHybridCallGraphBuilder) getBuilder();
+				IMethod method = node.getMethod();
+				if ((method instanceof AstMethod) == false)
+					Assertions.UNREACHABLE("Global read must be invoked in AstMethod: " + method.getClass().getName());
+				String fn = ((AstMethod) method).getSourcePosition().getURL().getFile();
+
+				if (fn.endsWith("preamble.js") || fn.endsWith("prologue.js")) {
+					for (InstanceKey globalObj : builder.getGlobalObjects(JavaScriptTypes.jsName)) {
+						if (directGlobalObjectRef(field)) {
+							// points-to set is just the global object
+							system.newConstraint(def, globalObj);
+						} else {
+							system.findOrCreateIndexForInstanceKey(globalObj);
+							PointerKey p = getPointerKeyForInstanceField(globalObj, f);
+							system.newConstraint(def, assignOperator, p);
+						}
+					}
+				} else {
+					Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf(File.separator) + 1));
+					InstanceKey globalObj = builder.getGlobalObject(JavaScriptTypes.jsName, afn);
+					if (directGlobalObjectRef(field)) {
+						// points-to set is just the global object
+						system.newConstraint(def, globalObj);
+					} else {
+						system.findOrCreateIndexForInstanceKey(globalObj);
+						PointerKey p = getPointerKeyForInstanceField(globalObj, f);
+						system.newConstraint(def, assignOperator, p);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void visitAstGlobalWrite(AstGlobalWrite instruction) {
+			// TODO Auto-generated method stub
+			int rval = instruction.getVal();
+			FieldReference field = makeNonGlobalFieldReference(instruction.getDeclaredField());
+			IField f = getClassHierarchy().resolveField(field);
+			assert f != null : "could not resolve referenced global " + field;
+			assert !f.getFieldTypeReference().isPrimitiveType();
+
+			AndroidHybridCallGraphBuilder builder = (AndroidHybridCallGraphBuilder) getBuilder();
+			IMethod method = node.getMethod();
+			if ((method instanceof AstMethod) == false)
+				Assertions.UNREACHABLE("Global read must be invoked in AstMethod: " + method.getClass().getName());
+			String fn = ((AstMethod) method).getSourcePosition().getURL().getFile();
+
+			if (fn.endsWith("preamble.js") || fn.endsWith("prologue.js")) {
+				for (InstanceKey globalObj : builder.getGlobalObjects(JavaScriptTypes.jsName)) {
+					system.findOrCreateIndexForInstanceKey(globalObj);
+					PointerKey p = getPointerKeyForInstanceField(globalObj, f);
+
+					PointerKey rvalKey = getPointerKeyForLocal(rval);
+					if (contentsAreInvariant(symbolTable, du, rval)) {
+						system.recordImplicitPointsToSet(rvalKey);
+						InstanceKey[] ik = getInvariantContents(rval);
+						for (int i = 0; i < ik.length; i++) {
+							system.newConstraint(p, ik[i]);
+						}
+					} else {
+						system.newConstraint(p, assignOperator, rvalKey);
+					}
+				}
+			} else {
+				Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf(File.separator) + 1));
+				InstanceKey globalObj = builder.getGlobalObject(JavaScriptTypes.jsName, afn);
+				system.findOrCreateIndexForInstanceKey(globalObj);
+				PointerKey p = getPointerKeyForInstanceField(globalObj, f);
+
+				PointerKey rvalKey = getPointerKeyForLocal(rval);
+				if (contentsAreInvariant(symbolTable, du, rval)) {
+					system.recordImplicitPointsToSet(rvalKey);
+					InstanceKey[] ik = getInvariantContents(rval);
+					for (int i = 0; i < ik.length; i++) {
+						system.newConstraint(p, ik[i]);
+					}
+				} else {
+					system.newConstraint(p, assignOperator, rvalKey);
+				}
+			}
+		}
+	}
+	
+	public class AndroidHybridJSImplicitPointsToSetVisitor extends JSImplicitPointsToSetVisitor {
+
+		public AndroidHybridJSImplicitPointsToSetVisitor(AstPointerAnalysisImpl analysis, LocalPointerKey lpk) {
+			super(analysis, lpk);
+		}
+
+		@Override
+		public void visitJavaScriptInvoke(JavaScriptInvoke instruction) {
+
+		}
+
+		@Override
+		public void visitTypeOf(JavaScriptTypeOfInstruction instruction) {
+
+		}
+
+		@Override
+		public void visitJavaScriptPropertyRead(JavaScriptPropertyRead instruction) {
+
+		}
+
+		@Override
+		public void visitJavaScriptPropertyWrite(JavaScriptPropertyWrite instruction) {
+
+		}
+
+		@Override
+		public void visitJavaScriptInstanceOf(JavaScriptInstanceOf instruction) {
+
+		}
+
+		@Override
+		public void visitCheckRef(JavaScriptCheckReference instruction) {
+
+		}
+
+		@Override
+		public void visitWithRegion(JavaScriptWithRegion instruction) {
+
+		}
+
+		@Override
+		public void visitAstGlobalRead(AstGlobalRead instruction) {
+			FieldReference field = makeNonGlobalFieldReference(instruction.getDeclaredField());
+			assert !directGlobalObjectRef(field);
+			IField f = getClassHierarchy().resolveField(field);
+			assert f != null;
+			MutableSparseIntSet S = MutableSparseIntSet.makeEmpty();
+
+			IMethod method = node.getMethod();
+			if ((method instanceof AstMethod) == false)
+				Assertions.UNREACHABLE("Global read must be invoked in AstMethod: " + method.getClass().getName());
+			String fn = ((AstMethod) method).getSourcePosition().getURL().getFile();
+
+			if (fn.endsWith("preamble.js") || fn.endsWith("prologue.js")) {
+				for (InstanceKey globalObj : getGlobalObjects(JavaScriptTypes.jsName)) {
+					PointerKey fkey = analysis.getHeapModel().getPointerKeyForInstanceField(globalObj, f);
+					if (fkey != null) {
+						OrdinalSet pointees = analysis.getPointsToSet(fkey);
+						IntSet set = pointees.getBackingSet();
+						if (set != null) {
+							S.addAll(set);
+						}
+					}
+					pointsToSet = new OrdinalSet<InstanceKey>(S, analysis.getInstanceKeyMapping());
+				}
+			}else{
+				Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf(File.separator) + 1));
+		          InstanceKey globalObj = getGlobalObject(JavaScriptTypes.jsName, afn);
+		          PointerKey fkey = analysis.getHeapModel().getPointerKeyForInstanceField(globalObj, f);
+					if (fkey != null) {
+						OrdinalSet pointees = analysis.getPointsToSet(fkey);
+						IntSet set = pointees.getBackingSet();
+						if (set != null) {
+							S.addAll(set);
+						}
+					}
+					pointsToSet = new OrdinalSet<InstanceKey>(S, analysis.getInstanceKeyMapping());
+			}
+		}
+
+		@Override
+		public void visitSetPrototype(SetPrototype instruction) {
+		}
+
+		@Override
+		public void visitPrototypeLookup(PrototypeLookup instruction) {
+		}
+	};
 }

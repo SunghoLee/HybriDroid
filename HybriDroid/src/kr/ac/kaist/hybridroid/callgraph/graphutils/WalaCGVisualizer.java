@@ -9,8 +9,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer.GraphType;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer.GraphType;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;

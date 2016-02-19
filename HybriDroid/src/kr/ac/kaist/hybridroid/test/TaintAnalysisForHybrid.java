@@ -101,7 +101,7 @@ public class TaintAnalysisForHybrid {
 	};
 	
 	final private boolean isSourceTarget(CGNode caller, SSAAbstractInvokeInstruction inst){
-		Debug.setDebuggable(this, true);
+
 		//TODO: after perfectly modeling of Activity, use this code commented out.
 //		for(CGNode target : cg.getPossibleTargets(caller, inst.getCallSite())){
 //			Atom className = target.getMethod().getDeclaringClass().getName().getClassName();

@@ -13,23 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 
-import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
-import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintVisitor;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.IConstraintNode;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.ForwardSetSolver;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IStringValue;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
-import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
-import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
-import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
-import kr.ac.kaist.hybridroid.util.data.Pair;
-
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.JarFileModule;
@@ -52,6 +35,7 @@ import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
@@ -70,6 +54,23 @@ import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.io.FileProvider;
 import com.ibm.wala.util.strings.Atom;
+
+import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintVisitor;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IConstraintNode;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.ForwardSetSolver;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IStringValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
+import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
+import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
+import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
+import kr.ac.kaist.hybridroid.util.data.Pair;
 
 /**
  * 
@@ -170,7 +171,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		WalaCGVisualizer vis = new WalaCGVisualizer();
 		vis.visualize(cg, "cfg_test.dot");
 		vis.printLabel("label.txt");
-		Set<IBox> boxSet = findHotspots(cg, hotspots);
+		Set<IBox> boxSet = findHotspots(cg, pa, hotspots);
 		this.spotBoxSet = boxSet;
 		IBox[] boxes = boxSet.toArray(new IBox[0]);
 		for(IBox box : boxes){
@@ -300,7 +301,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		return entrypoints;
 	}
 	
-	private Set<IBox> findHotspots(CallGraph cg, List<Hotspot> hotspots){
+	private Set<IBox> findHotspots(CallGraph cg, PointerAnalysis<InstanceKey> pa, List<Hotspot> hotspots){
 		Set<IBox> boxes = new HashSet<IBox>();
 		for(CGNode node : cg){
 			IR ir = node.getIR();
@@ -318,7 +319,14 @@ public class AndroidStringAnalysis implements StringAnalysis{
 				for(Hotspot hotspot : hotspots){
 					if(isHotspot(inst, hotspot)){
 						int use = inst.getUse(hotspot.index() + 1);
-						boxes.add(new VarBox(node, i, use));
+						IBox nBox = new VarBox(node, i, use);
+						boxes.add(nBox);
+						int receiver = inst.getUse(0);
+						PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(node, receiver);
+						System.out.println("PK: " + pk);
+						for(InstanceKey ik : pa.getPointsToSet(pk)){
+							System.out.println("\tIK: " + ik);
+						}
 					}
 				}
 			}

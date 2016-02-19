@@ -11,9 +11,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-import kr.ac.kaist.hybridroid.util.debug.Debug;
-import kr.ac.kaist.hybridroid.util.files.LoaderUtils;
-
 import org.jf.dexlib.Util.FileUtils;
 
 import com.ibm.wala.classLoader.IClass;
@@ -22,6 +19,9 @@ import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.strings.Atom;
+
+import kr.ac.kaist.hybridroid.util.debug.Debug;
+import kr.ac.kaist.hybridroid.utils.LoaderUtils;
 
 public class JsAnalysisScopeReader {
 	private File file;

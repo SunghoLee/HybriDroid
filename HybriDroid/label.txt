@@ -128,7 +128,6 @@
 1057 -> Node: < Primordial, Ljava/lang/Class, isLocalClass()Z > Context: Everywhere
 504 -> Node: < Primordial, Ljava/util/ArrayList, set(ILjava/lang/Object;)Ljava/lang/Object; > Context: Everywhere
 316 -> Node: < Primordial, Ljava/nio/ByteArrayBuffer, <init>(I[BIZ)V > Context: Everywhere
-2 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeWorldClinit()V > Context: Everywhere
 314 -> Node: < Primordial, Llibcore/reflect/AnnotationAccess, indexToMethod(Ljava/lang/Class;Lcom/android/dex/Dex;I)Ljava/lang/reflect/AccessibleObject; > Context: Everywhere
 235 -> Node: < Primordial, Ljava/util/AbstractList, <init>()V > Context: Everywhere
 146 -> Node: < Primordial, Ljava/util/ComparableTimSort, <init>([Ljava/lang/Object;)V > Context: Everywhere
@@ -149,6 +148,7 @@
 1325 -> Node: < Primordial, Ljava/lang/reflect/Modifier, isTransient(I)Z > Context: Everywhere
 10 -> Node: < Primordial, Landroid/app/Activity, <init>()V > Context: Everywhere
 961 -> Node: < Primordial, Landroid/animation/PropertyValuesHolder, access$400(Ljava/lang/Object;IF)V > Context: Everywhere
+2 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeWorldClinit()V > Context: Everywhere
 3 -> Node: < Application, Lcom/example/multiwebviewtest/MainActivity, <clinit>()V > Context: Everywhere
 416 -> Node: < Primordial, Ljava/lang/Integer, <init>(I)V > Context: Everywhere
 1196 -> Node: < Primordial, Ljava/util/ComparableTimSort, mergeCollapse()V > Context: Everywhere
@@ -425,7 +425,6 @@
 755 -> Node: < Primordial, Ljava/lang/ClassLoader$SystemClassLoader, <clinit>()V > Context: Everywhere
 832 -> Node: < Primordial, Landroid/animation/Keyframe$IntKeyframe, <init>(F)V > Context: Everywhere
 12 -> Node: < Primordial, Landroid/os/Parcel, obtain()Landroid/os/Parcel; > Context: Everywhere
-1 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere
 175 -> Node: < Primordial, Llibcore/reflect/AnnotationMember, equalArrayValue(Ljava/lang/Object;)Z > Context: Everywhere
 745 -> Node: < Primordial, Ljava/util/ArrayList, iterator()Ljava/util/Iterator; > Context: Everywhere
 842 -> Node: < Primordial, Ljava/util/ArrayList, newCapacity(I)I > Context: Everywhere
@@ -1012,6 +1011,7 @@
 603 -> Node: < Primordial, Ljava/lang/String, toString()Ljava/lang/String; > Context: Everywhere
 622 -> Node: < Primordial, Ljava/lang/Integer, toString(I)Ljava/lang/String; > Context: Everywhere
 643 -> Node: < Primordial, Ljava/lang/String, substring(II)Ljava/lang/String; > Context: Everywhere
+1 -> Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere
 222 -> Node: < Primordial, Landroid/os/Bundle, getParcelable(Ljava/lang/String;)Landroid/os/Parcelable; > Context: Everywhere
 726 -> Node: < Primordial, Lcom/android/internal/util/ArrayUtils, <clinit>()V > Context: Everywhere
 1060 -> Node: < Primordial, Ljava/util/HashMap, keySet()Ljava/util/Set; > Context: Everywhere

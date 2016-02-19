@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer;
-import kr.ac.kaist.hybridroid.util.graph.visuailize.Visualizer.GraphType;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer.GraphType;
 
 import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSACFG;

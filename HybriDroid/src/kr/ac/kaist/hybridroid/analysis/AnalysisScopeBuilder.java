@@ -10,8 +10,8 @@ import com.ibm.wala.properties.WalaProperties;
 
 import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
 import kr.ac.kaist.hybridroid.shell.Shell;
-import kr.ac.kaist.hybridroid.util.files.LocalFileReader;
 import kr.ac.kaist.hybridroid.util.print.AsyncPrinter;
+import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 
 public class AnalysisScopeBuilder {
 	private File target;

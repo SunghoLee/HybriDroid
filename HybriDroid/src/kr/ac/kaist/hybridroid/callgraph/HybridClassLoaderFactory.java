@@ -2,6 +2,7 @@ package kr.ac.kaist.hybridroid.callgraph;
 
 import java.io.IOException;
 
+import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
 import com.ibm.wala.cast.js.translator.JavaScriptTranslatorFactory;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
@@ -11,8 +12,6 @@ import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.config.SetOfClasses;
-
-import kr.ac.kaist.hybridroid.js.loader.MultipleJavaScriptLoader;
 
 public class HybridClassLoaderFactory extends ClassLoaderFactoryImpl {
 
@@ -39,7 +38,7 @@ public class HybridClassLoaderFactory extends ClassLoaderFactoryImpl {
       throws IOException 
   {
       if (classLoaderReference.equals(JavaScriptTypes.jsLoader)) {	
-	MultipleJavaScriptLoader L = new MultipleJavaScriptLoader(cha, jsTranslatorFactory);
+	JavaScriptLoader L = new JavaScriptLoader(cha, jsTranslatorFactory);
 	L.init(scope.getModules(classLoaderReference));
 	return L;
 

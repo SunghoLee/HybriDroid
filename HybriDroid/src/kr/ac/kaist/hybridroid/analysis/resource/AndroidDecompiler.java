@@ -16,7 +16,7 @@ public class AndroidDecompiler {
 			String path = apkFile.getCanonicalPath();
 			String toPath = path.substring(0, path.length()-4);
 			String[] cmds = {"-f", "d", path};
-			String apktool = AndroidDecompiler.class.getClassLoader().getResource("apktool_2.0.2.jar").getPath();
+			String apktool = AndroidDecompiler.class.getClassLoader().getResource("resources/apktool_2.0.2.jar").getPath();
 			String[] cmd = {"java", "-jar", apktool, "-f", "d", path, "-o", toPath};
 			ProcessBuilder pb = new ProcessBuilder();
 			pb.command(cmd);
