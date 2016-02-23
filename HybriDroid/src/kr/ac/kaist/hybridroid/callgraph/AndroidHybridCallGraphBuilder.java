@@ -3,11 +3,11 @@ package kr.ac.kaist.hybridroid.callgraph;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
-import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder.AstPointerAnalysisImpl;
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder.AstPointerAnalysisImpl.AstImplicitPointsToSetVisitor;
 import com.ibm.wala.cast.ipa.callgraph.CrossLanguageSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
@@ -16,7 +16,6 @@ import com.ibm.wala.cast.ir.ssa.AstGlobalRead;
 import com.ibm.wala.cast.ir.ssa.AstGlobalWrite;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSConstraintVisitor;
-import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSPointerAnalysisImpl;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSPointerAnalysisImpl.JSImplicitPointsToSetVisitor;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.ssa.JavaScriptCheckReference;
@@ -77,6 +76,9 @@ import com.ibm.wala.util.intset.OrdinalSet;
 import com.ibm.wala.util.strings.Atom;
 
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.Pointing;
+import kr.ac.kaist.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
 import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
@@ -104,14 +106,15 @@ public class AndroidHybridCallGraphBuilder extends
 			.findOrCreateAsciiAtom("JavascriptInterface");
 	private HybridAPIMisusesChecker typeChecker;
 	private AndroidStringAnalysis asa;
+	private Map<String, String> pathMap;
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
-			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa) {
+			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, Map<String, String> pathMap) {
 		super(cha, options, cache);
-
+		
 		if((options.getAnalysisScope() instanceof AndroidHybridAnalysisScope) == false)
 			Assertions.UNREACHABLE("AndroidHybridCallGraphBuilder must receive AndroidHybridAnalysisScope as a scope. current: " + options.getAnalysisScope().getClass().getName());
-		
+		this.pathMap = pathMap;
 		this.typeChecker = typeChecker;
 		this.asa = asa;
 		jsGlobalMap = new HashMap<Atom, GlobalObjectKey>();
@@ -242,7 +245,6 @@ public class AndroidHybridCallGraphBuilder extends
 				processHybridCallingConstraints(caller, instruction, target,
 						constParams, uniqueCatchKey);
 			} else 
-//				JSSSAPropagationCallGraphBuilder.processCallingConstraintsInternal(this, caller, instruction, target, constParams, uniqueCatchKey);
 				super.processCallingConstraints(caller, instruction, target,
 						constParams, uniqueCatchKey);
 		} else {
@@ -251,7 +253,7 @@ public class AndroidHybridCallGraphBuilder extends
 		}
 	}
 
-	public class HybridJavaConstraintVisitor extends ConstraintVisitor {
+	public class HybridJavaConstraintVisitor extends ResourceVisitor {
 		public HybridJavaConstraintVisitor(
 				SSAPropagationCallGraphBuilder builder, CGNode node) {
 			super(builder, node);
@@ -310,7 +312,6 @@ public class AndroidHybridCallGraphBuilder extends
 							
 							Collection<IMethod> methods = wClass.getAllMethods();
 							
-							
 							InstanceKey objKey = new AllocationSite(
 									caller.getMethod(), newSite, wClass);
 							AndroidHybridAppModel.addJSInterface(name, objKey);
@@ -360,10 +361,24 @@ public class AndroidHybridCallGraphBuilder extends
 							 * global objects are seperated by javascript file
 							 * name.
 							 */
-//							AndroidStringAnalysis.SpotSpec spec = asa.getSpotSpec();
-//							asa.get
-//							node.getMethod().getReference().toString()
+							Set<HotspotDescriptor> descSet = asa.getAllDescriptors();
+							Set<GlobalObjectKey> globalObjs = new HashSet<GlobalObjectKey>();
 							
+							for(HotspotDescriptor desc : descSet){
+								if(desc.getReceiverAlias().contains(Pointing.make(node, instruction.getUse(0)))){
+									Set<String> htmls = desc.getValues();
+									if (!htmls.isEmpty()) {
+										for (String html : htmls) {
+											globalObjs.add(getGlobalObject(JavaScriptTypes.jsName, Atom.findOrCreateAsciiAtom(pathMap.get(html))));
+										}
+									}else{
+										Assertions.UNREACHABLE("Loaded html is unknown.");
+									}
+								}
+							}
+							
+							if(globalObjs.isEmpty())
+								Assertions.UNREACHABLE("Unknown WebView for the bridge object.");
 							/*
 							 * attach the Android Java interface object to
 							 * JavaScript global object. the attached object is
@@ -374,7 +389,7 @@ public class AndroidHybridCallGraphBuilder extends
 //									.getGlobalObject(JavaScriptTypes.jsName);
 //							system.findOrCreateIndexForInstanceKey(globalObj);
 
-							Collection<GlobalObjectKey> globalObjs = getGlobalObjects(JavaScriptTypes.jsName);
+//							Collection<GlobalObjectKey> globalObjs = getGlobalObjects(JavaScriptTypes.jsName);
 							
 							FieldReference field = FieldReference.findOrCreate(
 									JavaScriptTypes.jsLoader, "LRoot",
@@ -562,11 +577,7 @@ public class AndroidHybridCallGraphBuilder extends
 		
 		if(!jsGlobalMap.containsKey(file))
 			Assertions.UNREACHABLE("the file is not in the scope: " + file);
-		
-		System.out.println("#Map: " + jsGlobalMap);
-		System.out.println("#File: " + file);
-		System.out.println("#Global: " + jsGlobalMap.get(file));
-		
+				
 		return jsGlobalMap.get(file);
 	}
 	
@@ -609,7 +620,7 @@ public class AndroidHybridCallGraphBuilder extends
 	      @Override
 	      public AstImplicitPointsToSetVisitor get(Atom language, LocalPointerKey construct) {
 	        if (JavaScriptTypes.jsName.equals(language)) {
-	          return new JSImplicitPointsToSetVisitor((AstPointerAnalysisImpl) getPointerAnalysis(), construct);
+	          return new AndroidHybridJSImplicitPointsToSetVisitor((AstPointerAnalysisImpl) getPointerAnalysis(), construct);
 	        } else {
 	          return new AstImplicitPointsToSetVisitor((AstPointerAnalysisImpl) getPointerAnalysis(), construct);
 	        }

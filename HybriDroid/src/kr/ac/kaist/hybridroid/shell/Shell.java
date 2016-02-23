@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,10 @@ import org.omg.CORBA.DynAnyPackage.Invalid;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.properties.WalaProperties;
+import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
+import com.ibm.wala.util.collections.Pair;
 
 import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
@@ -95,16 +98,18 @@ public class Shell {
 			asa.setExclusion(CallGraphTestUtil.REGRESSION_EXCLUSIONS);
 			asa.addAnalysisScope(targetPath);
 			List<Hotspot> hotspots = new ArrayList<Hotspot>();
-			hotspots.add(new ArgumentHotspot("loadUrl", 1, 0));
+			hotspots.add(new ArgumentHotspot(ClassLoaderReference.Application, "android/webkit/WebView", "loadUrl(Ljava/lang/String;)V", 0));
 			asa.analyze(hotspots);
 			JSScriptMerger jssm = new JSScriptMerger();
 			Map<IBox, Set<String>> loadPages = asa.getSpotString();
 			
 			Set<File> jsFiles = new HashSet<File>();
-			
+			Map<String, String> htmlJsPathMap = new HashMap<String, String>(); 
 			for(Set<String> pageSet : loadPages.values()){
 				for(String page : pageSet){
-					jsFiles.add(jssm.merge(dirPath, page));
+					Pair<String, File> p = jssm.merge(dirPath, page); 
+					jsFiles.add(p.snd);
+					htmlJsPathMap.put(p.fst, p.snd.getName());
 				}
 			}
 			
@@ -118,7 +123,7 @@ public class Shell {
 			}
 
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			cfgAnalysis.main(scopeBuilder.makeScope(), asa);
+			cfgAnalysis.main(scopeBuilder.makeScope(), asa, htmlJsPathMap);
 		} else {
 			// TODO: support several functions
 		}

@@ -16,6 +16,7 @@ import com.ibm.wala.cast.js.html.jericho.JerichoTag;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
 import com.ibm.wala.util.collections.Pair;
 
+
 /**
  * Merge several javascript codes in a html into a file of javascript. The codes
  * may contains codes of javascript files or inlining javascript codes.
@@ -49,7 +50,7 @@ public class JSScriptMerger {
 	 * @param htmlPath path of the html file
 	 * @return a file object contains all javascript codes
 	 */
-	public File merge(String dirPath, String htmlPath){
+	public Pair<String,File> merge(String dirPath, String htmlPath){
 		System.out.println("#HTML: " + htmlPath);		
 		String path = dirPath + File.separator + htmlPath.replace("file:///", "").replace("android_asset", "assets");
 		System.out.println("\tpath: " + path);
@@ -82,7 +83,7 @@ public class JSScriptMerger {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return newJS;
+		return Pair.make(htmlPath, newJS);
 	}
 	
 	/**

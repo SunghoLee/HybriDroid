@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 
+import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.JarFileModule;
@@ -34,9 +36,9 @@ import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -52,6 +54,7 @@ import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.config.FileOfClasses;
+import com.ibm.wala.util.intset.OrdinalSet;
 import com.ibm.wala.util.io.FileProvider;
 import com.ibm.wala.util.strings.Atom;
 
@@ -68,6 +71,7 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IVa
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
+import kr.ac.kaist.hybridroid.callgraph.ResourceCallGraphBuilder;
 import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
 import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
 import kr.ac.kaist.hybridroid.util.data.Pair;
@@ -82,11 +86,13 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	private List<Hotspot> hotspots;
 	private Set<IBox> spotBoxSet;
 	private Map<IConstraintNode, Set<String>> result;
+	private Map<Hotspot, Set<HotspotDescriptor>> descMap;
 	
 	public AndroidStringAnalysis(){
 		scopeInit();
 		worklist = new WorkList();
 		result = new HashMap<IConstraintNode, Set<String>>();
+		descMap = new HashMap<Hotspot, Set<HotspotDescriptor>>();
 	}
 	
 	public AndroidStringAnalysis(AndroidResourceAnalysis ra){
@@ -149,7 +155,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		ForwardSetSolver fss = new ForwardSetSolver();
 		Map<IConstraintNode, IValue> res = fss.solve(cg);
 		System.out.println("--- String Analysis Results ---");
-		for(IConstraintNode n : result.keySet()){
+		for(IConstraintNode n : res.keySet()){
 			IValue v = res.get(n);
 			System.out.println("#N: " + n);
 			System.out.println("\t#V: " + v);
@@ -199,6 +205,19 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		System.out.println("------------");
 		
 		solve(graph);
+		makeDescriptors();
+	}
+	
+	private void makeDescriptors(){
+		Set<HotspotDescriptor> descSet = getAllDescriptors();
+		
+		for(IConstraintNode n : result.keySet()){
+			for(HotspotDescriptor desc : descSet){
+				if(desc.getConstNode().equals(n)){
+					desc.setValues(result.get(n));
+				}
+			}
+		}
 	}
 	
 	public List<Hotspot> getSpots(){
@@ -257,7 +276,8 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		options.setSelector(new ClassHierarchyClassTargetSelector(cha));
 		options.setSelector(new ClassHierarchyMethodTargetSelector(cha));
 //		CallGraphBuilder cgb = new nCFABuilder(0, cha, options, cache, null, null);
-		CallGraphBuilder cgb = ZeroXCFABuilder.make(cha, options, cache, null, null, 0);
+//		CallGraphBuilder cgb = ZeroXCFABuilder.make(cha, options, cache, null, null, 0);
+		CallGraphBuilder cgb = ResourceCallGraphBuilder.make(cha, options, cache, null, null, 0);
 		return Pair.make(cgb.makeCallGraph(options, null), cgb.getPointerAnalysis());
 	}
 	
@@ -318,20 +338,63 @@ public class AndroidStringAnalysis implements StringAnalysis{
 				
 				for(Hotspot hotspot : hotspots){
 					if(isHotspot(inst, hotspot)){
-						int use = inst.getUse(hotspot.index() + 1);
-						IBox nBox = new VarBox(node, i, use);
+						int useVar = inst.getUse(hotspot.index() + 1);
+						IBox nBox = new VarBox(node, i, useVar);
 						boxes.add(nBox);
-						int receiver = inst.getUse(0);
-						PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(node, receiver);
-						System.out.println("PK: " + pk);
-						for(InstanceKey ik : pa.getPointsToSet(pk)){
-							System.out.println("\tIK: " + ik);
+						int receiverVar = inst.getUse(0);
+						PointerKey usePK = pa.getHeapModel().getPointerKeyForLocal(node, useVar);
+						PointerKey receiverPK = pa.getHeapModel().getPointerKeyForLocal(node, receiverVar);
+						InstanceKey[] uses = getInstanceKeys(pa, usePK);
+						InstanceKey[] receivers = getInstanceKeys(pa, receiverPK);
+						
+						HeapGraph<InstanceKey> hg = pa.getHeapGraph();
+						Set<Pointing> rpSet = new HashSet<Pointing>();
+						
+						for(InstanceKey receiver : receivers){
+							for(Iterator<Object> ipk = hg.getPredNodes(receiver); ipk.hasNext();){
+								Object o = ipk.next();
+								if(o instanceof LocalPointerKey){
+									LocalPointerKey rpk = (LocalPointerKey) o;
+									rpSet.add(new Pointing(rpk.getNode(), rpk.getValueNumber()));
+								}
+							}
 						}
+						
+						Set<Pointing> upSet = new HashSet<Pointing>();
+						
+						for(InstanceKey use : uses){
+							for(Iterator<Object> ipk = hg.getPredNodes(use); ipk.hasNext();){
+								Object o = ipk.next();
+								if(o instanceof LocalPointerKey){
+									LocalPointerKey upk = (LocalPointerKey) o;
+									rpSet.add(new Pointing(upk.getNode(), upk.getValueNumber()));
+								}
+							}
+						}
+						putHotspotDesciptor(hotspot, new HotspotDescriptor(node, inst.iindex, nBox, rpSet, upSet));
 					}
 				}
 			}
 		}
 		return boxes;
+	}
+	
+	private void putHotspotDesciptor(Hotspot h, HotspotDescriptor desc){
+		if(!descMap.containsKey(h)){
+			descMap.put(h, new HashSet<HotspotDescriptor>());
+		}
+		descMap.get(h).add(desc);
+	}
+	
+	private InstanceKey[] getInstanceKeys(PointerAnalysis<InstanceKey> pa, PointerKey pk){
+		OrdinalSet<InstanceKey> ikSet = pa.getPointsToSet(pk);
+		InstanceKey[] iks = new InstanceKey[ikSet.size()];
+		
+		int index = 0;
+		for(InstanceKey ik : ikSet){
+			iks[index++] = ik;
+		}
+		return iks;
 	}
 	
 	private boolean isHotspot(SSAInstruction inst, Hotspot hotspot){
@@ -340,10 +403,13 @@ public class AndroidStringAnalysis implements StringAnalysis{
 			if(inst instanceof SSAAbstractInvokeInstruction){
 				SSAAbstractInvokeInstruction invokeInst = (SSAAbstractInvokeInstruction) inst;
 				MethodReference targetMr = invokeInst.getDeclaredTarget();
-				if(targetMr.getName().toString().equals(argHotspot.getMethodName()) && targetMr.getNumberOfParameters() == argHotspot.getParamNum())
+				TypeReference cTRef = targetMr.getDeclaringClass();
+				Selector mSelector = targetMr.getSelector();
+				if(cTRef.equals(argHotspot.getClassDescriptor()) && mSelector.equals(argHotspot.getMethodDescriptor()))
 					return true;
 			}
 		}
+
 		return false;
 	}
 	
@@ -404,6 +470,101 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		
 		public int size(){
 			return list.size();
+		}
+	}
+	
+	
+	public Set<HotspotDescriptor> getDescriptors(Hotspot h){
+		return descMap.get(h);
+	}
+	
+	public Set<HotspotDescriptor> getAllDescriptors(){
+		Set<HotspotDescriptor> res = new HashSet<HotspotDescriptor>();
+		for(Set<HotspotDescriptor> desc : descMap.values()){
+			res.addAll(desc);
+		}
+		return res;
+	}
+	
+	public class HotspotDescriptor{
+		private CGNode node;
+		private int iindex;
+		private Set<Pointing> receiverAlias;
+		private Set<Pointing> argAlias;
+		private Set<String> values;
+		private IConstraintNode constNode;
+		
+		private HotspotDescriptor(CGNode node, int iindex, IConstraintNode constNode, Set<Pointing> receiver, Set<Pointing> arg){
+			this.node = node;
+			this.iindex = iindex;
+			this.constNode = constNode;
+			this.receiverAlias = receiver;
+			this.argAlias = arg;
+		}
+		
+		private void setValues(Set<String> values){
+			this.values = values;
+		}
+		
+		private IConstraintNode getConstNode(){
+			return constNode;
+		}
+		
+		public Set<Pointing> getReceiverAlias(){
+			return receiverAlias;
+		}
+		
+		public CGNode getNode(){
+			return node;
+		}
+		
+		public SSAInstruction getInstruction(){
+			return node.getIR().getInstructions()[iindex];
+		}
+		
+		public Set<Pointing> getSpotAlias(){
+			return argAlias;
+		}
+		
+		public Set<String> getValues(){
+			if(values != null)
+				return values;
+			else
+				return Collections.emptySet();
+		}
+	}
+	
+	public static class Pointing{
+		private CGNode node;
+		private int varNum;
+		
+		public static Pointing make(CGNode node, int varNum){
+			return new Pointing(node, varNum);
+		}
+		
+		private Pointing(CGNode node, int varNum){
+			this.node = node;
+			this.varNum = varNum;
+		}
+		
+		@Override
+		public int hashCode(){
+			return node.hashCode() + varNum;
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof Pointing){
+				Pointing p = (Pointing) o;
+				if(p.node.getMethod().equals(node.getMethod()) && p.node.getContext().equals(node.getContext()) && p.varNum == varNum)
+					return true;
+			}
+			return false;
+		}
+		
+		@Override
+		public String toString(){
+			return "[" + varNum + "] in " + node;
 		}
 	}
 }

@@ -1,22 +1,27 @@
 package kr.ac.kaist.hybridroid.analysis.string;
 
+import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.types.Selector;
+import com.ibm.wala.types.TypeReference;
+
 public class ArgumentHotspot implements Hotspot {
-	private String methodName;
-	private int paramNum;
+	private TypeReference cDescriptor;
+	private Selector mSelector;
 	private int argIndex;
 	
-	public ArgumentHotspot(String methodName, int paramNum, int argIndex){
-		this.methodName = methodName;
-		this.paramNum = paramNum;
+	public ArgumentHotspot(ClassLoaderReference cRef, String cDescriptor, String mDescriptor, int argIndex){
 		this.argIndex = argIndex;
+		
+		this.cDescriptor = TypeReference.findOrCreateClass(cRef, cDescriptor.substring(0, cDescriptor.lastIndexOf("/")), cDescriptor.substring(cDescriptor.lastIndexOf("/")+1));
+		this.mSelector = Selector.make(mDescriptor);
 	}
 
-	public String getMethodName() {
-		return methodName;
+	public TypeReference getClassDescriptor() {
+		return this.cDescriptor;
 	}
-
-	public int getParamNum() {
-		return paramNum;
+	
+	public Selector getMethodDescriptor() {
+		return this.mSelector;
 	}
 
 	public int getArgIndex() {
@@ -30,6 +35,6 @@ public class ArgumentHotspot implements Hotspot {
 	
 	@Override
 	public String toString(){
-		return "ArgSpot[" + methodName + " (@" + argIndex + " of " + paramNum + ")]";
+		return "ArgSpot[" + cDescriptor + " " + mSelector + " (@" + argIndex + ")]";
 	}
 }

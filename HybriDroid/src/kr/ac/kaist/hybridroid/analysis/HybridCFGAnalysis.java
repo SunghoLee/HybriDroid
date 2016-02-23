@@ -60,7 +60,7 @@ import kr.ac.kaist.hybridroid.utils.VisualizeCGTest;
  * @author Sungho Lee
  */
 public class HybridCFGAnalysis {
-
+	
 	public HybridCFGAnalysis() {
 
 	}
@@ -133,8 +133,9 @@ public class HybridCFGAnalysis {
 	 * @throws IllegalArgumentException
 	 * @throws CancelException
 	 */
-	public void main(AndroidHybridAnalysisScope scope, AndroidStringAnalysis asa) throws IOException,
+	public void main(AndroidHybridAnalysisScope scope, AndroidStringAnalysis asa, Map<String, String> pathMap) throws IOException,
 			ClassHierarchyException, IllegalArgumentException, CancelException {
+		
 		JSCallGraphUtil.setTranslatorFactory(new CAstRhinoTranslatorFactory());
 		
 		HybridClassLoaderFactory loaders = new HybridClassLoaderFactory();
@@ -157,7 +158,7 @@ public class HybridCFGAnalysis {
 		addHybridDispatchLogic(options, scope, cha);
 
 		AndroidHybridCallGraphBuilder b = new AndroidHybridCallGraphBuilder(
-				cha, options, cache, HybridAPIMisusesChecker.getInstance(), asa);
+				cha, options, cache, HybridAPIMisusesChecker.getInstance(), asa, pathMap);
 
 		CallGraph cg = b.makeCallGraph(options);
 

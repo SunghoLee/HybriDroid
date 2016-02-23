@@ -26,6 +26,7 @@ public class AndroidHybridMethodTargetSelector extends
 		
 		if(receiver instanceof MockupClass){
 			IMethod target = ((MockupClass)receiver).getMethod();
+			
 //			System.err.println("@calling: " + target);
 			return target;
 		}else{
