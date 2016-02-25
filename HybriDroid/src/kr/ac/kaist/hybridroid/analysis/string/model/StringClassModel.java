@@ -1,10 +1,13 @@
 package kr.ac.kaist.hybridroid.analysis.string.model;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ssa.SSAInvokeInstruction;
+import com.ibm.wala.types.Selector;
+import com.ibm.wala.types.TypeReference;
 
 import kr.ac.kaist.hybridroid.analysis.string.constraint.AssignOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstBox;
@@ -15,60 +18,58 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.ReplaceOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.SSAInvokeInstruction;
-
-public class StringClassModel implements IClassModel{
+public class StringClassModel extends AbstractClassModel{
 	private static StringClassModel instance;
-	
-	private Map<String, IMethodModel> methodMap;
-	
+		
 	public static StringClassModel getInstance(){
 		if(instance == null)
 			instance = new StringClassModel();
 		return instance;
 	}
 	
-	private StringClassModel(){
-		methodMap = new HashMap<String, IMethodModel>();
-		init();
+	protected void init(){
+		methodMap.put(Selector.make("valueOf(C)Ljava/lang/String;"), new ValueOf());
+		methodMap.put(Selector.make("valueOf(Ljava/lang/Object;)Ljava/lang/String;"), new ValueOf());
+		methodMap.put(Selector.make("valueOf(Z)Ljava/lang/String;"), new ValueOf());
+		methodMap.put(Selector.make("replace(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;"), new Replace());
+		methodMap.put(Selector.make("<init>()V"), new Init1());
+		methodMap.put(Selector.make("<init>(II[C)V"), new Init2());
+		methodMap.put(Selector.make("<init>([CII)V"), new Init2());
+		methodMap.put(Selector.make("<init>([BII)V"), new Init2());
+		methodMap.put(Selector.make("substring(II)Ljava/lang/String;"), new Substring1());
+		methodMap.put(Selector.make("substring(I)Ljava/lang/String;"), new Substring2());
+		methodMap.put(Selector.make("length()I"), new Length());
+		methodMap.put(Selector.make("indexOf(II)I"), new IndexOf1());
+		methodMap.put(Selector.make("indexOf(Ljava/lang/String;I)I"), new IndexOf1());
+		methodMap.put(Selector.make("toString()Ljava/lang/String;"), new ToString());
+//		methodMap.put(Selector.make("fastIndexOf(II)I"), new FastIndexOf());
+		
+//		methodMap.put("format", new Format());
+//		methodMap.put("copyValueOf", new CopyValueOf());
 	}
 	
-	private void init(){
-		methodMap.put("valueOf", new ValueOf());
-		methodMap.put("replace", new Replace());
-		methodMap.put("<init>", new Init());
-		methodMap.put("substring", new Substring());
-		methodMap.put("length", new Length());
-		methodMap.put("indexOf", new IndexOf());
-		methodMap.put("toString", new ToString());
-		methodMap.put("format", new Format());
-		methodMap.put("copyValueOf", new CopyValueOf());
-	}
+//	//fastIndexOf(II)I
+//	class FastIndexOf implements IMethodModel<Set<IBox>>{
+//
+//		@Override
+//		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller, SSAInvokeInstruction invokeInst) {
+//			// TODO Auto-generated method stub
+//			return null;
+//		}
+//		
+//		@Override
+//		public String toString(){
+//			return "Constraint Graph Method Model: String.fastIndexOf(II)I";
+//		}
+//	}
 	
-	@Override
-	public IMethodModel getMethod(String methodName){
-		if(methodMap.containsKey(methodName))
-			return methodMap.get(methodName);
-		System.err.println("Unkwon 'String' method: " + methodName);
-		return null;
-	}
-	
+	//valueOf(C)Ljava/lang/String;
+	//valueOf(Ljava/lang/Object;)Ljava/lang/String;
+	//valueOf(Z)Ljava/lang/String;
 	class ValueOf implements IMethodModel<Set<IBox>>{
 
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 1:
-				return arg1(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String ValueOf: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		public Set<IBox> arg1(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int useVar = invokeInst.getUse(0);
@@ -80,26 +81,16 @@ public class StringClassModel implements IClassModel{
 		
 		@Override
 		public String toString(){
-			return "Constraint Graph Method Model: String.valueOf";
+			return "Constraint Graph Method Model: String.valueOf(C)Ljava/lang/String;";
 		}
 		
 	}
 	
+	//replace(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;
 	class Replace implements IMethodModel<Set<IBox>>{
 
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 3:
-				return arg3(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String Replace: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg3(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int strVar = invokeInst.getUse(0);
@@ -118,7 +109,7 @@ public class StringClassModel implements IClassModel{
 					
 			return boxSet;
 		}
-		
+				
 		@Override
 		public String toString(){
 			return "Constraint Graph Method Model: String.replace";
@@ -126,25 +117,17 @@ public class StringClassModel implements IClassModel{
 		
 	}
 	
-	class Init implements IMethodModel<Set<IBox>>{
+	//<init>()V
+	class Init1 implements IMethodModel<Set<IBox>>{
 
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
-			// TODO Auto-generated method stub
-			switch(invokeInst.getNumberOfUses()){
-			case 0:
-				return arg0(graph, def, caller, invokeInst);
-			case 1:
-				return arg1(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String <init>: #arg is " + invokeInst.getNumberOfUses(), true);
+			System.err.println("\tinit1: " + invokeInst);
+			for(int i=0; i < invokeInst.getNumberOfParameters()-1; i++){
+				TypeReference tr = invokeInst.getDeclaredTarget().getParameterType(i);
+				System.out.println("#("+i+") " + tr);
 			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg0(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst){
 			Set<IBox> boxSet = new HashSet<IBox>();
 			IBox strBox = new ConstBox(caller, "", ConstType.STRING);
 			if(graph.addEdge(new AssignOpNode(), def, strBox)){
@@ -154,8 +137,25 @@ public class StringClassModel implements IClassModel{
 			return boxSet;
 		}
 		
-		private Set<IBox> arg1(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst){
+		@Override
+		public String toString(){
+			return "Constraint Graph Method Model: String.<init>";
+		}
+	}
+	
+	//<init>(II[C)V
+	//<init>([CII)V
+	//<init>([BII)V
+	class Init2 implements IMethodModel<Set<IBox>>{
+
+		@Override
+		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
+				SSAInvokeInstruction invokeInst) {
+			System.err.println("\tinit2: " + invokeInst);
+			for(int i=0; i < invokeInst.getNumberOfParameters()-1; i++){
+				TypeReference tr = invokeInst.getDeclaredTarget().getParameterType(i);
+				System.out.println("#("+i+") " + tr);
+			}
 			Set<IBox> boxSet = new HashSet<IBox>();
 //			int strVar = invokeInst.getUse(0);
 //			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
@@ -173,40 +173,11 @@ public class StringClassModel implements IClassModel{
 		}
 	}
 	
-	class Substring implements IMethodModel<Set<IBox>>{
+	//substring(II)Ljava/lang/String;
+	class Substring1 implements IMethodModel<Set<IBox>>{
 
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 2:
-				return arg2(graph, def, caller, invokeInst);
-			case 3:
-				return arg3(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String Substring: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg2(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			Set<IBox> boxSet = new HashSet<IBox>();
-			int strVar = invokeInst.getUse(0);
-			int beginVar = invokeInst.getUse(1);
-			
-			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			IBox beginBox = new VarBox(caller, invokeInst.iindex, beginVar);
-			
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, beginBox)){
-				boxSet.add(strBox);
-				boxSet.add(beginBox);
-			}
-					
-			return boxSet;
-		}
-		
-		private Set<IBox> arg3(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int strVar = invokeInst.getUse(0);
@@ -228,25 +199,41 @@ public class StringClassModel implements IClassModel{
 		
 		@Override
 		public String toString(){
-			return "Constraint Graph Method Model: String.substring";
+			return "Constraint Graph Method Model: String.substring(II)Ljava/lang/String;";
 		}
 	}
 	
+	// substring(I)Ljava/lang/String;
+	class Substring2 implements IMethodModel<Set<IBox>> {
+
+		@Override
+		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller, SSAInvokeInstruction invokeInst) {
+			Set<IBox> boxSet = new HashSet<IBox>();
+			int strVar = invokeInst.getUse(0);
+			int beginVar = invokeInst.getUse(1);
+
+			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
+			IBox beginBox = new VarBox(caller, invokeInst.iindex, beginVar);
+
+			if (graph.addEdge(new ReplaceOpNode(), def, strBox, beginBox)) {
+				boxSet.add(strBox);
+				boxSet.add(beginBox);
+			}
+
+			return boxSet;
+		}
+
+		@Override
+		public String toString() {
+			return "Constraint Graph Method Model: String.substring(I)Ljava/lang/String;";
+		}
+	}
+
+	//length()I
 	class Length implements IMethodModel<Set<IBox>>{
 
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 1:
-				return arg1(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String Length: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg1(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int strVar = invokeInst.getUse(0);
@@ -260,44 +247,15 @@ public class StringClassModel implements IClassModel{
 		
 		@Override
 		public String toString(){
-			return "Constraint Graph Method Model: String.length";
+			return "Constraint Graph Method Model: String.length()I";
 		}
 	}
 	
-	class IndexOf implements IMethodModel<Set<IBox>>{
+	//indexOf(II)I
+	class IndexOf1 implements IMethodModel<Set<IBox>>{
 
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 2:
-				return arg2(graph, def, caller, invokeInst);
-			case 3:
-				return arg3(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String IndexOf: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg2(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			Set<IBox> boxSet = new HashSet<IBox>();
-			int strVar = invokeInst.getUse(0);
-			int charVar = invokeInst.getUse(1);
-			
-			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			IBox charBox = new VarBox(caller, invokeInst.iindex, charVar);
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, charBox)){
-				boxSet.add(strBox);
-				boxSet.add(charBox);
-			}
-			
-			return boxSet;
-		}
-		
-		
-		private Set<IBox> arg3(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int strVar = invokeInst.getUse(0);
@@ -318,40 +276,88 @@ public class StringClassModel implements IClassModel{
 		
 		@Override
 		public String toString(){
-			return "Constraint Graph Method Model: String.indexOf";
+			return "Constraint Graph Method Model: String.indexOf(II)I";
 		}
 	}
 	
-	class ToString implements IMethodModel<Set<IBox>>{
+	//?
+		class IndexOf2 implements IMethodModel<Set<IBox>>{
 
-		@Override
-		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 1:
-				return arg1(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String ToString: #arg is " + invokeInst.getNumberOfUses(), true);
+			@Override
+			public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
+					SSAInvokeInstruction invokeInst) {
+				switch(invokeInst.getNumberOfUses()){
+				case 2:
+					return arg2(graph, def, caller, invokeInst);
+				case 3:
+					return arg3(graph, def, caller, invokeInst);
+				default : 
+					StringModel.setWarning("Unknown String IndexOf: #arg is " + invokeInst.getNumberOfUses(), true);
+				}
+				return Collections.emptySet();
 			}
-			return Collections.emptySet();
+			
+			private Set<IBox> arg2(ConstraintGraph graph, IBox def, CGNode caller,
+					SSAInvokeInstruction invokeInst) {
+				Set<IBox> boxSet = new HashSet<IBox>();
+				int strVar = invokeInst.getUse(0);
+				int charVar = invokeInst.getUse(1);
+				
+				IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
+				IBox charBox = new VarBox(caller, invokeInst.iindex, charVar);
+				if(graph.addEdge(new ReplaceOpNode(), def, strBox, charBox)){
+					boxSet.add(strBox);
+					boxSet.add(charBox);
+				}
+				
+				return boxSet;
+			}
+			
+			
+			private Set<IBox> arg3(ConstraintGraph graph, IBox def, CGNode caller,
+					SSAInvokeInstruction invokeInst) {
+				Set<IBox> boxSet = new HashSet<IBox>();
+				int strVar = invokeInst.getUse(0);
+				int charVar = invokeInst.getUse(1);
+				int fromVar = invokeInst.getUse(2);
+				
+				IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
+				IBox charBox = new VarBox(caller, invokeInst.iindex, charVar);
+				IBox fromBox = new VarBox(caller, invokeInst.iindex, fromVar);
+				if(graph.addEdge(new ReplaceOpNode(), def, strBox, charBox, fromBox)){
+					boxSet.add(strBox);
+					boxSet.add(charBox);
+					boxSet.add(fromBox);
+				}
+				
+				return boxSet;
+			}
+			
+			@Override
+			public String toString(){
+				return "Constraint Graph Method Model: String.indexOf";
+			}
 		}
 		
-		private Set<IBox> arg1(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
+	// toString()Ljava/lang/String;
+	class ToString implements IMethodModel<Set<IBox>> {
+
+		@Override
+		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller, SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int strVar = invokeInst.getUse(0);
 			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			
-			if(graph.addEdge(new ToStringOpNode(), def, strBox)){
+
+			if (graph.addEdge(new ToStringOpNode(), def, strBox)) {
 				boxSet.add(strBox);
 			}
-			
+
 			return boxSet;
 		}
-		
+
 		@Override
-		public String toString(){
-			return "Constraint Graph Method Model: String.toString";
+		public String toString() {
+			return "Constraint Graph Method Model: String.toString()Ljava/lang/String;";
 		}
 	}
 	

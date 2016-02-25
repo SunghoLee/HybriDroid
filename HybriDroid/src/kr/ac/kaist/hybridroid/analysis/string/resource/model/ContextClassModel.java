@@ -12,6 +12,7 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstType;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.model.AbstractClassModel;
 import kr.ac.kaist.hybridroid.analysis.string.model.IClassModel;
 import kr.ac.kaist.hybridroid.analysis.string.model.IMethodModel;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
@@ -19,13 +20,15 @@ import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SymbolTable;
+import com.ibm.wala.types.Selector;
 
-public class ContextClassModel implements IClassModel {
+public class ContextClassModel extends AbstractClassModel{
 	private static ContextClassModel instance;
 
-	private Map<String, IMethodModel> methodMap;
 	private AndroidResourceAnalysis ra;
 	private String region;
+	
+	protected ContextClassModel(){}
 	
 	public static ContextClassModel getInstance(AndroidResourceAnalysis ra, String region) {
 		if (instance == null || instance.hasAndroidResourceAnalysis() == false){
@@ -46,13 +49,7 @@ public class ContextClassModel implements IClassModel {
 		return true;
 	}
 	
-	private ContextClassModel() {
-		methodMap = new HashMap<String, IMethodModel>();
-		init();
-	}
-
 	private ContextClassModel(AndroidResourceAnalysis ra, String region) {
-		this();
 		this.ra = ra;
 		this.region = region;
 	}
@@ -81,36 +78,15 @@ public class ContextClassModel implements IClassModel {
 		return "RESOURCE";
 	}
 	
-	private void init() {
-		methodMap.put("getString", new GetString());
+	protected void init() {
+		methodMap.put(Selector.make("getString(I)Ljava/lang/String"), new GetString1());
 	}
 
-	@Override
-	public IMethodModel getMethod(String methodName) {
-		if (methodMap.containsKey(methodName))
-			return methodMap.get(methodName);
-		System.err.println("Unkwon 'Context' method: " + methodName);
-		return null;
-	}
-
-	class GetString implements IMethodModel<Set<IBox>> {
+	//getString(I)Ljava/lang/String
+	class GetString1 implements IMethodModel<Set<IBox>> {
 
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch (invokeInst.getNumberOfUses()) {
-			case 1:
-				return arg1(graph, def, caller, invokeInst);
-			case 2:
-				return arg2(graph, def, caller, invokeInst);
-			default:
-				StringModel.setWarning("Unknown Context getString: #arg is "
-						+ invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-
-		public Set<IBox> arg1(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 //			int useVar = invokeInst.getUse(1);
@@ -119,8 +95,18 @@ public class ContextClassModel implements IClassModel {
 				boxSet.add(use);
 			return boxSet;
 		}
+		
+		@Override
+		public String toString() {
+			return "Constraint Graph Method Model: Context.getString(I)Ljava/lang/String";
+		}
 
-		public Set<IBox> arg2(ConstraintGraph graph, IBox def, CGNode caller,
+	}
+	
+	//?
+	class GetString2 implements IMethodModel<Set<IBox>>{
+		@Override
+		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int useVar = invokeInst.getUse(1);
@@ -135,8 +121,7 @@ public class ContextClassModel implements IClassModel {
 		
 		@Override
 		public String toString() {
-			return "Constraint Graph Method Model: Context.getString";
+			return "Constraint Graph Method Model: Context.getString?";
 		}
-
 	}
 }

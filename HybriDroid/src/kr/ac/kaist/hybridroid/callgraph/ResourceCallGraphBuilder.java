@@ -5,7 +5,6 @@ import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
@@ -16,6 +15,7 @@ import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
+import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.debug.Assertions;
 
@@ -46,8 +46,9 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 	
 	public static class ResourceVisitor extends ConstraintVisitor{
 
-		private IClass activityClass;
-		private IClassHierarchy cha;
+		private final IClass activityClass;
+		private final Selector fvbiSelector;
+		private final IClassHierarchy cha;
 		
 		public ResourceVisitor(SSAPropagationCallGraphBuilder builder, CGNode node) {
 			super(builder, node);
@@ -56,19 +57,17 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 			
 			TypeReference activityTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/app/Activity");
 			activityClass = cha.lookupClass(activityTR);
+			
+			fvbiSelector = Selector.make("findViewById(I)Landroid/view/View;");
 		}
 
 		@Override
 		public void visitInvoke(SSAInvokeInstruction instruction) {
 			// TODO Auto-generated method stub
 			MethodReference target = instruction.getDeclaredTarget();
-			String mName = target.getName().toString();
 			IClass mainClass = cha.lookupClass(target.getDeclaringClass());
 			
-			if (mName.contains("findViewById") && target.getNumberOfParameters() == 1
-					&& target.getParameterType(0).equals(TypeReference.Int)
-					&& cha.isSubclassOf(mainClass, activityClass)) {
-				
+			if(fvbiSelector.equals(target.getSelector()) && cha.isSubclassOf(mainClass, activityClass)){
 				SymbolTable symTab = node.getIR().getSymbolTable();
 				int paramVar = instruction.getUse(1);
 				
@@ -90,8 +89,12 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 							ResourceInstanceKey rik = new ResourceInstanceKey(node, cha.lookupClass(tr), instruction.iindex, v);
 							system.newConstraint(builder.getPointerKeyForLocal(node, defVar), rik);
 						}
-					}else
-						Assertions.UNREACHABLE("the return value of Activity.findViewById must be converted to any concrete type: " + nextInst);
+					}else{
+//						Assertions.UNREACHABLE("the return value of Activity.findViewById must be converted to any concrete type: " + nextInst);
+						//currently, if the return of findViewById is not casted, just deal with it as View.
+						ResourceInstanceKey rik = new ResourceInstanceKey(node, cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/view/View")), instruction.iindex, v);
+						system.newConstraint(builder.getPointerKeyForLocal(node, defVar), rik);
+					}
 				}else{
 					System.err.println("Warning: resource descriptor is not int constant." + instruction);
 				}

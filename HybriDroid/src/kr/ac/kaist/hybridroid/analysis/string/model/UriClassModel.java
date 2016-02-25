@@ -1,10 +1,12 @@
 package kr.ac.kaist.hybridroid.analysis.string.model;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ssa.SSAInvokeInstruction;
+import com.ibm.wala.types.Selector;
 
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
@@ -12,13 +14,8 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.UriGetQueryParameterOpN
 import kr.ac.kaist.hybridroid.analysis.string.constraint.UriParseOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.SSAInvokeInstruction;
-
-public class UriClassModel implements IClassModel{
+public class UriClassModel  extends AbstractClassModel{
 	private static UriClassModel instance;
-	
-	private Map<String, IMethodModel> methodMap;
 	
 	public static UriClassModel getInstance(){
 		if(instance == null)
@@ -26,23 +23,32 @@ public class UriClassModel implements IClassModel{
 		return instance;
 	}
 	
-	private UriClassModel(){
-		methodMap = new HashMap<String, IMethodModel>();
-		init();
-	}
-	
-	private void init(){
-		methodMap.put("getQueryParameter", new GetQueryParameter());
-		methodMap.put("parse", new Parse());
+	protected void init(){
+		methodMap.put(Selector.make("toString()Ljava/lang/String;"), new ToString());
+//		methodMap.put("getQueryParameter", new GetQueryParameter());
+//		methodMap.put("parse", new Parse());
 		
 	}
-	
-	@Override
-	public IMethodModel getMethod(String methodName){
-		if(methodMap.containsKey(methodName))
-			return methodMap.get(methodName);
-		System.err.println("Unkwon 'Uri' method: " + methodName);
-		return null;
+		
+	//toString()Ljava/lang/String;
+	class ToString implements IMethodModel<Set<IBox>>{
+
+		@Override
+		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller, SSAInvokeInstruction invokeInst) {
+			// TODO Auto-generated method stub
+			Set<IBox> boxSet = new HashSet<IBox>();
+			int uriVar = invokeInst.getUse(0);
+			IBox uriBox = new VarBox(caller, invokeInst.iindex, uriVar);
+			if(graph.addEdge(new UriGetQueryParameterOpNode(), def, uriBox)){
+					boxSet.add(uriBox);
+			}
+			return boxSet;
+		}
+		
+		@Override
+		public String toString(){
+			return "Constraint Graph Method Model: Uri.toString()Ljava/lang/String;";
+		}
 	}
 	
 	class GetQueryParameter implements IMethodModel<Set<IBox>>{

@@ -64,7 +64,9 @@ import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.ssa.SymbolTable;
+import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.FieldReference;
+import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.CancelException;
@@ -99,14 +101,13 @@ import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 public class AndroidHybridCallGraphBuilder extends
 		JavaJavaScriptHybridCallGraphBuilder {
 
-	private static final Atom webviewClassName = Atom.findOrCreateAsciiAtom("WebView");
-	private static final Atom addInterfaceMethodName = Atom
-			.findOrCreateAsciiAtom("addJavascriptInterface");
-	private static final Atom interfAnnotationName = Atom
-			.findOrCreateAsciiAtom("JavascriptInterface");
-	private HybridAPIMisusesChecker typeChecker;
-	private AndroidStringAnalysis asa;
-	private Map<String, String> pathMap;
+	private final HybridAPIMisusesChecker typeChecker;
+	private final AndroidStringAnalysis asa;
+	private final Map<String, String> pathMap;
+	private final IClass wvClass;
+	private final IClass jsinterAnnClass;
+	private final Selector addjsSelector;
+
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
 			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, Map<String, String> pathMap) {
@@ -119,6 +120,13 @@ public class AndroidHybridCallGraphBuilder extends
 		this.asa = asa;
 		jsGlobalMap = new HashMap<Atom, GlobalObjectKey>();
 		globalInit(((AndroidHybridAnalysisScope)options.getAnalysisScope()).getJavaScriptNames());
+		
+		TypeReference wvTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/webkit/WebView");
+		TypeReference jsinterAnnTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/webkit/JavascriptInterface");
+		
+		wvClass = cha.lookupClass(wvTR);
+		jsinterAnnClass = cha.lookupClass(jsinterAnnTR);
+		addjsSelector = Selector.make("addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V");
 	}
 
 	private void globalInit(Set<Atom> files){
@@ -252,28 +260,49 @@ public class AndroidHybridCallGraphBuilder extends
 					constParams, uniqueCatchKey);
 		}
 	}
+	
+	/**
+	 * checking the method has '@JavascriptInterface' annotation. the annotation
+	 * shows that the method can be called at a JavaScript call site.
+	 * 
+	 * @param m
+	 *            target method
+	 * @return true if the method has '@JavascriptInterface' annotation, false
+	 *         otherwise.
+	 */
+	private boolean hasJavascriptInterfaceAnnotation(IMethod m) {
+		if(m.getAnnotations() != null)
+			for (Annotation ann : m.getAnnotations()) {
+				TypeReference annTr= ann.getType();
+				if (jsinterAnnClass.equals(cha.lookupClass(annTr)))
+					return true;
+			}
+		return false;
+	}
+	
 
 	public class HybridJavaConstraintVisitor extends ResourceVisitor {
+		
+		
 		public HybridJavaConstraintVisitor(
 				SSAPropagationCallGraphBuilder builder, CGNode node) {
 			super(builder, node);
-			// TODO Auto-generated constructor stub
 		}
-
+		
 		@Override
 		public void visitInvoke(SSAInvokeInstruction instruction) {
 			// TODO Auto-generated method stub
 			CGNode caller = node;
 			CallSiteReference site = instruction.getCallSite();
-			Atom classname = instruction.getDeclaredTarget()
-					.getDeclaringClass().getName().getClassName();
-			Atom methodname = instruction.getDeclaredTarget().getName();
 			PropagationSystem system = builder.getPropagationSystem();
-
+			IClass receiver = cha.lookupClass(instruction.getDeclaredTarget().getDeclaringClass());
+			Selector targetMethod = instruction.getDeclaredTarget().getSelector();
+			
 			// checking invoked method is 'addJavascriptInterface' of WebView
 			// class
-			if (classname.equals(webviewClassName)
-					&& methodname.equals(addInterfaceMethodName)) {
+			
+			if (wvClass.equals(receiver)
+					&& addjsSelector.equals(targetMethod)) {
 				IR ir = caller.getIR();
 				SSAAbstractInvokeInstruction[] invokes = ir.getCalls(site);
 				SymbolTable symTab = ir.getSymbolTable();
@@ -338,13 +367,11 @@ public class AndroidHybridCallGraphBuilder extends
 							
 							for (IMethod method : methods) {
 								if (hasJavascriptInterfaceAnnotation(method)) {
-//									System.err.println("\t#method: " + method);
 									wClass.addMethodAsField(method);
 									String mname = method.getName().toString();
 									IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
 									
 									PointerKey constantPK = builder.getPointerKeyForInstanceField(objKey, f);
-//									System.err.println("\t#CK: " + constantPK);
 									InstanceKey ik = makeMockupInstanceKey(method);
 									
 									system.findOrCreateIndexForInstanceKey(ik);
@@ -433,6 +460,21 @@ public class AndroidHybridCallGraphBuilder extends
 			}
 			super.visitInvoke(instruction);
 		}
+		
+		/**
+		 * making a mock-up instance key for the method which can be called from a
+		 * JavaScript call site.
+		 * 
+		 * @param method
+		 *            the target method used for making the mock-up instance.
+		 * @param obj
+		 *            the object instance key in which the method is declared.
+		 * @return
+		 * @throws CancelException
+		 */
+		private InstanceKey makeMockupInstanceKey(IMethod method) {
+			return new MockupInstanceKey(method);
+		}
 	}
 
 	@Override
@@ -472,41 +514,6 @@ public class AndroidHybridCallGraphBuilder extends
 		}
 		// Fail to find the object creation site in the method. 
 		return null;
-	}
-	
-	
-	/**
-	 * making a mock-up instance key for the method which can be called from a
-	 * JavaScript call site.
-	 * 
-	 * @param method
-	 *            the target method used for making the mock-up instance.
-	 * @param obj
-	 *            the object instance key in which the method is declared.
-	 * @return
-	 * @throws CancelException
-	 */
-	private InstanceKey makeMockupInstanceKey(IMethod method) {
-		return new MockupInstanceKey(method);
-	}
-
-	/**
-	 * checking the method has '@JavascriptInterface' annotation. the annotation
-	 * shows that the method can be called at a JavaScript call site.
-	 * 
-	 * @param m
-	 *            target method
-	 * @return true if the method has '@JavascriptInterface' annotation, false
-	 *         otherwise.
-	 */
-	private boolean hasJavascriptInterfaceAnnotation(IMethod m) {
-		if(m.getAnnotations() != null)
-			for (Annotation ann : m.getAnnotations()) {
-				Atom className = ann.getType().getName().getClassName();
-				if (className.equals(interfAnnotationName))
-					return true;
-			}
-		return false;
 	}
 		
 	private InterfaceClass wrappingClass(IClass objClass){

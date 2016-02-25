@@ -9,11 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.model.IMethodModel;
-import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
-import kr.ac.kaist.hybridroid.util.data.Pair;
-
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -35,20 +30,28 @@ import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.ssa.SSAUnaryOpInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.MethodReference;
+import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 
-public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
-	private CallGraph cg;
-	private FieldDefAnalysis fda;
-	private ConstraintGraph graph;
-	private Set<String> warnings;
+import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.model.IMethodModel;
+import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
+import kr.ac.kaist.hybridroid.util.data.Pair;
+
+final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
+	private final CallGraph cg;
+	private final FieldDefAnalysis fda;
+	private final ConstraintGraph graph;
+	private final Set<String> warnings;
+	private final IClassHierarchy cha;
 	private IConstraintMonitor monitor;
-	
+
 	private int iter = 0;
 	public ConstraintVisitor(CallGraph cg, FieldDefAnalysis fda, ConstraintGraph graph, IConstraintMonitor monitor){
 		this.cg = cg;
 		this.fda = fda;
 		this.graph = graph;
+		this.cha = cg.getClassHierarchy();
 		warnings = new HashSet<String>();
 		returnInstCache = new HashMap<CGNode, List<SSAReturnInstruction>>();
 		callInstCache = new HashMap<Pair<CGNode, CGNode>, List<SSAInvokeInstruction>>();
@@ -153,7 +156,9 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				SSAInvokeInstruction invokeInst = (SSAInvokeInstruction)defInst;
 				if(cg.getPossibleTargets(node, invokeInst.getCallSite()).size() != 0){
 					for (CGNode target : cg.getPossibleTargets(node, invokeInst.getCallSite())) {
-						IMethodModel<Set<IBox>> m = StringModel.getTargetMethod(target);
+						IClass tClass = target.getMethod().getDeclaringClass();
+						Selector tMethodSelector = target.getMethod().getSelector(); 
+						IMethodModel<Set<IBox>> m = StringModel.getTargetMethod(tClass, tMethodSelector);
 						//We use our modeling method rather than original method.
 //						System.out.println("\tT: " + target);
 						if(m != null){
@@ -173,15 +178,18 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				}else{ //If there is no target method, we use our modeling that is targeted to declaring target class and method.
 					//If the method is not declared in the class, we find the method in it super class.
 					//TODO: Does it make false edge for this invocation?
-					String mn = invokeInst.getDeclaredTarget().getName().toString();
+					Selector tMethodSelector = invokeInst.getDeclaredTarget().getSelector();
 					
 					IClassHierarchy cha = cg.getClassHierarchy();
 					TypeReference tr = invokeInst.getDeclaredTarget().getDeclaringClass();
 					IClass klass = cha.lookupClass(tr);
 					IMethodModel<Set<IBox>> m = null;
+					
+					System.err.println("\tTryTo: " + klass);
+					System.err.println("\tM: " + tMethodSelector);
 					while(klass != null){
-						String cn = klass.getName().getClassName().toString();
-						m = StringModel.getTargetMethod(cn, mn);
+						IClass tClass = klass;
+						m = StringModel.getTargetMethod(tClass, tMethodSelector);
 						if(m != null){
 							res.addAll(m.draw(graph, b, node, invokeInst));
 							break;
@@ -212,8 +220,8 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				}
 			}else if(defInst instanceof SSANewInstruction){
 				SSANewInstruction newInst = (SSANewInstruction) defInst;
-				String className = newInst.getConcreteType().getName().getClassName().toString();
-				if(!StringModel.isClassModeled(className)){
+				IClass nClass = cha.lookupClass(newInst.getConcreteType());
+				if(!StringModel.isClassModeled(nClass)){
 //					throw new InternalError("an object of not modeled class is created: " + defInst);
 					System.out.println("an object of not modeled class is created: " + defInst);
 					StringModel.setWarning("an object of not modeled class is created: " + defInst, true);
@@ -226,14 +234,15 @@ public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				}
 				
 				for(CGNode target : cg.getPossibleTargets(node, initCall.getCallSite())){
-					IMethodModel<Set<IBox>> m = StringModel.getTargetMethod(target);
+					IClass tClass = target.getMethod().getDeclaringClass();
+					Selector tMethodSelector = target.getMethod().getSelector();
+					IMethodModel<Set<IBox>> m = StringModel.getTargetMethod(tClass, tMethodSelector);
 					if(m != null){
 						res.addAll(m.draw(graph, b, node, initCall));
 					}
 				}
 			}else if(defInst instanceof SSAPhiInstruction){
 				SSAPhiInstruction phiInst = (SSAPhiInstruction) defInst;
-				System.out.println("PHI: " + phiInst);
 				IBox[] boxes = new IBox[phiInst.getNumberOfUses()];
 				for(int i=0; i<phiInst.getNumberOfUses(); i++){					
 					if(phiInst.getUse(i) < 0){

@@ -6,58 +6,34 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ssa.SSAInvokeInstruction;
+import com.ibm.wala.types.Selector;
+
 import kr.ac.kaist.hybridroid.analysis.string.constraint.AppendOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.SSAInvokeInstruction;
-
-public class StringBufferClassModel implements IClassModel{
+public class StringBufferClassModel extends AbstractClassModel{
 	private static StringBufferClassModel instance;
-	
-	private Map<String, IMethodModel> methodMap;
-	
+		
 	public static StringBufferClassModel getInstance(){
 		if(instance == null)
 			instance = new StringBufferClassModel();
 		return instance;
 	}
 	
-	private StringBufferClassModel(){
-		methodMap = new HashMap<String, IMethodModel>();
-		init();
+	protected void init(){
+		methodMap.put(Selector.make("toString()Ljava/lang/String;"), new ToString());
+//		methodMap.put("append", new Append());
 	}
-	
-	private void init(){
-		methodMap.put("toString", new ToString());
-		methodMap.put("append", new Append());
-	}
-	
-	@Override
-	public IMethodModel getMethod(String methodName){
-		if(methodMap.containsKey(methodName))
-			return methodMap.get(methodName);
-		System.err.println("Unkwon 'StringBuffer' method: " + methodName);
-		return null;
-	}
-	
+		
+	//toString()Ljava/lang/String;
 	class ToString implements IMethodModel<Set<IBox>>{
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 1:
-				return arg1(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown StringBuffer append: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg1(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int useVar = invokeInst.getUse(0);
@@ -69,7 +45,7 @@ public class StringBufferClassModel implements IClassModel{
 		
 		@Override
 		public String toString(){
-			return "Constraint Graph Method Model: StringBuffer.toString";
+			return "Constraint Graph Method Model: StringBuffer.toString()Ljava/lang/String;";
 		}
 	}
 	

@@ -728,7 +728,6 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
 
     private JavaScriptRootClass(IClassLoader loader, CAstSourcePositionMap.Position sourcePosition) {
       super(sourcePosition, JavaScriptTypes.Root.getName(), loader, (short) 0, emptyMap1, JavaScriptTypes.Root);
-
       types.put(JavaScriptTypes.Root.getName(), this);
     }
 

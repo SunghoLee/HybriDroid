@@ -418,6 +418,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 			System.err.println("TargetSpot: " + box);
 		}
 		
+		StringModel.init(cg.getClassHierarchy());
 		ConstraintGraph graph = new ConstraintGraph();
 //		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new InteractionConstraintMonitor(cg, InteractionConstraintMonitor.CLASSTYPE_ALL, InteractionConstraintMonitor.NODETYPE_NONE));
 		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, null);//new GraphicalDebugMornitor(initials));
@@ -428,7 +429,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		int iter = 1;
 		while(!worklist.isEmpty()){
 			IBox box = worklist.pop();
-			System.out.println("#Iter(" + (iter++) + ", size: " + worklist.size() + ") " + box);
+//			System.out.println("#Iter(" + (iter++) + ", size: " + worklist.size() + ") " + box);
 			Set<IBox> res = box.visit(v);
 			
 			for(IBox next : res)

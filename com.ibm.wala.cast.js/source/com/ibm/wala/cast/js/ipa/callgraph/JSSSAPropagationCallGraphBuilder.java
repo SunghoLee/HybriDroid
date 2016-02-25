@@ -209,6 +209,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
         JavaScriptTypes.Root);
     IField f = cha.resolveField(fieldRef);
     assert f != null : "couldn't resolve " + varName;
+    System.out.println("QWRQWRQWRQWR");
     return getPointerKeyForInstanceField(getGlobalObject(JavaScriptTypes.jsName), f);
   }
   @Override
@@ -502,7 +503,6 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
           system.newConstraint(def, assignOperator, p);
         }
       }
-
     }
 
     @Override
@@ -526,7 +526,6 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
       } else {
         system.newConstraint(p, assignOperator, rvalKey);
       }
-
     }
 
     @Override

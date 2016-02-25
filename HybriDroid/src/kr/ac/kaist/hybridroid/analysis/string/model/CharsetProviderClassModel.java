@@ -11,26 +11,26 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
+import kr.ac.kaist.hybridroid.analysis.string.model.ObjectClassModel.ToString1;
 
-public class ObjectClassModel extends AbstractClassModel{
-	private static ObjectClassModel instance;
+public class CharsetProviderClassModel extends AbstractClassModel {
+	private static CharsetProviderClassModel instance;
 	
-	public static ObjectClassModel getInstance(){
+	public static CharsetProviderClassModel getInstance(){
 		if(instance == null)
-			instance = new ObjectClassModel();
+			instance = new CharsetProviderClassModel();
 		return instance;
 	}
 	
 	protected void init(){
-		methodMap.put(Selector.make("toString(V)Ljava/lang/String;"), new ToString1());
+		methodMap.put(Selector.make("charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;"), new CharsetForName());
 		methodMap.put(Selector.make("toString()Ljava/lang/String;"), new ToString1());
 //		methodMap.put(Selector.make("charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;"), new ToString1());
 		//charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;
 	}
 		
-	//toString(V)Ljava/lang/String;
-	//toString()Ljava/lang/String;
-	class ToString1 implements IMethodModel<Set<IBox>>{
+	//charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;
+	class CharsetForName implements IMethodModel<Set<IBox>>{
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
@@ -49,4 +49,3 @@ public class ObjectClassModel extends AbstractClassModel{
 		}
 	}
 }
-
