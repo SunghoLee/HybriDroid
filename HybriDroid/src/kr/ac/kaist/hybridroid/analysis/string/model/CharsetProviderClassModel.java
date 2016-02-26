@@ -11,7 +11,6 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
-import kr.ac.kaist.hybridroid.analysis.string.model.ObjectClassModel.ToString1;
 
 public class CharsetProviderClassModel extends AbstractClassModel {
 	private static CharsetProviderClassModel instance;
@@ -24,7 +23,7 @@ public class CharsetProviderClassModel extends AbstractClassModel {
 	
 	protected void init(){
 		methodMap.put(Selector.make("charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;"), new CharsetForName());
-		methodMap.put(Selector.make("toString()Ljava/lang/String;"), new ToString1());
+//		methodMap.put(Selector.make("toString()Ljava/lang/String;"), new ToString1());
 //		methodMap.put(Selector.make("charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;"), new ToString1());
 		//charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;
 	}
@@ -45,7 +44,7 @@ public class CharsetProviderClassModel extends AbstractClassModel {
 		
 		@Override
 		public String toString(){
-			return "Constraint Graph Method Model: Object.toString";
+			return "Constraint Graph Method Model: CharsetProvider.charsetForName(Ljava/lang/String;)Ljava/nio/charset/Charset;";
 		}
 	}
 }

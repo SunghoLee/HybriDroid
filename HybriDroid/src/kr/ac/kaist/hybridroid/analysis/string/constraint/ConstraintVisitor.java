@@ -15,6 +15,7 @@ import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.shrikeBT.IUnaryOpInstruction.IOperator;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAArrayLoadInstruction;
@@ -197,16 +198,21 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 							klass = klass.getSuperclass();
 					}
 					if(m == null){
-						StringModel.setWarning("the method does not have a body: " + defInst, true);
+//						StringModel.setWarning("the method does not have a body: " + defInst, true);
 						ConstBox box = new ConstBox(node, "", ConstType.STRING_TOP);
 						if(graph.addEdge(new AssignOpNode(), b, box))
 							res.add(box);
 					}
 				}
 			}else if(defInst instanceof SSAUnaryOpInstruction){
-				System.out.println("Unary: " + defInst);
+				SSAUnaryOpInstruction uopInst = (SSAUnaryOpInstruction) defInst;
+				int use = uopInst.getUse(0);
+				IOperator op = uopInst.getOpcode();
+				IBox opBox = null;
+				
+//				System.out.println("Unary: " + defInst + " , " + op.getClass().getName());
 			}else if(defInst instanceof SSABinaryOpInstruction){
-				System.out.println("Binary: " + defInst);
+//				System.out.println("Binary: " + defInst);
 			}else if(defInst instanceof SSAGetInstruction){
 				SSAGetInstruction getInst = (SSAGetInstruction) defInst;
 				Set<Pair<CGNode, Set<SSAPutInstruction>>> defSet = fda.getFSFieldDefInstructions(cg, node, getInst);
@@ -223,8 +229,11 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				IClass nClass = cha.lookupClass(newInst.getConcreteType());
 				if(!StringModel.isClassModeled(nClass)){
 //					throw new InternalError("an object of not modeled class is created: " + defInst);
-					System.out.println("an object of not modeled class is created: " + defInst);
-					StringModel.setWarning("an object of not modeled class is created: " + defInst, true);
+//					System.out.println("an object of not modeled class is created: " + defInst);
+//					StringModel.setWarning("an object of not modeled class is created: " + defInst, true);
+					ConstBox box = new ConstBox(node, "", ConstType.STRING_TOP);
+					if(graph.addEdge(new AssignOpNode(), b, box))
+						res.add(box);
 					return res;
 				}
 				int defVar = newInst.getDef();
@@ -279,18 +288,12 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 					res.add(box);
 			}else{
 //				throw new InternalError("not defined instruction: " + defInst);
-				setWarning("not defined instruction: " + defInst, true);
+//				setWarning("not defined instruction: " + defInst, true);
+				ConstBox box = new ConstBox(node, "", ConstType.STRING_TOP);
+				if(graph.addEdge(new AssignOpNode(), b, box))
+					res.add(box);
 			}
 		}
-//		if(res.contains(null)){
-//			System.out.println("NULL?");
-//			try {
-//				System.in.read();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 		if(monitor != null)
 			monitor.monitor(iter, graph, b, res);
 		

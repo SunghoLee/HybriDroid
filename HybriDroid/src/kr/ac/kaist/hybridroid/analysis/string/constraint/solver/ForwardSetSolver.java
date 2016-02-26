@@ -35,6 +35,7 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.Bot
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.DoubleTopValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IntegerTopValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.model.AppendOpSetModel;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.model.AssignOpSetModel;
@@ -146,10 +147,14 @@ public class ForwardSetSolver implements IStringConstraintSolver<IConstraintNode
 				nVal = strMap.get(pred);
 			}else if(n instanceof VarBox){
 				Set<IConstraintNode> preds = graph.getPredecessors(n);
-				if(preds.size() != 1)
+				if(preds.size() == 0)
+					nVal = StringBotValue.getInstance();
+				else if(preds.size() != 1)
 					throw new InternalError("Incorrected Graph: Besides OperatorNode, all nodes must have only one predecessor: [" + nindex + "] " + n + ", PREDS: " + preds.size());
-				IConstraintNode pred = preds.iterator().next();
-				nVal = strMap.get(pred);
+				else{
+					IConstraintNode pred = preds.iterator().next();
+					nVal = strMap.get(pred);
+				}
 			}else
 				throw new InternalError("UnknownBox: IBox node must be ConstBox, ParamBox or VarBox: " + n.getClass().getName());
 		}else if(n instanceof IOperatorNode){
