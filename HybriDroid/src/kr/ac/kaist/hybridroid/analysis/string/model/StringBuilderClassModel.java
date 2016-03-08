@@ -1,6 +1,5 @@
 package kr.ac.kaist.hybridroid.analysis.string.model;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,8 +27,8 @@ public class StringBuilderClassModel extends AbstractClassModel{
 		
 	protected void init(){
 		methodMap.put(Selector.make("<init>()V"), new Init1());
+		methodMap.put(Selector.make("<init>(I)V"), new Init1());
 		methodMap.put(Selector.make("<init>(Ljava/lang/String;)V"), new Init2());
-		methodMap.put(Selector.make("<init>(I)V"), new Init2());
 		methodMap.put(Selector.make("toString()Ljava/lang/String;"), new ToString());
 		methodMap.put(Selector.make("append(Ljava/lang/String;)Ljava/lang/StringBuilder;"), new Append());
 		methodMap.put(Selector.make("append(Ljava/lang/Object;)Ljava/lang/StringBuilder;"), new Append());
@@ -82,6 +81,7 @@ public class StringBuilderClassModel extends AbstractClassModel{
 		}
 	}
 	
+	//<init>(I)V
 	//<init>()V
 	class Init1 implements IMethodModel<Set<IBox>>{
 		
@@ -89,7 +89,7 @@ public class StringBuilderClassModel extends AbstractClassModel{
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
-			IBox use = new ConstBox(caller, "\"\"", ConstType.STRING);
+			IBox use = new ConstBox(caller, "", ConstType.STRING);
 			if(graph.addEdge(new AssignOpNode(), def, use))
 					boxSet.add(use);
 			
@@ -102,7 +102,6 @@ public class StringBuilderClassModel extends AbstractClassModel{
 		}
 	}
 
-	//<init>(I)V
 	//<init>(Ljava/lang/String;)V
 	class Init2 implements IMethodModel<Set<IBox>>{
 		

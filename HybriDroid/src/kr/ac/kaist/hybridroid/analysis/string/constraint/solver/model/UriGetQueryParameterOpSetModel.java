@@ -7,29 +7,34 @@ import java.util.StringTokenizer;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.IDomain;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.BotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.TopValue;
 
-public class UriGetQueryParameterOpSetModel implements IOperationModel<IValue> {
+public class UriGetQueryParameterOpSetModel implements IOperationModel{
 
+	private static UriGetQueryParameterOpSetModel instance;
+	
+	public static UriGetQueryParameterOpSetModel getInstance(){
+		if(instance == null)
+			instance = new UriGetQueryParameterOpSetModel();
+		return instance;
+	}
 
 	@Override
 	public IValue apply(IValue... args) {
 		// TODO Auto-generated method stub
 		if(args.length != 2)
 			throw new InternalError("UriGetQueryParameter must have two in-edges.");
-		System.out.println("args[0]: " + args[0]);
-		System.out.println("args[1]: " + args[1]);
 		
 		IValue absUri = (IValue)args[0].clone();
 		IValue absKey = (IValue)args[1].clone();
 		
-		if(absUri instanceof StringTopValue)
+		if(absUri instanceof TopValue || absKey instanceof TopValue)
 			return StringTopValue.getInstance();
 		else if(absUri instanceof BotValue || absKey instanceof BotValue)
-			return BotValue.getInstance();
-		
-		System.out.println("fst: " + absUri);
-		System.out.println("snd: " + absKey);
+			return StringBotValue.getInstance();
+
 		//this part is domain specific!
 		IDomain domain = absUri.getDomain();
 		Set<String> uri = (Set<String>)domain.getOperator().gamma(absUri);

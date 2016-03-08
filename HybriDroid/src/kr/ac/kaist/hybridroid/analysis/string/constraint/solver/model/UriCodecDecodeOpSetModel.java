@@ -5,14 +5,29 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ibm.wala.util.debug.Assertions;
+
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.BooleanDomain.BooleanValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.IDomain;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.StringSetDomain.StringSetValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.BotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IBooleanValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IStringValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.TopValue;
 
-public class UriCodecDecodeOpSetModel implements IOperationModel<IValue> {
+public class UriCodecDecodeOpSetModel implements IOperationModel{
 
+	private static UriCodecDecodeOpSetModel instance;
+	
+	public static UriCodecDecodeOpSetModel getInstance(){
+		if(instance == null)
+			instance = new UriCodecDecodeOpSetModel();
+		return instance;
+	}
+	
 	@SuppressWarnings({ "unused", "unchecked" })
 	@Override
 	public IValue apply(IValue... args) {
@@ -20,14 +35,16 @@ public class UriCodecDecodeOpSetModel implements IOperationModel<IValue> {
 		if(args.length != 4)
 			throw new InternalError("UriCodecDecode method must have four in-edges.");
 		
-		IStringValue absStr = (IStringValue)args[0];
-		IBooleanValue absCv = (IBooleanValue)args[1];
-		IStringValue absCs = (IStringValue)args[2];
-		IBooleanValue absTof = (IBooleanValue)args[3];
+		IValue absStr = args[0];
+		IValue absCv = args[1];
+		IValue absCs = args[2];
+		IValue absTof = args[3];
 		
-		if(absStr instanceof StringTopValue || absCs instanceof StringTopValue)
+		if(absStr instanceof TopValue || absCs instanceof TopValue || absCv instanceof TopValue || absTof instanceof TopValue)
 			return StringTopValue.getInstance();
-		else{
+		else if(absStr instanceof BotValue || absCs instanceof BotValue || absCv instanceof BotValue || absTof instanceof BotValue)
+			return StringBotValue.getInstance();
+		else if(absStr instanceof StringSetValue || absCs instanceof StringSetValue || absCv instanceof BooleanValue || absTof instanceof BooleanValue){
 			// this part is domain specific!
 			IDomain strDomain = absStr.getDomain();
 			IDomain boolDomain = absCv.getDomain();
@@ -49,7 +66,12 @@ public class UriCodecDecodeOpSetModel implements IOperationModel<IValue> {
 				}
 			}
 			return strDomain.getOperator().alpha(res);
-		}
+		}else
+			if(CRASH)
+				Assertions.UNREACHABLE("incorrect args(arg1: " + absStr.getClass().getName() + ", arg2: " + absCv.getClass().getName() + ", arg3: " + absCs.getClass().getName() + ", arg4: " + absTof.getClass().getName() + ")");
+			else
+				return BotValue.getInstance();
+		return null;
 	}
 
 	private String decode(String s, boolean convertPlus, Charset charset,

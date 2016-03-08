@@ -78,6 +78,8 @@ import com.ibm.wala.util.intset.OrdinalSet;
 import com.ibm.wala.util.strings.Atom;
 
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo.BridgeDescription;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.Pointing;
 import kr.ac.kaist.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
@@ -107,7 +109,7 @@ public class AndroidHybridCallGraphBuilder extends
 	private final IClass wvClass;
 	private final IClass jsinterAnnClass;
 	private final Selector addjsSelector;
-
+	private final BridgeInfo bi;
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
 			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, Map<String, String> pathMap) {
@@ -127,6 +129,7 @@ public class AndroidHybridCallGraphBuilder extends
 		wvClass = cha.lookupClass(wvTR);
 		jsinterAnnClass = cha.lookupClass(jsinterAnnTR);
 		addjsSelector = Selector.make("addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V");
+		bi = asa.getBridgeInfo();
 	}
 
 	private void globalInit(Set<Atom> files){
@@ -315,35 +318,55 @@ public class AndroidHybridCallGraphBuilder extends
 
 						// to find the object creation site. only support intra,
 						// not inter-method.
-						SSAInstruction defInst = caller.getDU().getDef(objUse);
-
 						// only support constant name, not composition name.
 						if (symTab.isConstant(nameUse)) {
 							String name = (String) symTab
 									.getConstantValue(nameUse);
 							
-							NewSiteReference newSite = getLocalCreationSite(ir.getInstructions(), caller.getDU(), objUse);
+//							NewSiteReference newSite = getLocalCreationSite(ir.getInstructions(), caller.getDU(), objUse);
+//							
+//							if(newSite == null){
+//								try {
+//									throw new NotLocalCreationException(caller, invoke, objUse);
+//								} catch (NotLocalCreationException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//							}
 							
-							if(newSite == null){
-								try {
-									throw new NotLocalCreationException(caller, invoke, objUse);
-								} catch (NotLocalCreationException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+							Set<BridgeDescription> bdSet = bi.getDescriptionsOfBridge(node, objUse);
+								
+							if(bdSet.isEmpty()){
+								String err = "Cannot find the bridge object instance: \n";
+								err += "# caller: " + node;
+								err += "# instruction: " + invoke;
+								Assertions.UNREACHABLE(err);
 							}
 							
-							TypeReference tr = newSite.getDeclaredType();
+							ConcreteTypeKey[] objKeys = new ConcreteTypeKey[bdSet.size()];
 							
-							IClass objClass = cha.lookupClass(tr);
-							InterfaceClass wClass = wrappingClass(objClass);
-							cha.addClass(wClass);
+							int objIndex = 0;
+							for(BridgeDescription bd : bdSet){
+								TypeReference tr = bd.getTypeReference();
+								IClass objClass = cha.lookupClass(tr);
+								InterfaceClass wClass = wrappingClass(objClass);
+								cha.addClass(wClass);
+								
+								objKeys[objIndex] = new ConcreteTypeKey(wClass);
+								AndroidHybridAppModel.addJSInterface(name, objKeys[objIndex++]);
+							}
 							
-							Collection<IMethod> methods = wClass.getAllMethods();
-							
-							InstanceKey objKey = new AllocationSite(
-									caller.getMethod(), newSite, wClass);
-							AndroidHybridAppModel.addJSInterface(name, objKey);
+//							TypeReference tr = newSite.getDeclaredType();
+//							
+//							IClass objClass = cha.lookupClass(tr);
+//							InterfaceClass wClass = wrappingClass(objClass);
+//							cha.addClass(wClass);
+//							
+//							Collection<IMethod> methods = wClass.getAllMethods();
+//							
+//							InstanceKey objKey = new AllocationSite(
+//									caller.getMethod(), newSite, wClass);
+//							AndroidHybridAppModel.addJSInterface(name, objKey);
 							
 //							System.err.println("#InterfaceName: " + name);
 //							System.err.println("#InterfaceClass: "
@@ -361,25 +384,47 @@ public class AndroidHybridCallGraphBuilder extends
 									JavaScriptTypes.jsLoader, "LString");
 							IClass jsStringClass = cha.lookupClass(jsString);
 
-							AbstractFieldPointerKey typePK = ReflectedFieldPointerKey
-									.mapped(new ConcreteTypeKey(jsStringClass),
-											objKey);
-							
-							for (IMethod method : methods) {
-								if (hasJavascriptInterfaceAnnotation(method)) {
-									wClass.addMethodAsField(method);
-									String mname = method.getName().toString();
-									IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
-									
-									PointerKey constantPK = builder.getPointerKeyForInstanceField(objKey, f);
-									InstanceKey ik = makeMockupInstanceKey(method);
-									
-									system.findOrCreateIndexForInstanceKey(ik);
-									
-									system.newConstraint(constantPK, ik);
-									system.newConstraint(typePK, ik);
+							for(int i=0; i<objKeys.length; i++){
+								AbstractFieldPointerKey typePK = ReflectedFieldPointerKey
+										.mapped(new ConcreteTypeKey(jsStringClass),
+												objKeys[i]);
+								
+								InterfaceClass wClass = (InterfaceClass)objKeys[i].getConcreteType();
+										
+								Collection<IMethod> methods = wClass.getAllMethods();
+								
+								for (IMethod method : methods) {
+									if (hasJavascriptInterfaceAnnotation(method)) {
+										wClass.addMethodAsField(method);
+										String mname = method.getName().toString();
+										IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
+										
+										PointerKey constantPK = builder.getPointerKeyForInstanceField(objKeys[i], f);
+										InstanceKey ik = makeMockupInstanceKey(method);
+										
+										system.findOrCreateIndexForInstanceKey(ik);
+										
+										system.newConstraint(constantPK, ik);
+										system.newConstraint(typePK, ik);
+									}
 								}
 							}
+							
+//							for (IMethod method : methods) {
+//								if (hasJavascriptInterfaceAnnotation(method)) {
+//									wClass.addMethodAsField(method);
+//									String mname = method.getName().toString();
+//									IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
+//									
+//									PointerKey constantPK = builder.getPointerKeyForInstanceField(objKey, f);
+//									InstanceKey ik = makeMockupInstanceKey(method);
+//									
+//									system.findOrCreateIndexForInstanceKey(ik);
+//									
+//									system.newConstraint(constantPK, ik);
+//									system.newConstraint(typePK, ik);
+//								}
+//							}
 
 							
 							/*
@@ -388,24 +433,33 @@ public class AndroidHybridCallGraphBuilder extends
 							 * global objects are seperated by javascript file
 							 * name.
 							 */
+							
+							System.out.println("#INVOKE: " + instruction);
+							System.out.println("#NODE: " + node);
 							Set<HotspotDescriptor> descSet = asa.getAllDescriptors();
 							Set<GlobalObjectKey> globalObjs = new HashSet<GlobalObjectKey>();
-							
+							Set<String> htmls = null;
 							for(HotspotDescriptor desc : descSet){
 								if(desc.getReceiverAlias().contains(Pointing.make(node, instruction.getUse(0)))){
-									Set<String> htmls = desc.getValues();
+									htmls = desc.getValues();
 									if (!htmls.isEmpty()) {
 										for (String html : htmls) {
-											globalObjs.add(getGlobalObject(JavaScriptTypes.jsName, Atom.findOrCreateAsciiAtom(pathMap.get(html))));
+											if(pathMap.containsKey(html)){
+												globalObjs.add(getGlobalObject(JavaScriptTypes.jsName, Atom.findOrCreateAsciiAtom(pathMap.get(html))));
+												System.out.println("HtmlLoaded: " + html);
+											}
 										}
 									}else{
-										Assertions.UNREACHABLE("Loaded html is unknown.");
+										System.err.println("Loaded html is unknown.");
+										super.visitInvoke(instruction);
+										return;
 									}
 								}
 							}
 							
-							if(globalObjs.isEmpty())
-								Assertions.UNREACHABLE("Unknown WebView for the bridge object.");
+							if(globalObjs.isEmpty()){
+								System.out.println("Unknown html page: " + htmls);
+							}
 							/*
 							 * attach the Android Java interface object to
 							 * JavaScript global object. the attached object is
@@ -440,7 +494,8 @@ public class AndroidHybridCallGraphBuilder extends
 								PointerKey fieldPtr = builder
 										.getPointerKeyForInstanceField(globalObj, f);
 	
-								system.newConstraint(fieldPtr, objKey);							
+								for(int i=0; i<objKeys.length; i++)
+									system.newConstraint(fieldPtr, objKeys[i]);							
 							}
 						} else {
 							// TODO: Support non-constant string value

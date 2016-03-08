@@ -13,6 +13,23 @@ public class ConstBox implements IBox {
 		this.type = type;
 	}
 	
+	private ConstType getConstType(Object v){
+		if(v instanceof String)
+			return ConstType.STRING;
+		else if(v instanceof Boolean)
+			return ConstType.BOOL;
+		else if(v instanceof Integer)
+			return ConstType.INT;
+		else if(v instanceof Double)
+			return ConstType.DOUBLE;
+		else if(v instanceof Float)
+			return ConstType.DOUBLE;
+		else if(v instanceof Long)
+			return ConstType.LONG;
+		
+		return ConstType.UNKNOWN;
+	}
+	
 	@Override
 	public String toString(){
 		String str = "ConstBox[value: ";

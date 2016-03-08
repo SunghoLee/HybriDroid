@@ -220,11 +220,23 @@ public class ConstraintGraph implements Iterable<IConstraintNode>{
 			Set<IConstraintNode> ops = getFromNodes(node, new ConstraintFilter(){
 				@Override
 				public boolean filter(IConstraintNode n){
-					if(n instanceof AssignOpNode)
-						return true;
-					return false;
+//					if(n instanceof AssignOpNode)
+//						return true;
+//					return false;
+					return true;
 				}
 			});
+//			if(node.toString().contains("VarBox[11]  in Node: < Application, Lorg/a/c, a(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; >")){
+//				System.out.println("n: " + node);
+//				System.out.println("ops: " + getFromNodes(node, new ConstraintFilter(){
+//
+//					@Override
+//					public boolean filter(IConstraintNode n) {
+//						// TODO Auto-generated method stub
+//						return true;
+//					}
+//				}));
+//			}
 			if(ops.size() > 1){
 				Set<IConstraintNode> froms = new HashSet<IConstraintNode>();
 				for(IConstraintNode op : ops){

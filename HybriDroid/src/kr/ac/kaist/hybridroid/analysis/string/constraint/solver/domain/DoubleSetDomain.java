@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.BooleanDomain.BooleanValue;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.IntegerSetDomain.IntegerDomainOp;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.BotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.DoubleBotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.DoubleTopValue;
@@ -79,7 +78,7 @@ public final class DoubleSetDomain implements IDoubleDomain {
 		}
 	}
 	
-	static class DoubleSetValue implements IDoubleValue {
+	public static class DoubleSetValue implements IDoubleValue {
 		private Set<Double> values;
 		private DoubleSetDomain domain;
 		
@@ -107,14 +106,25 @@ public final class DoubleSetDomain implements IDoubleDomain {
 		@Override
 		public IValue weakUpdate(IValue v) {
 			// TODO Auto-generated method stub
-			if(v instanceof DoubleSetValue){
-				DoubleSetValue ssv = (DoubleSetValue) v;
-				values.addAll(ssv.values);
-				if(MAX_SET_SIZE < values.size())
-					return DoubleTopValue.getInstance();
+			if(v instanceof BotValue)
 				return this;
+			else if(v instanceof IDoubleValue){
+				if(v instanceof DoubleBotValue)
+					return this;
+				else if(v instanceof DoubleTopValue)
+					return v;
+				else{
+					DoubleSetValue ssv = (DoubleSetValue) v;
+					Set<Double> newValues = new HashSet<Double>();
+					newValues.addAll(values);
+					newValues.addAll(ssv.values);
+					
+					if(newValues.size() > MAX_SET_SIZE)
+						return DoubleTopValue.getInstance();
+					return new DoubleSetValue(newValues);
+				}
 			}else{
-				return DoubleTopValue.getInstance();
+				return TopValue.getInstance();
 			}
 		}
 
@@ -122,6 +132,27 @@ public final class DoubleSetDomain implements IDoubleDomain {
 		public IDomain getDomain() {
 			// TODO Auto-generated method stub
 			return domain;
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof DoubleSetValue){
+				DoubleSetValue d = (DoubleSetValue)o;
+				if(d.values.size() == this.values.size()){
+					for(Double dd : this.values){
+						if(!d.values.contains(dd)){
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode(){
+			return values.hashCode();
 		}
 	}
 

@@ -1,5 +1,7 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
+
 public class BinaryOpNode implements IOperatorNode {
 	public static enum BinaryOperator{
 		PLUS{
@@ -49,5 +51,11 @@ public class BinaryOpNode implements IOperatorNode {
 	@Override
 	public String toString(){
 		return o.toString();
+	}
+
+	@Override
+	public IValue apply(IValue... args) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

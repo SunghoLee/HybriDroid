@@ -1,5 +1,7 @@
 package kr.ac.kaist.hybridroid.analysis.string.constraint;
 
-public interface IOperatorNode extends IConstraintNode {
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
 
+public interface IOperatorNode extends IConstraintNode {
+	public IValue apply(IValue... args);
 }

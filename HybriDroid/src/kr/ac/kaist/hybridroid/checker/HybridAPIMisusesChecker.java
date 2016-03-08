@@ -174,6 +174,10 @@ public class HybridAPIMisusesChecker {
 	 * @return true if the type is safe, otherwise false.
 	 */
 	public boolean argTypeCheck(CGNode caller, SSAAbstractInvokeInstruction call, int argNum, IMethod target, TypeReference paramType, TypeReference argType){
+		if(!AndroidJavaJavaScriptTypeMap.isJs2JavaTypeCompatibleNoImplicitConversion(argType, paramType)){
+			addWarning(new ImplicitParamTypeWarning(caller, call, target, argNum, argType, paramType));
+		}
+		
 		if(!AndroidJavaJavaScriptTypeMap.isJs2JavaTypeCompatible(argType, paramType)){
 			addWarning(new ParamTypeWarning(caller, call, target, argNum, argType, paramType));
 			return false;
@@ -428,6 +432,27 @@ public class HybridAPIMisusesChecker {
 					return true;
 			}
 			return false;
+		}
+	}
+	
+	class ImplicitParamTypeWarning extends ParamTypeWarning{
+
+		public ImplicitParamTypeWarning(CGNode node, SSAAbstractInvokeInstruction inst, IMethod target, int argNum,
+				TypeReference argType, TypeReference paramType) {
+			super(node, inst, target, argNum, argType, paramType);
+			// TODO Auto-generated constructor stub
+		}
+		
+		@Override
+		public String toString(){
+			String msg = "*Warning* Implicit type conversion occured: ";
+			msg += "\n\t caller: " + getNode();
+			msg += "\n\t instruction: " + getCallInst();
+			msg += "\n\t target: " + getTarget();
+			msg += "\n\t #arg: " + getArgNum();
+			msg += "\n\t paramType: " + getParamType();
+			msg += "\n\t argType: " + getArgType();
+			return msg;
 		}
 	}
 	

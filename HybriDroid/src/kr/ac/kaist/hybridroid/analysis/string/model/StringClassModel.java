@@ -1,6 +1,5 @@
 package kr.ac.kaist.hybridroid.analysis.string.model;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,7 +13,10 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstType;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.IndexOfOpNode;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.LengthOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ReplaceOpNode;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.SubstringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ToStringOpNode;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.VarBox;
 
@@ -188,7 +190,7 @@ public class StringClassModel extends AbstractClassModel{
 			IBox beginBox = new VarBox(caller, invokeInst.iindex, beginVar);
 			IBox endBox = new VarBox(caller, invokeInst.iindex, endVar);
 			
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, beginBox, endBox)){
+			if(graph.addEdge(new SubstringOpNode(), def, strBox, beginBox, endBox)){
 				boxSet.add(strBox);
 				boxSet.add(beginBox);
 				boxSet.add(endBox);
@@ -215,7 +217,7 @@ public class StringClassModel extends AbstractClassModel{
 			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
 			IBox beginBox = new VarBox(caller, invokeInst.iindex, beginVar);
 
-			if (graph.addEdge(new ReplaceOpNode(), def, strBox, beginBox)) {
+			if (graph.addEdge(new SubstringOpNode(), def, strBox, beginBox)) {
 				boxSet.add(strBox);
 				boxSet.add(beginBox);
 			}
@@ -238,7 +240,7 @@ public class StringClassModel extends AbstractClassModel{
 			Set<IBox> boxSet = new HashSet<IBox>();
 			int strVar = invokeInst.getUse(0);
 			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox)){
+			if(graph.addEdge(new LengthOpNode(), def, strBox)){
 				boxSet.add(strBox);
 			}
 			
@@ -265,7 +267,7 @@ public class StringClassModel extends AbstractClassModel{
 			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
 			IBox charBox = new VarBox(caller, invokeInst.iindex, charVar);
 			IBox fromBox = new VarBox(caller, invokeInst.iindex, fromVar);
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, charBox, fromBox)){
+			if(graph.addEdge(new IndexOfOpNode(), def, strBox, charBox, fromBox)){
 				boxSet.add(strBox);
 				boxSet.add(charBox);
 				boxSet.add(fromBox);
@@ -279,65 +281,6 @@ public class StringClassModel extends AbstractClassModel{
 			return "Constraint Graph Method Model: String.indexOf(II)I";
 		}
 	}
-	
-	//?
-		class IndexOf2 implements IMethodModel<Set<IBox>>{
-
-			@Override
-			public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-					SSAInvokeInstruction invokeInst) {
-				switch(invokeInst.getNumberOfUses()){
-				case 2:
-					return arg2(graph, def, caller, invokeInst);
-				case 3:
-					return arg3(graph, def, caller, invokeInst);
-				default : 
-					StringModel.setWarning("Unknown String IndexOf: #arg is " + invokeInst.getNumberOfUses(), true);
-				}
-				return Collections.emptySet();
-			}
-			
-			private Set<IBox> arg2(ConstraintGraph graph, IBox def, CGNode caller,
-					SSAInvokeInstruction invokeInst) {
-				Set<IBox> boxSet = new HashSet<IBox>();
-				int strVar = invokeInst.getUse(0);
-				int charVar = invokeInst.getUse(1);
-				
-				IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-				IBox charBox = new VarBox(caller, invokeInst.iindex, charVar);
-				if(graph.addEdge(new ReplaceOpNode(), def, strBox, charBox)){
-					boxSet.add(strBox);
-					boxSet.add(charBox);
-				}
-				
-				return boxSet;
-			}
-			
-			
-			private Set<IBox> arg3(ConstraintGraph graph, IBox def, CGNode caller,
-					SSAInvokeInstruction invokeInst) {
-				Set<IBox> boxSet = new HashSet<IBox>();
-				int strVar = invokeInst.getUse(0);
-				int charVar = invokeInst.getUse(1);
-				int fromVar = invokeInst.getUse(2);
-				
-				IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-				IBox charBox = new VarBox(caller, invokeInst.iindex, charVar);
-				IBox fromBox = new VarBox(caller, invokeInst.iindex, fromVar);
-				if(graph.addEdge(new ReplaceOpNode(), def, strBox, charBox, fromBox)){
-					boxSet.add(strBox);
-					boxSet.add(charBox);
-					boxSet.add(fromBox);
-				}
-				
-				return boxSet;
-			}
-			
-			@Override
-			public String toString(){
-				return "Constraint Graph Method Model: String.indexOf";
-			}
-		}
 		
 	// toString()Ljava/lang/String;
 	class ToString implements IMethodModel<Set<IBox>> {
@@ -358,131 +301,6 @@ public class StringClassModel extends AbstractClassModel{
 		@Override
 		public String toString() {
 			return "Constraint Graph Method Model: String.toString()Ljava/lang/String;";
-		}
-	}
-	
-	class Format implements IMethodModel<Set<IBox>>{
-
-		@Override
-		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 3:
-				return arg3(graph, def, caller, invokeInst);
-			case 4:
-				return arg4(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String Format: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg4(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			Set<IBox> boxSet = new HashSet<IBox>();
-			int strVar = invokeInst.getUse(0);
-			int localeVar = invokeInst.getUse(1);
-			int formatVar = invokeInst.getUse(2);
-			int objArrVar = invokeInst.getUse(3);
-			
-			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			IBox localeBox = new VarBox(caller, invokeInst.iindex, localeVar);
-			IBox formatBox = new VarBox(caller, invokeInst.iindex, formatVar);
-			IBox objArrBox = new VarBox(caller, invokeInst.iindex, objArrVar);
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, localeBox, formatBox, objArrBox)){
-				boxSet.add(strBox);
-				boxSet.add(localeBox);
-				boxSet.add(formatBox);
-				boxSet.add(objArrBox);
-			}
-			
-			return boxSet;
-		}
-		
-		
-		private Set<IBox> arg3(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			Set<IBox> boxSet = new HashSet<IBox>();
-			int strVar = invokeInst.getUse(0);
-			int formatVar = invokeInst.getUse(1);
-			int objArrVar = invokeInst.getUse(2);
-			
-			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			IBox formatBox = new VarBox(caller, invokeInst.iindex, formatVar);
-			IBox objArrBox = new VarBox(caller, invokeInst.iindex, objArrVar);
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, formatBox, objArrBox)){
-				boxSet.add(strBox);
-				boxSet.add(formatBox);
-				boxSet.add(objArrBox);
-			}
-			
-			return boxSet;
-		}
-		
-		@Override
-		public String toString(){
-			return "Constraint Graph Method Model: String.format";
-		}
-	}
-	
-	class CopyValueOf implements IMethodModel<Set<IBox>>{
-
-		@Override
-		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			switch(invokeInst.getNumberOfUses()){
-			case 2:
-				return arg2(graph, def, caller, invokeInst);
-			case 4:
-				return arg4(graph, def, caller, invokeInst);
-			default : 
-				StringModel.setWarning("Unknown String Format: #arg is " + invokeInst.getNumberOfUses(), true);
-			}
-			return Collections.emptySet();
-		}
-		
-		private Set<IBox> arg4(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			Set<IBox> boxSet = new HashSet<IBox>();
-			int strVar = invokeInst.getUse(0);
-			int dataVar = invokeInst.getUse(1);
-			int offsetVar = invokeInst.getUse(2);
-			int countVar = invokeInst.getUse(3);
-			
-			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			IBox dataBox = new VarBox(caller, invokeInst.iindex, dataVar);
-			IBox offsetBox = new VarBox(caller, invokeInst.iindex, offsetVar);
-			IBox countBox = new VarBox(caller, invokeInst.iindex, countVar);
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, dataBox, offsetBox, countBox)){
-				boxSet.add(strBox);
-				boxSet.add(dataBox);
-				boxSet.add(offsetBox);
-				boxSet.add(countBox);
-			}
-			
-			return boxSet;
-		}
-		
-		
-		private Set<IBox> arg2(ConstraintGraph graph, IBox def, CGNode caller,
-				SSAInvokeInstruction invokeInst) {
-			Set<IBox> boxSet = new HashSet<IBox>();
-			int strVar = invokeInst.getUse(0);
-			int dataVar = invokeInst.getUse(1);
-			
-			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);
-			IBox dataBox = new VarBox(caller, invokeInst.iindex, dataVar);
-			if(graph.addEdge(new ReplaceOpNode(), def, strBox, dataBox)){
-				boxSet.add(strBox);
-				boxSet.add(dataBox);
-			}
-			
-			return boxSet;
-		}
-		
-		@Override
-		public String toString(){
-			return "Constraint Graph Method Model: String.format";
 		}
 	}
 }

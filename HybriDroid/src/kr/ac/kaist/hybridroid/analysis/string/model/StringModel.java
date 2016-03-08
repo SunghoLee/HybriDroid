@@ -73,8 +73,8 @@ public class StringModel {
 		IClassModel mClass = getModeledClass(tClass);
 		if(mClass != null){
 			IMethodModel mm= mClass.getMethod(tMethodSelector);
-			if(mm == null)
-				System.err.println("#class: " + tClass);
+//			if(mm == null)
+//				System.err.println("#class: " + tClass);
 			return mm;
 		}
 		return null;

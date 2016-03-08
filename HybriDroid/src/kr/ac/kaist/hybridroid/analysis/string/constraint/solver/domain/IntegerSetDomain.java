@@ -3,7 +3,7 @@ package kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.BooleanDomain.BooleanValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.DoubleSetDomain.DoubleSetValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.StringSetDomain.StringSetValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.BotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IIntegerValue;
@@ -42,7 +42,7 @@ public final class IntegerSetDomain implements IIntegerDomain {
 		return op();
 	}
 	
-	static class IntegerDomainOp implements IDomainOp<Integer, Set<Integer>>{
+	public static class IntegerDomainOp implements IDomainOp<Integer, Set<Integer>>{
 		private IntegerDomainOp(){}
 		
 		@Override
@@ -80,7 +80,7 @@ public final class IntegerSetDomain implements IIntegerDomain {
 		}
 	}
 	
-	static class IntegerSetValue implements IIntegerValue {
+	public static class IntegerSetValue implements IIntegerValue {
 		private Set<Integer> values;
 		private IDomain domain;
 		
@@ -108,15 +108,26 @@ public final class IntegerSetDomain implements IIntegerDomain {
 		@Override
 		public IValue weakUpdate(IValue v) {
 			// TODO Auto-generated method stub
-			if(v instanceof IntegerSetValue){
-				IntegerSetValue ssv = (IntegerSetValue) v;
-				values.addAll(ssv.values);
-				if(MAX_SET_SIZE < values.size())
-					return IntegerTopValue.getInstance();
+			if(v instanceof BotValue)
 				return this;
-			}else if(v instanceof StringSetValue){
-				// this case is only for 'null' value.
-				return v.weakUpdate(this);
+			else if(v instanceof IIntegerValue){
+				if(v instanceof IntegerBotValue)
+					return this;
+				else if(v instanceof IntegerTopValue)
+					return v;
+				else if(v instanceof StringSetValue){
+					//this is only for 'null' value.
+					return v.weakUpdate(this);
+				}else{
+					IntegerSetValue ssv = (IntegerSetValue) v;
+					Set<Integer> newValues = new HashSet<Integer>();
+					newValues.addAll(values);
+					newValues.addAll(ssv.values);
+					
+					if(MAX_SET_SIZE < newValues.size())
+						return IntegerTopValue.getInstance();
+					return new IntegerSetValue(newValues);
+				}
 			}else{
 				return TopValue.getInstance();
 			}
@@ -126,6 +137,27 @@ public final class IntegerSetDomain implements IIntegerDomain {
 		public IDomain getDomain() {
 			// TODO Auto-generated method stub
 			return domain;
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof IntegerSetValue){
+				IntegerSetValue d = (IntegerSetValue)o;
+				if(d.values.size() == this.values.size()){
+					for(Integer dd : this.values){
+						if(!d.values.contains(dd)){
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode(){
+			return values.hashCode();
 		}
 		
 		@Override

@@ -21,9 +21,11 @@ public class StringTopValue extends TopValue implements IStringValue {
 	@Override
 	public IValue weakUpdate(IValue v) {
 		// TODO Auto-generated method stub
-		if(v instanceof IStringValue){
+		if(v instanceof IStringValue)
 			return this;
-		}else
+		else if(v instanceof BotValue)
+			return this;
+		else
 			return TopValue.getInstance();
 	}
 	

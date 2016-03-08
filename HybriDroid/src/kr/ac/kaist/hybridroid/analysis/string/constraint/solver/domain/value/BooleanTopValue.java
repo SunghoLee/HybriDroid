@@ -21,6 +21,8 @@ public class BooleanTopValue extends TopValue implements IBooleanValue {
 		// TODO Auto-generated method stub
 		if(v instanceof IBooleanValue)
 			return this;
+		else if(v instanceof BotValue)
+			return this;
 		else
 			return TopValue.getInstance();
 	}

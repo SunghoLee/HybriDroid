@@ -26,10 +26,15 @@ import com.ibm.wala.util.collections.Pair;
 public class JSScriptMerger {
 	public JSScriptMerger(){}
 	
-	private File getHtmlFile(String htmlPath){
-		File html = new File(htmlPath);
-		if(!htmlPath.endsWith(".html") && !htmlPath.endsWith(".htm") || !html.exists() || !html.isFile())
+	private File getHtmlFile(String htmlPath) throws InternalError{
+		if(!htmlPath.endsWith(".html") && !htmlPath.endsWith(".htm"))
 			throw new InternalError("the file is not html file: " + htmlPath);
+		
+		File html = new File(htmlPath);
+		
+		if(!html.exists() || !html.isFile())
+			throw new InternalError("the html file does not exist: " + htmlPath);
+		
 		return html;
 	}
 	
@@ -51,11 +56,27 @@ public class JSScriptMerger {
 	 * @return a file object contains all javascript codes
 	 */
 	public Pair<String,File> merge(String dirPath, String htmlPath){
-		System.out.println("#HTML: " + htmlPath);		
+		if(!htmlPath.startsWith("file:///") || (!htmlPath.endsWith(".html") && !htmlPath.endsWith(".htm"))){
+			if(htmlPath.startsWith("javascript:")){
+				System.out.println("#JavaScript code: " + htmlPath);
+			}else{
+				System.out.println("#Not Local Html: " + htmlPath);
+			}
+			return null;
+		}
+
+		System.out.println("#HTML: " + htmlPath);
 		String path = dirPath + File.separator + htmlPath.replace("file:///", "").replace("android_asset", "assets");
 		System.out.println("\tpath: " + path);
 		
-		File html = getHtmlFile(path);
+		File html = null;
+		try
+		{
+			html = getHtmlFile(path);
+		}catch(InternalError e){
+			System.out.println(e.getMessage());
+			return null;
+		}
 		
 		String script = "";
 		
@@ -122,6 +143,8 @@ public class JSScriptMerger {
 				}else{
 					String txt = p.fst;
 					try {
+						if(txt.startsWith("./")) //remove current directory descriptor
+							txt = txt.substring(2);
 						BufferedReader br = new BufferedReader(new FileReader(new File(path + File.separator + txt)));
 						String s;
 						while((s = br.readLine()) != null){

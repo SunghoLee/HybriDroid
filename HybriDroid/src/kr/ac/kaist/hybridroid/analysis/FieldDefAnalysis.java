@@ -8,12 +8,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCFGVisualizer;
-import kr.ac.kaist.hybridroid.util.data.Pair;
-
 import com.ibm.wala.classLoader.CallSiteReference;
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
@@ -31,6 +27,9 @@ import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.util.intset.IntIterator;
 import com.ibm.wala.util.intset.OrdinalSet;
+
+import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCFGVisualizer;
+import kr.ac.kaist.hybridroid.util.data.Pair;
 
 /**
  * Analyze which fields are defined in which nodes. This analysis result can be
@@ -189,11 +188,14 @@ public class FieldDefAnalysis {
 						
 						PointerKey ownerPK = pa.getHeapModel().getPointerKeyForLocal(node, owner);
 						for(InstanceKey ownerIK : (OrdinalSet<InstanceKey>)pa.getPointsToSet(ownerPK)){
-							PointerKey pk = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, cha.resolveField(fr));
-							if(!localFieldToNodesTest.containsKey(pk))
-								localFieldToNodesTest.put(pk, new HashSet<Pair<CGNode, SSAPutInstruction>>());
-							localFieldToNodesTest.get(pk).add(Pair.make(node, putInst));
-							fields.add(pk);
+							IField f = cha.resolveField(fr);
+							if(f != null){
+								PointerKey pk = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, cha.resolveField(fr));
+								if(!localFieldToNodesTest.containsKey(pk))
+									localFieldToNodesTest.put(pk, new HashSet<Pair<CGNode, SSAPutInstruction>>());
+								localFieldToNodesTest.get(pk).add(Pair.make(node, putInst));
+								fields.add(pk);
+							}
 						}
 					}
 				}
@@ -253,8 +255,11 @@ public class FieldDefAnalysis {
 			
 			PointerKey ownerPK = pa.getHeapModel().getPointerKeyForLocal(node, owner);
 			for(InstanceKey ownerIK : (OrdinalSet<InstanceKey>)pa.getPointsToSet(ownerPK)){
-				PointerKey fieldPK = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, cha.resolveField(fr));
-				fieldKeys.add(fieldPK);
+				IField f = cha.resolveField(fr);
+				if(f != null){
+					PointerKey fieldPK = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, f);
+					fieldKeys.add(fieldPK);
+				}
 			} 
 		}
 		

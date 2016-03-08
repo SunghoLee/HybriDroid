@@ -3,8 +3,8 @@ package kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.BooleanDomain.BooleanValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.IntegerSetDomain.IntegerSetValue;
+import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.LongSetDomain.LongSetValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.BotValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IStringValue;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
@@ -106,20 +106,34 @@ public final class StringSetDomain implements IStringDomain {
 		@Override
 		public IValue weakUpdate(IValue v) {
 			// TODO Auto-generated method stub
-			if(v instanceof StringSetValue){
-				StringSetValue ssv = (StringSetValue) v;
-				values.addAll(ssv.values);
-				if(MAX_SET_SIZE < values.size())
-					return StringTopValue.getInstance();
+			if(v instanceof BotValue)
 				return this;
+			else if(v instanceof IStringValue){
+				if(v instanceof StringBotValue)
+					return this;
+				else if(v instanceof StringTopValue)
+					return v;
+				else{
+					StringSetValue ssv = (StringSetValue) v;
+					Set<String> newValues = new HashSet<String>();
+					newValues.addAll(values);
+					newValues.addAll(ssv.values);
+					if(MAX_SET_SIZE < newValues.size())
+						return StringTopValue.getInstance();
+					return new StringSetValue(newValues);
+				}
 			}else if(v instanceof IntegerSetValue){
 				// this case is only for 'null'.
 				IntegerSetValue isv = (IntegerSetValue) v;
 				Set<Integer> ints = (Set<Integer>) isv.getDomain().getOperator().gamma(isv);
 				if(ints.size() == 1 && ints.iterator().next() == 0){
 					// we handle with the null value as 'null' string value.
-					values.add("null");
-					return this;
+					Set<String> newValues = new HashSet<String>();
+					newValues.addAll(values);
+					newValues.add("null");
+					if(MAX_SET_SIZE < newValues.size())
+						return StringTopValue.getInstance();
+					return new StringSetValue(newValues);
 				}else
 					return TopValue.getInstance();
 			}else{
@@ -131,6 +145,27 @@ public final class StringSetDomain implements IStringDomain {
 		public IDomain getDomain() {
 			// TODO Auto-generated method stub
 			return domain;
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof StringSetValue){
+				StringSetValue d = (StringSetValue)o;
+				if(d.values.size() == this.values.size()){
+					for(String dd : this.values){
+						if(!d.values.contains(dd)){
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode(){
+			return values.hashCode();
 		}
 		
 		@Override

@@ -1,0 +1,38 @@
+var t = functino foo1(){
+this.a;
+}
+
+var d = {}
+
+t.bind(b, c, d);
+
+
+
+=====
+function foo1(a, d){
+	 for(qwrqwr)
+	 	 arguemtns[3] = arguments[2];
+	 arguments[1] = arguments.callee.arg1;
+	 arguments[2] = arguments.callee.arg2;
+
+	  
+	 arguments.callee.this.a;
+	 
+}
+
+function foo1_bind(a, d){
+	 for(qwrqwr)
+	 	 arguemtns[3] = arguments[2];
+	 arguments[1] = arguments.callee.arg1;
+	 arguments[2] = arguments.callee.arg2;
+
+	  
+	 arguments.callee.this.a;
+	 
+}
+
+
+foo1.this = b;
+foo1.arg1 = c;
+foo1.arg2 = d;
+

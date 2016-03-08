@@ -22,6 +22,8 @@ public class IntegerTopValue extends TopValue implements IIntegerValue {
 		// TODO Auto-generated method stub
 		if(v instanceof IIntegerValue)
 			return this;
+		else if(v instanceof BotValue)
+			return this;
 		else
 			return TopValue.getInstance();
 	}

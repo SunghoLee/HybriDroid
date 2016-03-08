@@ -33,6 +33,7 @@ import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.debug.Assertions;
 
 import kr.ac.kaist.hybridroid.analysis.FieldDefAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.model.IMethodModel;
@@ -138,7 +139,7 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 		Object constant = null;
 		
 		if(graph.isDrawed(b)){
-			System.out.println("[SKIPPED] " + b);
+//			System.out.println("[SKIPPED] " + b);
 			return res;
 		}
 		
@@ -186,8 +187,8 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 					IClass klass = cha.lookupClass(tr);
 					IMethodModel<Set<IBox>> m = null;
 					
-					System.err.println("\tTryTo: " + klass);
-					System.err.println("\tM: " + tMethodSelector);
+//					System.err.println("\tTryTo: " + klass);
+//					System.err.println("\tM: " + tMethodSelector);
 					while(klass != null){
 						IClass tClass = klass;
 						m = StringModel.getTargetMethod(tClass, tMethodSelector);
@@ -199,30 +200,55 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 					}
 					if(m == null){
 //						StringModel.setWarning("the method does not have a body: " + defInst, true);
-						ConstBox box = new ConstBox(node, "", ConstType.STRING_TOP);
+						ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
 						if(graph.addEdge(new AssignOpNode(), b, box))
 							res.add(box);
 					}
 				}
+				
+				if(res.size() == 0){
+					ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
+					if(graph.addEdge(new AssignOpNode(), b, box))
+						res.add(box);
+				}
 			}else if(defInst instanceof SSAUnaryOpInstruction){
+				//TODO: Concretize!
 				SSAUnaryOpInstruction uopInst = (SSAUnaryOpInstruction) defInst;
 				int use = uopInst.getUse(0);
 				IOperator op = uopInst.getOpcode();
 				IBox opBox = null;
 				
+				ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
+				if(graph.addEdge(new AssignOpNode(), b, box))
+					res.add(box);
 //				System.out.println("Unary: " + defInst + " , " + op.getClass().getName());
 			}else if(defInst instanceof SSABinaryOpInstruction){
+				//TODO: Concretize!
 //				System.out.println("Binary: " + defInst);
+				ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
+				if(graph.addEdge(new AssignOpNode(), b, box))
+					res.add(box);
+				
 			}else if(defInst instanceof SSAGetInstruction){
 				SSAGetInstruction getInst = (SSAGetInstruction) defInst;
 				Set<Pair<CGNode, Set<SSAPutInstruction>>> defSet = fda.getFSFieldDefInstructions(cg, node, getInst);
+				boolean assigned = false;
 				for(Pair<CGNode, Set<SSAPutInstruction>> p : defSet){
 					CGNode defNode = p.fst();
 					for(SSAPutInstruction defPutInst : p.snd()){
 						VarBox putBox = new VarBox(defNode, defPutInst.iindex, defPutInst.getUse(1));
-						if(graph.addEdge(new AssignOpNode(), b, putBox))
+						if(graph.addEdge(new AssignOpNode(), b, putBox)){
 							res.add(putBox);
+							assigned = true;
+						}
 					}					
+				}
+				
+				//if the field analysis does not contain the target field, just string bot is returned.
+				if(!assigned){
+					ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
+					if(graph.addEdge(new AssignOpNode(), b, box))
+						res.add(box);
 				}
 			}else if(defInst instanceof SSANewInstruction){
 				SSANewInstruction newInst = (SSANewInstruction) defInst;
@@ -238,17 +264,24 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				}
 				int defVar = newInst.getDef();
 				SSAInvokeInstruction initCall = getInitInst(node, defVar);
-				if(initCall == null){
-					return res;
-				}
 				
-				for(CGNode target : cg.getPossibleTargets(node, initCall.getCallSite())){
-					IClass tClass = target.getMethod().getDeclaringClass();
-					Selector tMethodSelector = target.getMethod().getSelector();
-					IMethodModel<Set<IBox>> m = StringModel.getTargetMethod(tClass, tMethodSelector);
-					if(m != null){
-						res.addAll(m.draw(graph, b, node, initCall));
+				if(initCall != null){
+					for(CGNode target : cg.getPossibleTargets(node, initCall.getCallSite())){
+						IClass tClass = target.getMethod().getDeclaringClass();
+						Selector tMethodSelector = target.getMethod().getSelector();
+						IMethodModel<Set<IBox>> m = StringModel.getTargetMethod(tClass, tMethodSelector);
+						if(m != null){
+							res.addAll(m.draw(graph, b, node, initCall));
+						}else{ //if the new class is not modeled, just string bot is returned.
+							ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
+							if(graph.addEdge(new AssignOpNode(), b, box))
+								res.add(box);
+						}
 					}
+				}else{ //if the created object does not be know, just string bot is returned.
+					ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
+					if(graph.addEdge(new AssignOpNode(), b, box))
+						res.add(box);
 				}
 			}else if(defInst instanceof SSAPhiInstruction){
 				SSAPhiInstruction phiInst = (SSAPhiInstruction) defInst;
@@ -275,7 +308,7 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 				SSAArrayLoadInstruction loadInst = (SSAArrayLoadInstruction) defInst;
 				ConstBox box = null;
 				
-				System.out.println("load: " + loadInst.getElementType().getName().getClassName().toString());
+//				System.out.println("load: " + loadInst.getElementType().getName().getClassName().toString());
 				switch(loadInst.getElementType().getName().getClassName().toString()){
 				case "String":
 					box = new ConstBox(node, "", ConstType.STRING_TOP);
@@ -289,7 +322,7 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 			}else{
 //				throw new InternalError("not defined instruction: " + defInst);
 //				setWarning("not defined instruction: " + defInst, true);
-				ConstBox box = new ConstBox(node, "", ConstType.STRING_TOP);
+				ConstBox box = new ConstBox(node, "", ConstType.STRING_BOT);
 				if(graph.addEdge(new AssignOpNode(), b, box))
 					res.add(box);
 			}
@@ -297,6 +330,9 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 		if(monitor != null)
 			monitor.monitor(iter, graph, b, res);
 		
+		if(res.size() == 0){
+			Assertions.UNREACHABLE("res must contains one or more boxes: " + node.getDU().getDef(var));
+		}
 		return res;
 	}
 
@@ -327,8 +363,9 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 	public Set<IBox> visit(ConstBox b) {
 		// TODO Auto-generated method stub
 		iter();
-		if(monitor != null)
-			monitor.monitor(iter, graph, b, Collections.emptySet());
+		if(monitor != null){
+			monitor.monitor(iter, graph, b, new HashSet<IBox>());
+		}
 		
 		return Collections.emptySet();
 	}
@@ -364,6 +401,10 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 			return ConstType.INT;
 		else if(v instanceof Double)
 			return ConstType.DOUBLE;
+		else if(v instanceof Float)
+			return ConstType.DOUBLE;
+		else if(v instanceof Long)
+			return ConstType.LONG;
 		
 		setWarning("Unknown type: " + v + "(" + v.getClass().getName() + ")", true);
 		return ConstType.UNKNOWN;

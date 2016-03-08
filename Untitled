@@ -1,0 +1,761 @@
+bash-3.2$ cd ~/Documents/plrg/
+bash-3.2$ lks
+bash: lks: command not found
+bash-3.2$ ls
+project
+bash-3.2$ cd por
+bash: cd: por: No such file or directory
+bash-3.2$ ls
+project
+bash-3.2$ cd project/
+bash-3.2$ ls
+hybridroid
+bash-3.2$ cd tmp/
+bash-3.2$ ls
+tmp.tex
+bash-3.2$ pdflatex tmp
+bash: pdflatex: command not found
+bash-3.2$ cd ~/Documents/plrg/
+bash-3.2$ ls
+project
+bash-3.2$ cd project/
+bash-3.2$ ls
+hybridroid	tmp
+bash-3.2$ git clone https://github.com/SunghoLee/WALA.git
+
+
+Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.
+
+
+bash-3.2$ git clone https://github.com/SunghoLee/WALA.git
+Cloning into 'WALA'...
+remote: Counting objects: 75394, done.        
+remote: Total 75394 (delta 0), reused 0 (delta 0), pack-reused 75394        
+Receiving objects: 100% (75394/75394), 205.79 MiB | 2.89 MiB/s, done.
+Resolving deltas: 100% (44067/44067), done.
+Checking connectivity... done.
+Checking out files: 100% (2539/2539), done.
+bash-3.2$ ls
+WALA		hybridroid	tmp
+bash-3.2$ cd cd WALA/
+bash: cd: cd: No such file or directory
+bash-3.2$ ls
+WALA		hybridroid	tmp
+bash-3.2$ cd WALA/
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ ls -al
+total 40
+drwxr-xr-x  45 leesh  staff  1530 Jan 29 13:31 .
+drwxr-xr-x   6 leesh  staff   204 Jan 29 13:30 ..
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 .git
+-rwxr-xr-x   1 leesh  staff  1174 Jan 29 13:31 .gitignore
+-rwxr-xr-x   1 leesh  staff   651 Jan 29 13:31 .travis.yml
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 HybriDroid
+drwxr-xr-x   8 leesh  staff   272 Jan 29 13:31 HybriDroid.util
+-rwxr-xr-x   1 leesh  staff     1 Jan 29 13:31 README.md
+drwxr-xr-x  17 leesh  staff   578 Jan 29 13:31 apps
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala-feature
+drwxr-xr-x   4 leesh  staff   136 Jan 29 13:31 com.ibm.wala-repository
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 com.ibm.wala.cast
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.cast.java
+drwxr-xr-x   3 leesh  staff   102 Jan 29 13:31 com.ibm.wala.cast.java.jdt.test
+drwxr-xr-x  10 leesh  staff   340 Jan 29 13:31 com.ibm.wala.cast.java.polyglot
+drwxr-xr-x  10 leesh  staff   340 Jan 29 13:31 com.ibm.wala.cast.java.polyglot.test
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.cast.java.test
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.cast.java.test.data
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 com.ibm.wala.cast.js
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.cast.js.html.nu_validator
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.cast.js.rhino
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.cast.js.rhino.test
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 com.ibm.wala.cast.js.test
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.cast.js.test.data
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.cast.test
+drwxr-xr-x  16 leesh  staff   544 Jan 29 13:31 com.ibm.wala.core
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.core.testdata
+drwxr-xr-x  17 leesh  staff   578 Jan 29 13:31 com.ibm.wala.core.tests
+drwxr-xr-x  16 leesh  staff   544 Jan 29 13:31 com.ibm.wala.dalvik
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.dalvik.test
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.ide
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala.ide-feature
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.ide.jdt
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.ide.jdt.test
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.ide.jsdt
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.ide.jsdt.tests
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.ide.tests
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.scandroid
+drwxr-xr-x  16 leesh  staff   544 Jan 29 13:31 com.ibm.wala.shrike
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala.tests-feature
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala.tests.ide-feature
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.util
+drwxr-xr-x   3 leesh  staff   102 Jan 29 13:31 data
+-rwxr-xr-x   1 leesh  staff  7811 Jan 29 13:31 pom.xml
+drwxr-xr-x   5 leesh  staff   170 Jan 29 13:31 targets
+bash-3.2$ ls -al
+total 40
+drwxr-xr-x  45 leesh  staff  1530 Jan 29 13:31 .
+drwxr-xr-x   6 leesh  staff   204 Jan 29 13:30 ..
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 .git
+-rwxr-xr-x   1 leesh  staff  1174 Jan 29 13:31 .gitignore
+-rwxr-xr-x   1 leesh  staff   651 Jan 29 13:31 .travis.yml
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 HybriDroid
+drwxr-xr-x   8 leesh  staff   272 Jan 29 13:31 HybriDroid.util
+-rwxr-xr-x   1 leesh  staff     1 Jan 29 13:31 README.md
+drwxr-xr-x  17 leesh  staff   578 Jan 29 13:31 apps
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala-feature
+drwxr-xr-x   4 leesh  staff   136 Jan 29 13:31 com.ibm.wala-repository
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 com.ibm.wala.cast
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.cast.java
+drwxr-xr-x   3 leesh  staff   102 Jan 29 13:31 com.ibm.wala.cast.java.jdt.test
+drwxr-xr-x  10 leesh  staff   340 Jan 29 13:31 com.ibm.wala.cast.java.polyglot
+drwxr-xr-x  10 leesh  staff   340 Jan 29 13:31 com.ibm.wala.cast.java.polyglot.test
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.cast.java.test
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.cast.java.test.data
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 com.ibm.wala.cast.js
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.cast.js.html.nu_validator
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.cast.js.rhino
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.cast.js.rhino.test
+drwxr-xr-x  14 leesh  staff   476 Jan 29 13:31 com.ibm.wala.cast.js.test
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.cast.js.test.data
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.cast.test
+drwxr-xr-x  16 leesh  staff   544 Jan 29 13:31 com.ibm.wala.core
+drwxr-xr-x  13 leesh  staff   442 Jan 29 13:31 com.ibm.wala.core.testdata
+drwxr-xr-x  17 leesh  staff   578 Jan 29 13:31 com.ibm.wala.core.tests
+drwxr-xr-x  16 leesh  staff   544 Jan 29 13:31 com.ibm.wala.dalvik
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.dalvik.test
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.ide
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala.ide-feature
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.ide.jdt
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.ide.jdt.test
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.ide.jsdt
+drwxr-xr-x  11 leesh  staff   374 Jan 29 13:31 com.ibm.wala.ide.jsdt.tests
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.ide.tests
+drwxr-xr-x   9 leesh  staff   306 Jan 29 13:31 com.ibm.wala.scandroid
+drwxr-xr-x  16 leesh  staff   544 Jan 29 13:31 com.ibm.wala.shrike
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala.tests-feature
+drwxr-xr-x   7 leesh  staff   238 Jan 29 13:31 com.ibm.wala.tests.ide-feature
+drwxr-xr-x  12 leesh  staff   408 Jan 29 13:31 com.ibm.wala.util
+drwxr-xr-x   3 leesh  staff   102 Jan 29 13:31 data
+-rwxr-xr-x   1 leesh  staff  7811 Jan 29 13:31 pom.xml
+drwxr-xr-x   5 leesh  staff   170 Jan 29 13:31 targets
+bash-3.2$ cp -r .git ../hybridroid/
+bash-3.2$ cp .gitignore ../hybridroid/
+bash-3.2$ cd ..
+bash-3.2$ l;s
+bash: l: command not found
+bash: s: command not found
+bash-3.2$ ls
+WALA		hybridroid	tmp
+bash-3.2$ cd hybridroid/
+bash-3.2$ ls
+WALA
+bash-3.2$ mv .git .gitignore ./WALA/
+bash-3.2$ cd WALA/
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ git add *
+The following paths are ignored by one of your .gitignore files:
+com.ibm.wala.cast.java.jdt.test
+Use -f if you really want to add them.
+bash-3.2$ git commit -m "Implemented String Analyzer and JavaScript Merger"
+[master 2119570] Implemented String Analyzer and JavaScript Merger
+ Committer: LeeSungho <leesh@LeeSunghoui-iMac.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 72 files changed, 3750 insertions(+), 125 deletions(-)
+ rename HybriDroid.util/src/kr/ac/kaist/hybridroid/util/graph/{visuailize => visualize}/TestVisGS.java (90%)
+ rename HybriDroid.util/src/kr/ac/kaist/hybridroid/util/graph/{visuailize => visualize}/Visualizer.java (98%)
+ rename HybriDroid.util/src/kr/ac/kaist/hybridroid/util/graph/{visuailize => visualize}/VisualizerGS.java (91%)
+ create mode 100644 HybriDroid/label.txt
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/IOperatorNode.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/ToStringOpNode.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/UriCodecDecodeOpNode.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/ForwardSetSolver.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/IStringConstraintSolver.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/InteractiveSolverMonitor.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/BooleanDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/DoubleSetDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/IBooleanDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/IDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/IDomainOp.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/IDoubleDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/IIntegerDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/IStringDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/IntegerSetDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/StringSetDomain.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/BooleanBotValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/BooleanTopValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/BotValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/DoubleBotValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/DoubleTopValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/IBooleanValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/IDoubleValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/IIntegerValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/IStringValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/IValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/IntegerBotValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/IntegerTopValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/StringBotValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/StringTopValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/domain/value/TopValue.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/AppendOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/AssignOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/IOperationModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/ISolverMonitor.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/JoinOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/ReplaceOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/ToStringOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/UriCodecDecodeOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/UriGetQueryParameterOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/solver/model/UriParseOpSetModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/callgraph/graphutils/ConstraintGraphVisualizerGS.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/js/loader/MultipleJavaScriptLoader.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/js/merger/JSScriptMerger.java
+bash-3.2$ git push 
+warning: push.default is unset; its implicit value has changed in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the traditional behavior, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+When push.default is set to 'matching', git will push local branches
+to the remote branches that already exist with the same name.
+
+Since Git 2.0, Git defaults to the more conservative 'simple'
+behavior, which only pushes the current branch to the corresponding
+remote branch that 'git pull' uses to update the current branch.
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Username for 'https://github.com': sungholee
+Password for 'https://sungholee@github.com': nk159357
+
+Counting objects: 105, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (94/94), done.
+Writing objects: 100% (105/105), 114.93 KiB | 0 bytes/s, done.
+Total 105 (delta 60), reused 0 (delta 0)
+To https://github.com/SunghoLee/WALA.git
+   3823242..2119570  master -> master
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd ..
+bash-3.2$ ls
+WALA
+bash-3.2$ cd ..
+bash-3.2$ ls
+WALA		hybridroid	tmp
+bash-3.2$ rm -r WALA
+override r--r--r--  leesh/staff for WALA/.git/objects/pack/pack-13d154a1703f6247c69a20ae44ef9087f30fbbc8.idx? y
+override r--r--r--  leesh/staff for WALA/.git/objects/pack/pack-13d154a1703f6247c69a20ae44ef9087f30fbbc8.pack? y
+y
+bash-3.2$ bash: y: command not found
+bash-3.2$ y
+bash: y: command not found
+bash-3.2$ y
+bash: y: command not found
+bash-3.2$ y
+bash: y: command not found
+bash-3.2$ls
+hybridroid	tmp
+bash-3.2$ cd hybridroid/
+bash-3.2$ ls
+WALA
+bash-3.2$ cd WALA/
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd apps
+bash-3.2$ ls
+AndroidManifest.xml			HelloCordova.apk			HelloScript.apk				HelloScript_simple.apk			HelloScript_test-2.apk			NormalAliasFlowTest.apk			NormalAliasFlowTest_objfield_false.apk	resources.arsc
+HelloCordova-dex2jar.jar		HelloHybrid.apk				HelloScript22.apk			HelloScript_simple.jar			HybridAPIArgNum.apk			NormalAliasFlowTest_objfield1.apk	classes.dex
+bash-3.2$ cd ..
+ls
+bash-3.2$ HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd ..
+bash-3.2$ ls
+WALA
+bash-3.2$ cd ..
+bash-3.2$ ls
+hybridroid	tmp
+bash-3.2$ cd ..
+bash-3.2$ ls
+project
+bash-3.2$ cd project/
+bash-3.2$ ls
+hybridroid	tmp
+bash-3.2$ cd ..
+bash-3.2$ ls
+project
+bash-3.2$ mkdir and_apps
+bash-3.2$ cd and_apps/
+bash-3.2$ mv ~/Desktop/MultiWebviewTest.apk ./
+bash-3.2$ ls
+MultiWebviewTest.apk
+bash-3.2$ cd ..
+bash-3.2$ cd and_apps/
+bash-3.2$ pwd
+/Users/leesh/Documents/plrg/and_apps
+bash-3.2$ ls
+MultiWebviewTest.apk
+bash-3.2$ cd ..
+bash-3.2$ ls
+and_apps	project
+bash-3.2$ cd project/
+bash-3.2$ ls
+hybridroid	tmp
+bash-3.2$ cd hybridroid/
+bash-3.2$ lks
+bash: lks: command not found
+bash-3.2$lsc
+bash: lsc: command not found
+bash-3.2$ ls
+WALA
+bash-3.2$ cd WALA/
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd HybriDroid
+bash-3.2$ ls
+WebappTest.apk	cfg		const0.dot	const11.dot	const14.dot	const3.dot	const6.dot	const9.dot	const_op1.dot	const_op12.dot	const_op15.dot	const_op4.dot	const_op7.dot	dat		src
+bin		cfg_test.dot	const1.dot	const12.dot	const15.dot	const4.dot	const7.dot	const_op.dot	const_op10.dot	const_op13.dot	const_op2.dot	const_op5.dot	const_op8.dot	label.txt	tmp
+build.xml	const.svg	const10.dot	const13.dot	const2.dot	const5.dot	const8.dot	const_op0.dot	const_op11.dot	const_op14.dot	const_op3.dot	const_op6.dot	const_op9.dot	libs		wala.properties
+bash-3.2$ pwd
+/Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid
+bash-3.2$ cd ..
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd data
+bash-3.2$ ls
+android.jar
+bash-3.2$ pwd
+/Users/leesh/Documents/plrg/project/hybridroid/WALA/data
+bash-3.2$ cd ..
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd HybriDroid
+bash-3.2$ ls
+WebappTest.apk	cfg		const0.dot	const11.dot	const14.dot	const3.dot	const6.dot	const9.dot	const_op1.dot	const_op12.dot	const_op15.dot	const_op4.dot	const_op7.dot	dat		src
+bin		cfg_test.dot	const1.dot	const12.dot	const15.dot	const4.dot	const7.dot	const_op.dot	const_op10.dot	const_op13.dot	const_op2.dot	const_op5.dot	const_op8.dot	label.txt	tmp
+build.xml	const.svg	const10.dot	const13.dot	const2.dot	const5.dot	const8.dot	const_op0.dot	const_op11.dot	const_op14.dot	const_op3.dot	const_op6.dot	const_op9.dot	libs		wala.properties
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ rm /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ rm /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.dot
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ cd /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/
+bash-3.2$ git commit
+On branch master
+Your branch is up-to-date with 'origin/master'.
+Changes not staged for commit:
+	modified:   ../.gitignore
+	deleted:    ../.travis.yml
+	modified:   .classpath
+	modified:   cfg/cg_dex.dot
+	modified:   cfg/cg_dex.svg
+	modified:   src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java
+	modified:   src/kr/ac/kaist/hybridroid/callgraph/AndroidHybridAnalysisScope.java
+	modified:   src/kr/ac/kaist/hybridroid/callgraph/AndroidHybridCallGraphBuilder.java
+	modified:   src/kr/ac/kaist/hybridroid/callgraph/HybridClassLoaderFactory.java
+	deleted:    src/kr/ac/kaist/hybridroid/js/loader/MultipleJavaScriptLoader.java
+	modified:   src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java
+	modified:   ../com.ibm.wala.cast.js/source/com/ibm/wala/cast/js/ipa/callgraph/JSSSAPropagationCallGraphBuilder.java
+	modified:   ../com.ibm.wala.cast.js/source/com/ibm/wala/cast/js/loader/JavaScriptLoader.java
+	modified:   ../com.ibm.wala.core/src/com/ibm/wala/ipa/cha/ClassHierarchy.java
+
+no changes added to commit
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ ls
+WebappTest.apk	cfg		const0.dot	const11.dot	const14.dot	const3.dot	const6.dot	const9.dot	const_op1.dot	const_op12.dot	const_op15.dot	const_op4.dot	const_op7.dot	dat		src
+bin		cfg_test.dot	const1.dot	const12.dot	const15.dot	const4.dot	const7.dot	const_op.dot	const_op10.dot	const_op13.dot	const_op2.dot	const_op5.dot	const_op8.dot	label.txt	tmp
+build.xml	const.svg	const10.dot	const13.dot	const2.dot	const5.dot	const8.dot	const_op0.dot	const_op11.dot	const_op14.dot	const_op3.dot	const_op6.dot	const_op9.dot	libs		wala.properties
+bash-3.2$ cd ..
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ grep -r "class LocalFileReader" ./
+grep: .//com.ibm.wala.core.tests/com.ibm.wala.core.testdata_1.0.0.jar: No such file or directory
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd HybriDroid
+bash-3.2$ open cfg/cg_dex.dot
+bash-3.2$ ls
+WebappTest.apk	cfg		const.svg	const10.dot	const13.dot	const2.dot	const5.dot	const8.dot	const_op0.dot	const_op11.dot	const_op14.dot	const_op3.dot	const_op6.dot	const_op9.dot	libs		wala.properties
+bin		cfg_test.dot	const0.dot	const11.dot	const14.dot	const3.dot	const6.dot	const9.dot	const_op1.dot	const_op12.dot	const_op15.dot	const_op4.dot	const_op7.dot	dat		src
+build.xml	cg_dex.dot	const1.dot	const12.dot	const15.dot	const4.dot	const7.dot	const_op.dot	const_op10.dot	const_op13.dot	const_op2.dot	const_op5.dot	const_op8.dot	label.txt	tmp
+bash-3.2$ rm cfg/cg_dex.dot cfg/cg_dex.svg 
+bash-3.2$ ls
+WebappTest.apk	cfg		const.svg	const10.dot	const13.dot	const2.dot	const5.dot	const8.dot	const_op0.dot	const_op11.dot	const_op14.dot	const_op3.dot	const_op6.dot	const_op9.dot	libs		wala.properties
+bin		cfg_test.dot	const0.dot	const11.dot	const14.dot	const3.dot	const6.dot	const9.dot	const_op1.dot	const_op12.dot	const_op15.dot	const_op4.dot	const_op7.dot	dat		src
+build.xml	cg_dex.dot	const1.dot	const12.dot	const15.dot	const4.dot	const7.dot	const_op.dot	const_op10.dot	const_op13.dot	const_op2.dot	const_op5.dot	const_op8.dot	label.txt	tmp
+bash-3.2$ rm *.dot *.svg
+bash-3.2$ ls
+WebappTest.apk	bin		build.xml	cfg		dat		label.txt	libs		src		tmp		wala.properties
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ open /Users/leesh/Documents/plrg/project/hybridroid/WALA/HybriDroid/cfg/cg_dex.svg
+bash-3.2$ ls
+WebappTest.apk	bin		build.xml	cfg		cfg_test.dot	const_op6.dot	dat		label.txt	libs		src		tmp		wala.properties
+bash-3.2$ git add *
+The following paths are ignored by one of your .gitignore files:
+HybriDroid/bin
+HybriDroid/cfg_test.dot
+HybriDroid/const_op6.dot
+HybriDroid/tmp
+Use -f if you really want to add them.
+bash-3.2$ git commit -m "Implemented multiple JavaScript global object for multiple enviroments needed to support multiple webview." 
+[master cfd9d92] Implemented multiple JavaScript global object for multiple enviroments needed to support multiple webview.
+ Committer: LeeSungho <leesh@LeeSunghoui-iMac.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 24 files changed, 1471 insertions(+), 1227 deletions(-)
+ mode change 100755 => 100644 HybriDroid/cfg/cg_dex.dot
+ delete mode 100755 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/jsa/StringAnalysisWithJSA.java
+ delete mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/js/loader/MultipleJavaScriptLoader.java
+ delete mode 100755 HybriDroid/src/kr/ac/kaist/hybridroid/soot/SootBridge.java
+ delete mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/soot/graphutils/SootGraphVisualizer.java
+ delete mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/soot/phantom/PhantomClassManager.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/utils/LoaderUtils.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/utils/LocalFileReader.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/utils/VisualizeCGTest.java
+bash-3.2$ git push
+warning: push.default is unset; its implicit value has changed in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the traditional behavior, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+When push.default is set to 'matching', git will push local branches
+to the remote branches that already exist with the same name.
+
+Since Git 2.0, Git defaults to the more conservative 'simple'
+behavior, which only pushes the current branch to the corresponding
+remote branch that 'git pull' uses to update the current branch.
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Counting objects: 39, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (35/35), done.
+Writing objects: 100% (39/39), 18.14 KiB | 0 bytes/s, done.
+Total 39 (delta 22), reused 0 (delta 0)
+To https://github.com/SunghoLee/WALA.git
+   9123b4d..cfd9d92  master -> master
+bash-3.2$ grep -r "PK:" ./
+Binary file .//bin/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.class matches
+Binary file .//libs/jsa_droidsafe.jar matches
+Binary file .//libs/soot_modified.jar matches
+Binary file .//libs/wala.jar matches
+.//src/kr/ac/kaist/hybridroid/analysis/FieldDefAnalysis.java://		System.out.println("\tPK: " + fieldKeys);
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:						System.out.println("PK: " + pk);
+bash-3.2$ git add *
+The following paths are ignored by one of your .gitignore files:
+HybriDroid/bin
+HybriDroid/cfg
+HybriDroid/cfg_test.dot
+HybriDroid/const_op6.dot
+HybriDroid/t.txt
+HybriDroid/tmp
+Use -f if you really want to add them. 
+bash-3.2$ git commit -m "Attached bridge object to the global object pointed by the webview which is receiver of the addJavascriptInterface method" 
+[master 42f9780] Attached bridge object to the global object pointed by the webview which is receiver of the addJavascriptInterface method
+ Committer: LeeSungho <leesh@LeeSunghoui-iMac.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 12 files changed, 2399 insertions(+), 1861 deletions(-)
+ rewrite HybriDroid/label.txt (61%)
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/callgraph/ResourceCallGraphBuilder.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/pointer/ResourceInstanceKey.java
+bash-3.2$ git push
+warning: push.default is unset; its implicit value has changed in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the traditional behavior, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+When push.default is set to 'matching', git will push local branches
+to the remote branches that already exist with the same name.
+
+Since Git 2.0, Git defaults to the more conservative 'simple'
+behavior, which only pushes the current branch to the corresponding
+remote branch that 'git pull' uses to update the current branch.
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Counting objects: 28, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (23/23), done.
+Writing objects: 100% (28/28), 28.74 KiB | 0 bytes/s, done.
+Total 28 (delta 16), reused 0 (delta 0)
+To https://github.com/SunghoLee/WALA.git
+   cfd9d92..42f9780  master -> master
+bash-3.2$ cd /Users/leesh/Documents/plrg/and_apps/
+bash-3.2$ ;s
+bash: syntax error near unexpected token `;'
+bash-3.2$ ls
+MultiWebviewTest	MultiWebviewTest.apk
+bash-3.2$ rm -r MultiWebviewTest
+bash-3.2$ ls
+MultiWebviewTest.apk
+bash-3.2$ cd ..
+bash-3.2$ ls
+and_apps	project
+bash-3.2$ cd project/
+bash-3.2$ ls
+hybridroid	tmp
+bash-3.2$ cd hybridroid/
+bash-3.2$ ls
+WALA
+bash-3.2$ cd WALA/
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd apps/
+bash-3.2$ ls
+AndroidManifest.xml			HelloCordova.apk			HelloScript.apk				HelloScript_simple.apk			HelloScript_test-2.apk			NormalAliasFlowTest.apk			NormalAliasFlowTest_objfield_false.apk	resources.arsc
+HelloCordova-dex2jar.jar		HelloHybrid.apk				HelloScript22.apk			HelloScript_simple.jar			HybridAPIArgNum.apk			NormalAliasFlowTest_objfield1.apk	classes.dex
+bash-3.2$ cd ..
+ls
+bash-3.2$ HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ cd ..
+bash-3.2$ ls
+WALA
+bash-3.2$ cd ..
+bash-3.2$ ls
+hybridroid	tmp
+bash-3.2$ cd ..
+bash-3.2$ ls
+and_apps	project
+bash-3.2$ cd and_apps/
+bash-3.2$ ls
+MultiWebviewTest.apk
+bash-3.2$ pwd
+/Users/leesh/Documents/plrg/and_apps
+bash-3.2$ cd ..
+bash-3.2$ ls
+and_apps	project
+bash-3.2$ cd project/
+bash-3.2$ ls
+hybridroid	tmp
+bash-3.2$ cd hybridroid/
+bash-3.2$ ls
+WALA
+bash-3.2$ cd WALA/
+bash-3.2$ git add *
+The following paths are ignored by one of your .gitignore files:
+com.ibm.wala.cast.java.jdt.test
+com.ibm.wala.cast.js
+Use -f if you really want to add them.
+bash-3.2$ git commit -m "[Ongoing] Modify String analysis module to select right modeling method, and add some modeling methods."
+[master b23bc73] [Ongoing] Modify String analysis module to select right modeling method, and add some modeling methods.
+ Committer: LeeSungho <leesh@LeeSunghoui-iMac.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 23 files changed, 22512 insertions(+), 2866 deletions(-)
+ create mode 100644 HybriDroid.util/src/kr/ac/kaist/hybridroid/util/debug/Debug.java
+ delete mode 100644 HybriDroid/const.svg
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/model/AbstractClassModel.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/model/CharsetProviderClassModel.java
+ rewrite HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/model/StringModel.java (73%)
+bash-3.2$ git push
+warning: push.default is unset; its implicit value has changed in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the traditional behavior, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+When push.default is set to 'matching', git will push local branches
+to the remote branches that already exist with the same name.
+
+Since Git 2.0, Git defaults to the more conservative 'simple'
+behavior, which only pushes the current branch to the corresponding
+remote branch that 'git pull' uses to update the current branch.
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Counting objects: 63, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (45/45), done.
+Writing objects: 100% (63/63), 510.00 KiB | 0 bytes/s, done.
+Total 63 (delta 28), reused 0 (delta 0)
+To https://github.com/SunghoLee/WALA.git
+   42f9780..b23bc73  master -> master
+bash-3.2$ git add *
+The following paths are ignored by one of your .gitignore files:
+com.ibm.wala.cast.java.jdt.test
+com.ibm.wala.cast.js
+Use -f if you really want to add them.
+bash-3.2$ git commit -m "[Ongoing] Modify String analysis module to analyze String concisely."
+[master fc922f8] [Ongoing] Modify String analysis module to analyze String concisely.
+ Committer: LeeSungho <leesh@LeeSunghoui-iMac.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 6 files changed, 5887 insertions(+), 5798 deletions(-)
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/BinaryOpNode.java
+ create mode 100644 HybriDroid/src/kr/ac/kaist/hybridroid/analysis/string/constraint/UnaryOpNode.java
+bash-3.2$ git push
+warning: push.default is unset; its implicit value has changed in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the traditional behavior, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+When push.default is set to 'matching', git will push local branches
+to the remote branches that already exist with the same name.
+
+Since Git 2.0, Git defaults to the more conservative 'simple'
+behavior, which only pushes the current branch to the corresponding
+remote branch that 'git pull' uses to update the current branch.
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Counting objects: 19, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (16/16), done.
+Writing objects: 100% (19/19), 83.82 KiB | 0 bytes/s, done.
+Total 19 (delta 13), reused 0 (delta 0)
+To https://github.com/SunghoLee/WALA.git
+   b23bc73..fc922f8  master -> master
+bash-3.2$ ls
+HybriDroid				com.ibm.wala-repository			com.ibm.wala.cast.java.polyglot.test	com.ibm.wala.cast.js.rhino		com.ibm.wala.core			com.ibm.wala.ide			com.ibm.wala.ide.jsdt.tests		com.ibm.wala.tests.ide-feature
+HybriDroid.util				com.ibm.wala.cast			com.ibm.wala.cast.java.test		com.ibm.wala.cast.js.rhino.test		com.ibm.wala.core.testdata		com.ibm.wala.ide-feature		com.ibm.wala.ide.tests			com.ibm.wala.util
+README.md				com.ibm.wala.cast.java			com.ibm.wala.cast.java.test.data	com.ibm.wala.cast.js.test		com.ibm.wala.core.tests			com.ibm.wala.ide.jdt			com.ibm.wala.scandroid			data
+apps					com.ibm.wala.cast.java.jdt.test		com.ibm.wala.cast.js			com.ibm.wala.cast.js.test.data		com.ibm.wala.dalvik			com.ibm.wala.ide.jdt.test		com.ibm.wala.shrike			pom.xml
+com.ibm.wala-feature			com.ibm.wala.cast.java.polyglot		com.ibm.wala.cast.js.html.nu_validator	com.ibm.wala.cast.test			com.ibm.wala.dalvik.test		com.ibm.wala.ide.jsdt			com.ibm.wala.tests-feature		targets
+bash-3.2$ grep -r "fail contains!" ./
+bash: !": event not found
+bash-3.2$ grep -r "fail contains" ./
+grep: .//com.ibm.wala.core.tests/com.ibm.wala.core.testdata_1.0.0.jar: No such file or directory
+Binary file .//HybriDroid/bin/kr/ac/kaist/hybridroid/analysis/FieldDefAnalysis.class matches
+.//HybriDroid/src/kr/ac/kaist/hybridroid/analysis/FieldDefAnalysis.java:			System.out.println("fail contains!");
+bash-3.2$ 

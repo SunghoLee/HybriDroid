@@ -80,6 +80,31 @@ public class AndroidJavaJavaScriptTypeMap {
 		return javaTr;
 	}
 	
+	public static TypeReference js2JavaTypeConvertNoImplcitConversion(TypeReference jsTr, TypeReference declaredTr){
+		TypeReference javaTr = null;
+		
+		if(jsTr.equals(JS_BOOLEAN)){
+			if(declaredTr.equals(JAVA_PRI_B) || declaredTr.equals(JAVA_APP_B) || 
+					declaredTr.equals(JAVA_PRI_BOOLEAN) || declaredTr.equals(JAVA_APP_BOOLEAN))
+				javaTr = declaredTr;
+			
+		}else if(jsTr.equals(JS_NUMBER)){
+			if(declaredTr.equals(JAVA_PRI_I) || declaredTr.equals(JAVA_APP_I) ||
+					declaredTr.equals(JAVA_PRI_F) || declaredTr.equals(JAVA_APP_F) ||
+					declaredTr.equals(JAVA_PRI_D) || declaredTr.equals(JAVA_APP_D) ||
+					declaredTr.equals(JAVA_PRI_INTEGER) || declaredTr.equals(JAVA_APP_INTEGER) ||
+					declaredTr.equals(JAVA_PRI_DOUBLE) || declaredTr.equals(JAVA_APP_DOUBLE) ||
+					declaredTr.equals(JAVA_PRI_FLOAT) || declaredTr.equals(JAVA_APP_FLOAT))
+				javaTr = declaredTr;
+			
+		}else if(jsTr.equals(JS_STRING)){
+			if(declaredTr.equals(JAVA_PRI_STRING) || declaredTr.equals(JAVA_APP_STRING))
+				javaTr = declaredTr;
+		}
+		
+		return javaTr;
+	}
+	
 	public static TypeReference java2JsTypeConvert(TypeReference javaTr){
 		TypeReference jsTr = null;
 		
@@ -101,6 +126,13 @@ public class AndroidJavaJavaScriptTypeMap {
 		return jsTr;
 	}
 		
+	public static boolean isJs2JavaTypeCompatibleNoImplicitConversion(TypeReference jsType, TypeReference javaType){
+		if(js2JavaTypeConvertNoImplcitConversion(jsType, javaType) != null)
+			return true;
+		else
+			return false;
+	}
+	
 	public static boolean isJs2JavaTypeCompatible(TypeReference jsType, TypeReference javaType){
 		if(js2JavaTypeConvert(jsType, javaType) != null)
 			return true;

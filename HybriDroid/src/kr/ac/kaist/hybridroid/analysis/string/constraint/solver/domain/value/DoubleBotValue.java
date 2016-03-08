@@ -22,6 +22,8 @@ public class DoubleBotValue extends BotValue implements IDoubleValue {
 		// TODO Auto-generated method stub
 		if(v instanceof IDoubleValue)
 			return v;
+		else if(v instanceof BotValue)
+			return this;
 		else
 			return TopValue.getInstance();
 	}

@@ -89,10 +89,12 @@ public class ContextClassModel extends AbstractClassModel{
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
 			Set<IBox> boxSet = new HashSet<IBox>();
-//			int useVar = invokeInst.getUse(1);
-			IBox use = new ConstBox(caller, "RESOURCE", ConstType.STRING);
-			if (graph.addEdge(new AssignOpNode(), def, use))
-				boxSet.add(use);
+			int useVar = invokeInst.getUse(1);
+			String value = getString(caller, useVar);
+			IBox useBox = new ConstBox(caller, value, ConstType.STRING);
+			
+			if (graph.addEdge(new AssignOpNode(), def, useBox))
+				boxSet.add(useBox);
 			return boxSet;
 		}
 		

@@ -15,9 +15,11 @@ import java.util.Set;
 import java.util.jar.JarFile;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
+import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.JarFileModule;
+import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.dalvik.classLoader.DexFileModule;
 import com.ibm.wala.dalvik.classLoader.DexIRFactory;
 import com.ibm.wala.dalvik.ipa.callgraph.impl.AndroidEntryPoint;
@@ -31,6 +33,7 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
+import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
@@ -72,7 +75,6 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.Str
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
 import kr.ac.kaist.hybridroid.callgraph.ResourceCallGraphBuilder;
-import kr.ac.kaist.hybridroid.callgraph.graphutils.ConstraintGraphVisualizer;
 import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
 import kr.ac.kaist.hybridroid.util.data.Pair;
 
@@ -87,12 +89,14 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	private Set<IBox> spotBoxSet;
 	private Map<IConstraintNode, Set<String>> result;
 	private Map<Hotspot, Set<HotspotDescriptor>> descMap;
+	private BridgeInfo bi;
 	
 	public AndroidStringAnalysis(){
 		scopeInit();
 		worklist = new WorkList();
 		result = new HashMap<IConstraintNode, Set<String>>();
 		descMap = new HashMap<Hotspot, Set<HotspotDescriptor>>();
+		bi = new BridgeInfo();
 	}
 	
 	public AndroidStringAnalysis(AndroidResourceAnalysis ra){
@@ -155,7 +159,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		ForwardSetSolver fss = new ForwardSetSolver();
 		Map<IConstraintNode, IValue> res = fss.solve(cg);
 		System.out.println("--- String Analysis Results ---");
-		for(IConstraintNode n : res.keySet()){
+		for(IBox n : spotBoxSet){
 			IValue v = res.get(n);
 			System.out.println("#N: " + n);
 			System.out.println("\t#V: " + v);
@@ -193,19 +197,50 @@ public class AndroidStringAnalysis implements StringAnalysis{
 //		Box[] targets = boxes;
 		ConstraintGraph graph = buildConstraintGraph(cg, fda, targets);
 		System.err.println("Print Constraint Graph...");
-		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
+//		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
 //		cgvis.visualize(graph, "const0.dot", targets);
 		graph.optimize();
-		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
+//		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
 		
 		System.out.println("--- String modeling warning ---");
 		for(String warning : StringModel.getWarnings()){
 			System.out.println("[Warning] " + warning);
 		}
 		System.out.println("------------");
-		
 		solve(graph);
 		makeDescriptors();
+		collectBridgeInfo(cg, pa);
+	}
+	
+	
+	
+	private void collectBridgeInfo(CallGraph cg, PointerAnalysis<InstanceKey> pa){
+		final TypeReference wvType = TypeReference.find(ClassLoaderReference.Application, "Landroid/webkit/WebView");
+		final Selector addJSSelector = Selector.make("addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V");
+		
+		for(CGNode n : cg){
+			IR ir = n.getIR();
+			if(ir == null)
+				continue;
+			
+			for(Iterator<CallSiteReference> icsr = ir.iterateCallSites(); icsr.hasNext();){
+				for(SSAAbstractInvokeInstruction callInst : ir.getCalls(icsr.next())){
+					MethodReference mr = callInst.getDeclaredTarget();
+					if(mr.getDeclaringClass().equals(wvType) && mr.getSelector().equals(addJSSelector)){
+						int bridge = callInst.getUse(1);
+						PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(n, bridge);
+						for(InstanceKey ik : pa.getPointsToSet(pk)){
+							TypeReference tr = ik.getConcreteType().getReference();
+							bi.addBridge(n, bridge, tr);
+//							for(Iterator<com.ibm.wala.util.collections.Pair<CGNode, NewSiteReference>> ip = ik.getCreationSites(cg); ip.hasNext(); ){
+//								com.ibm.wala.util.collections.Pair<CGNode, NewSiteReference> p = ip.next();
+//								bi.addBridge(n, bridge, tr, p.fst, p.snd);
+//							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	private void makeDescriptors(){
@@ -328,7 +363,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 			
 			if(ir == null)
 				continue;
-			
+
 			SSAInstruction[] insts = ir.getInstructions();
 			for(int i=0; i<insts.length; i++){
 				SSAInstruction inst = insts[i];
@@ -338,17 +373,19 @@ public class AndroidStringAnalysis implements StringAnalysis{
 				
 				for(Hotspot hotspot : hotspots){
 					if(isHotspot(inst, hotspot)){
+
 						int useVar = inst.getUse(hotspot.index() + 1);
 						IBox nBox = new VarBox(node, i, useVar);
 						boxes.add(nBox);
 						int receiverVar = inst.getUse(0);
-						PointerKey usePK = pa.getHeapModel().getPointerKeyForLocal(node, useVar);
-						PointerKey receiverPK = pa.getHeapModel().getPointerKeyForLocal(node, receiverVar);
+						LocalPointerKey usePK = (LocalPointerKey)pa.getHeapModel().getPointerKeyForLocal(node, useVar);
+						LocalPointerKey receiverPK = (LocalPointerKey)pa.getHeapModel().getPointerKeyForLocal(node, receiverVar);
 						InstanceKey[] uses = getInstanceKeys(pa, usePK);
 						InstanceKey[] receivers = getInstanceKeys(pa, receiverPK);
 						
 						HeapGraph<InstanceKey> hg = pa.getHeapGraph();
 						Set<Pointing> rpSet = new HashSet<Pointing>();
+						rpSet.add(new Pointing(receiverPK.getNode(), receiverPK.getValueNumber()));
 						
 						for(InstanceKey receiver : receivers){
 							for(Iterator<Object> ipk = hg.getPredNodes(receiver); ipk.hasNext();){
@@ -361,6 +398,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 						}
 						
 						Set<Pointing> upSet = new HashSet<Pointing>();
+						upSet.add(new Pointing(usePK.getNode(), usePK.getValueNumber()));
 						
 						for(InstanceKey use : uses){
 							for(Iterator<Object> ipk = hg.getPredNodes(use); ipk.hasNext();){
@@ -533,6 +571,8 @@ public class AndroidStringAnalysis implements StringAnalysis{
 			else
 				return Collections.emptySet();
 		}
+		
+		
 	}
 	
 	public static class Pointing{
@@ -567,5 +607,92 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		public String toString(){
 			return "[" + varNum + "] in " + node;
 		}
+	}
+	
+	public static class BridgeInfo{
+		private Map<Pair<Atom, Integer>, Set<BridgeDescription>> bridgeDescMap;
+		
+		private BridgeInfo(){
+			bridgeDescMap = new HashMap<Pair<Atom, Integer>, Set<BridgeDescription>>();
+		}
+		
+//		private void addBridge(CGNode node, int var, TypeReference tr, CGNode cn, NewSiteReference nsr){
+//			Pair<CGNode, Integer> p = Pair.make(node, var);
+//			if(!bridgeDescMap.containsKey(p)){
+//				bridgeDescMap.put(p, new HashSet<BridgeDescription>());
+//			}
+//			bridgeDescMap.get(p).add(new BridgeDescription(cn, nsr, tr));
+//		}
+		
+		private void addBridge(CGNode node, int var, TypeReference tr){
+//			System.out.println("#FindBridge: " + node + " (var: " + var + ")");
+			Pair<Atom, Integer> p = Pair.make(Atom.findOrCreateAsciiAtom(node.toString()), var);
+			if(!bridgeDescMap.containsKey(p)){
+				bridgeDescMap.put(p, new HashSet<BridgeDescription>());
+			}
+			bridgeDescMap.get(p).add(new BridgeDescription(tr));
+		}
+		
+		public Set<BridgeDescription> getDescriptionsOfBridge(CGNode node, int var){
+//			System.out.println("#FindingBridge: " + node + " (var: " + var + ")");
+			Pair<Atom, Integer> p = Pair.make(Atom.findOrCreateAsciiAtom(node.toString()), var);
+			if(bridgeDescMap.containsKey(p))
+				return bridgeDescMap.get(p);
+			return Collections.emptySet();
+		}
+				
+		public static class BridgeDescription{
+//			private final CGNode cn;
+//			private final NewSiteReference nsr;
+			private final TypeReference tr;
+
+			private BridgeDescription(TypeReference tr){
+				this.tr = tr;
+			}
+
+			
+//			private BridgeDescription(CGNode cn, NewSiteReference nsr, TypeReference tr){
+//				this.cn = cn;
+//				this.nsr = nsr;
+//				this.tr = tr;
+//			}
+			
+//			public CGNode getNode(CallGraph cg){
+//				MethodReference mr = cn.getMethod().getReference();
+//				TypeReference classTR = mr.getDeclaringClass();
+//				IClassHierarchy cha = cg.getClassHierarchy();
+//				
+//				IClass wvCls = cha.lookupClass(classTR);
+//				IMethod method = wvCls.getMethod(mr.getSelector());
+//				
+//				return cg.getNode(method, cn.getContext());
+//			}
+//			
+//			public NewSiteReference getNewSiteReference(CallGraph cg){
+//				
+//				return getNewSiteReference(this.getNode(cg));
+//			}
+//			
+//			public NewSiteReference getNewSiteReference(CGNode n){
+//				IR ir = n.getIR();
+//				if(ir == null)
+//					return null;
+//				
+//				for(Iterator<NewSiteReference> insr = ir.iterateNewSites(); insr.hasNext(); ){
+//					NewSiteReference nsr = insr.next();
+//					if(nsr.getProgramCounter() == this.nsr.getProgramCounter() && nsr.getDeclaredType().equals(this.nsr.getDeclaredType()))
+//						return nsr;
+//				}
+//				return null;
+//			}
+//			
+			public TypeReference getTypeReference(){
+				return tr;
+			}
+		}
+	}
+	
+	public BridgeInfo getBridgeInfo(){
+		return bi;
 	}
 }

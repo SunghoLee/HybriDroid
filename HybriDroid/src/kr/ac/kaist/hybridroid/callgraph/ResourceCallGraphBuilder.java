@@ -67,7 +67,7 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 			MethodReference target = instruction.getDeclaredTarget();
 			IClass mainClass = cha.lookupClass(target.getDeclaringClass());
 			
-			if(fvbiSelector.equals(target.getSelector()) && cha.isSubclassOf(mainClass, activityClass)){
+			if(fvbiSelector.equals(target.getSelector()) && mainClass != null && cha.isSubclassOf(mainClass, activityClass)){
 				SymbolTable symTab = node.getIR().getSymbolTable();
 				int paramVar = instruction.getUse(1);
 				

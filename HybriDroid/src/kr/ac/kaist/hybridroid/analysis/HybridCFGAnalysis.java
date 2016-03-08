@@ -164,25 +164,9 @@ public class HybridCFGAnalysis {
 
 		System.out.println("Done");
 
-		VisualizeCGTest.visualizeCallGraph(cg, "cg_dex", true);
+//		VisualizeCGTest.visualizeCallGraph(cg, "cg_dex", true);
 
 		printTypeWarning(b.getWarnings());
-
-		Set<CGNode> nodeSet = printNodeInsts(
-				cg,
-				"Code body of function L/Users/leesh/Documents/plrg/projects/hybridroid/WALA/HybriDroid/tmp/assets/www/js/app.js//Users/leesh/Documents/plrg/projects/hybridroid/WALA/HybriDroid/tmp/assets/www/js/app.js@19:send");
-
-		for (CGNode node : nodeSet) {
-			PointerAnalysis pa = b.getPointerAnalysis();
-			PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(node, 23);
-			Iterator<InstanceKey> ikItor = pa.getPointsToSet(pk).iterator();
-			System.out.println(pk);
-			while (ikItor.hasNext()) {
-				InstanceKey ik = ikItor.next();
-				System.out.println("\tIK: " + ik);
-				System.out.println("\t\tTYPE: " + ik.getConcreteType());
-			}
-		}
 
 		// printNodeInsts(cg, null, "send");
 

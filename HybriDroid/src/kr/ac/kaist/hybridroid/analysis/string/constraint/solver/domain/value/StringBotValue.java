@@ -20,7 +20,11 @@ public class StringBotValue extends BotValue implements IStringValue {
 	@Override
 	public IValue weakUpdate(IValue v) {
 		// TODO Auto-generated method stub
-		return null;
+		if(v instanceof IStringValue)
+			return v;
+		else if(v instanceof BotValue)
+			return this;
+		return TopValue.getInstance();
 	}
 
 	@Override

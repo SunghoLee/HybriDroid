@@ -95,14 +95,22 @@ public final class BooleanDomain implements IBooleanDomain {
 		@Override
 		public IValue weakUpdate(IValue v) {
 			// TODO Auto-generated method stub
-			if(v instanceof BooleanValue){
-				BooleanValue bv = (BooleanValue) v;
-				if(bv.value == value)
+			if(v instanceof BotValue)
+				return this;
+			else if(v instanceof IBooleanValue){
+				if(v instanceof BooleanBotValue)
 					return this;
-				else
-					return BooleanTopValue.getInstance();
+				else if(v instanceof BooleanTopValue)
+					return v;
+				else{
+					BooleanValue bv = (BooleanValue) v;
+					if(bv.value == value)
+						return this;
+					else
+						return BooleanTopValue.getInstance();
+				}
 			}else
-				return BooleanTopValue.getInstance();
+				return TopValue.getInstance();
 		}
 
 		@Override
@@ -110,11 +118,28 @@ public final class BooleanDomain implements IBooleanDomain {
 			// TODO Auto-generated method stub
 			return domain;
 		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof BooleanValue){
+				BooleanValue b = (BooleanValue)o;
+				if(b.value == this.value)
+					return true;
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode(){
+			if(value)
+				return 1;
+			return 0;
+		}
 	}
 
 	@Override
 	public boolean isInstanceof(IValue v) {
 		// TODO Auto-generated method stub
 		return (v instanceof BooleanValue);
-	}
+	}	
 }

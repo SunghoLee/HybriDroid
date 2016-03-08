@@ -3,6 +3,7 @@ package kr.ac.kaist.hybridroid.analysis.string.constraint.solver;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -22,7 +23,6 @@ public class InteractiveSolverMonitor implements ISolverMonitor {
 	private int iter = 1;
 	private int target = -1;
 	
-	@Override
 	public void mornitor(ConstraintGraph graph,
 			Map<IConstraintNode, IValue> heap, IConstraintNode n, IValue preV,
 			IValue newV) {
@@ -151,5 +151,11 @@ public class InteractiveSolverMonitor implements ISolverMonitor {
 		}else{
 			System.out.println("The node is not real node in the program.");
 		}
+	}
+
+	@Override
+	public void monitor(Queue<IConstraintNode> worklist, IConstraintNode n, IValue preV, IValue newV, boolean isUpdate) {
+		// TODO Auto-generated method stub
+		
 	}
 }

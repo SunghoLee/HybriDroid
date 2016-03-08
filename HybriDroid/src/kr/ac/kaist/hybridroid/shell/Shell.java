@@ -108,8 +108,10 @@ public class Shell {
 			for(Set<String> pageSet : loadPages.values()){
 				for(String page : pageSet){
 					Pair<String, File> p = jssm.merge(dirPath, page); 
-					jsFiles.add(p.snd);
-					htmlJsPathMap.put(p.fst, p.snd.getName());
+					if(p != null){
+						jsFiles.add(p.snd);
+						htmlJsPathMap.put(p.fst, p.snd.getName());
+					}
 				}
 			}
 			
