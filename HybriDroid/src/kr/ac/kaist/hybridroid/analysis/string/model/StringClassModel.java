@@ -125,11 +125,11 @@ public class StringClassModel extends AbstractClassModel{
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
-			System.err.println("\tinit1: " + invokeInst);
-			for(int i=0; i < invokeInst.getNumberOfParameters()-1; i++){
-				TypeReference tr = invokeInst.getDeclaredTarget().getParameterType(i);
-				System.out.println("#("+i+") " + tr);
-			}
+//			System.err.println("\tinit1: " + invokeInst);
+//			for(int i=0; i < invokeInst.getNumberOfParameters()-1; i++){
+//				TypeReference tr = invokeInst.getDeclaredTarget().getParameterType(i);
+//				System.out.println("#("+i+") " + tr);
+//			}
 			Set<IBox> boxSet = new HashSet<IBox>();
 			IBox strBox = new ConstBox(caller, "", ConstType.STRING);
 			if(graph.addEdge(new AssignOpNode(), def, strBox)){
@@ -153,11 +153,11 @@ public class StringClassModel extends AbstractClassModel{
 		@Override
 		public Set<IBox> draw(ConstraintGraph graph, IBox def, CGNode caller,
 				SSAInvokeInstruction invokeInst) {
-			System.err.println("\tinit2: " + invokeInst);
-			for(int i=0; i < invokeInst.getNumberOfParameters()-1; i++){
-				TypeReference tr = invokeInst.getDeclaredTarget().getParameterType(i);
-				System.out.println("#("+i+") " + tr);
-			}
+//			System.err.println("\tinit2: " + invokeInst);
+//			for(int i=0; i < invokeInst.getNumberOfParameters()-1; i++){
+//				TypeReference tr = invokeInst.getDeclaredTarget().getParameterType(i);
+//				System.out.println("#("+i+") " + tr);
+//			}
 			Set<IBox> boxSet = new HashSet<IBox>();
 //			int strVar = invokeInst.getUse(0);
 //			IBox strBox = new VarBox(caller, invokeInst.iindex, strVar);

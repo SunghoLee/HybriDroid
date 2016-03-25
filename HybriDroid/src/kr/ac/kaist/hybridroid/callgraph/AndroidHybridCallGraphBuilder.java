@@ -1,6 +1,8 @@
 package kr.ac.kaist.hybridroid.callgraph;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,15 +20,6 @@ import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSConstraintVisitor;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSPointerAnalysisImpl.JSImplicitPointsToSetVisitor;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
-import com.ibm.wala.cast.js.ssa.JavaScriptCheckReference;
-import com.ibm.wala.cast.js.ssa.JavaScriptInstanceOf;
-import com.ibm.wala.cast.js.ssa.JavaScriptInvoke;
-import com.ibm.wala.cast.js.ssa.JavaScriptPropertyRead;
-import com.ibm.wala.cast.js.ssa.JavaScriptPropertyWrite;
-import com.ibm.wala.cast.js.ssa.JavaScriptTypeOfInstruction;
-import com.ibm.wala.cast.js.ssa.JavaScriptWithRegion;
-import com.ibm.wala.cast.js.ssa.PrototypeLookup;
-import com.ibm.wala.cast.js.ssa.SetPrototype;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.util.TargetLanguageSelector;
@@ -41,7 +34,6 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.ContextKey;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.AllocationSite;
 import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
 import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
@@ -77,6 +69,7 @@ import com.ibm.wala.util.intset.MutableSparseIntSet;
 import com.ibm.wala.util.intset.OrdinalSet;
 import com.ibm.wala.util.strings.Atom;
 
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo.BridgeDescription;
@@ -103,23 +96,26 @@ import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 public class AndroidHybridCallGraphBuilder extends
 		JavaJavaScriptHybridCallGraphBuilder {
 
+	public static boolean ALL_HTML_FOR_UNKNOWN = true;
+	
 	private final HybridAPIMisusesChecker typeChecker;
 	private final AndroidStringAnalysis asa;
-	private final Map<String, String> pathMap;
+	private final AndroidResourceAnalysis ara;
 	private final IClass wvClass;
 	private final IClass jsinterAnnClass;
 	private final Selector addjsSelector;
 	private final BridgeInfo bi;
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
-			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, Map<String, String> pathMap) {
+			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, AndroidResourceAnalysis ara) {
 		super(cha, options, cache);
 		
 		if((options.getAnalysisScope() instanceof AndroidHybridAnalysisScope) == false)
 			Assertions.UNREACHABLE("AndroidHybridCallGraphBuilder must receive AndroidHybridAnalysisScope as a scope. current: " + options.getAnalysisScope().getClass().getName());
-		this.pathMap = pathMap;
 		this.typeChecker = typeChecker;
 		this.asa = asa;
+		this.ara = ara;
+		
 		jsGlobalMap = new HashMap<Atom, GlobalObjectKey>();
 		globalInit(((AndroidHybridAnalysisScope)options.getAnalysisScope()).getJavaScriptNames());
 		
@@ -132,9 +128,10 @@ public class AndroidHybridCallGraphBuilder extends
 		bi = asa.getBridgeInfo();
 	}
 
-	private void globalInit(Set<Atom> files){
-		for(Atom file : files)
+	private void globalInit(Collection<Atom> files){
+		for(Atom file : files){
 			jsGlobalMap.put(file, new GlobalObjectKey(cha.lookupClass(JavaScriptTypes.Root)));
+		}
 	}
 	
 	private FilteredPointerKey getFilteredPointerKeyForInterfParams(CGNode caller, SSAAbstractInvokeInstruction inst, CGNode node, int valueNumber, IClass filter){
@@ -283,13 +280,15 @@ public class AndroidHybridCallGraphBuilder extends
 		return false;
 	}
 	
+	private Atom getJSOfHtml(String html){
+		return ((AndroidHybridAnalysisScope)options.getAnalysisScope()).htmlToJs(html);
+	}
 
 	public class HybridJavaConstraintVisitor extends ResourceVisitor {
-		
-		
+
 		public HybridJavaConstraintVisitor(
-				SSAPropagationCallGraphBuilder builder, CGNode node) {
-			super(builder, node);
+				SSAPropagationCallGraphBuilder builder, CGNode node, AndroidResourceAnalysis asa) {
+			super(builder, node, asa);
 		}
 		
 		@Override
@@ -434,32 +433,47 @@ public class AndroidHybridCallGraphBuilder extends
 							 * name.
 							 */
 							
-							System.out.println("#INVOKE: " + instruction);
-							System.out.println("#NODE: " + node);
+//							System.out.println("#INVOKE: " + instruction);
+//							System.out.println("#NODE: " + node);
 							Set<HotspotDescriptor> descSet = asa.getAllDescriptors();
 							Set<GlobalObjectKey> globalObjs = new HashSet<GlobalObjectKey>();
 							Set<String> htmls = null;
 							for(HotspotDescriptor desc : descSet){
 								if(desc.getReceiverAlias().contains(Pointing.make(node, instruction.getUse(0)))){
 									htmls = desc.getValues();
-									if (!htmls.isEmpty()) {
+
+									if(htmls.size() == 1 && htmls.iterator().next().equals("about:blank")){ // no-op.
+										return;
+									}else if (!htmls.isEmpty()) {
+										boolean isOnlineConnection = false;
 										for (String html : htmls) {
-											if(pathMap.containsKey(html)){
-												globalObjs.add(getGlobalObject(JavaScriptTypes.jsName, Atom.findOrCreateAsciiAtom(pathMap.get(html))));
+											if((isOnlineConnection |= html.startsWith("http")) == true)
+												System.out.println("Load online page: " + html +", we do not deal with it.");
+											
+											Atom js = getJSOfHtml(html);
+											
+											if(js != null){
+												globalObjs.add(getGlobalObject(JavaScriptTypes.jsName, js));
 												System.out.println("HtmlLoaded: " + html);
 											}
 										}
-									}else{
-										System.err.println("Loaded html is unknown.");
-										super.visitInvoke(instruction);
-										return;
+										
+										if(isOnlineConnection && globalObjs.isEmpty()){ //no-op; for online connection.
+											return;
+										}
 									}
 								}
 							}
 							
-							if(globalObjs.isEmpty()){
-								System.out.println("Unknown html page: " + htmls);
+							if(globalObjs.isEmpty()){								
+								if(ALL_HTML_FOR_UNKNOWN){
+									System.err.println("Loaded html is unknown.\n Every local html files may be loaded.");
+									globalObjs.addAll(getGlobalObjects(JavaScriptTypes.jsName));
+								}else{
+									Assertions.UNREACHABLE("Unknown html page: " + htmls);
+								}
 							}
+							
 							/*
 							 * attach the Android Java interface object to
 							 * JavaScript global object. the attached object is
@@ -543,7 +557,7 @@ public class AndroidHybridCallGraphBuilder extends
 							AndroidHybridCallGraphBuilder.this, construct);
 				} else {
 					return new HybridJavaConstraintVisitor(
-							AndroidHybridCallGraphBuilder.this, construct);
+							AndroidHybridCallGraphBuilder.this, construct, ara);
 				}
 			}
 		};
@@ -620,12 +634,7 @@ public class AndroidHybridCallGraphBuilder extends
 		}
 		
 	}
-//	
-//	@Override
-//	  public JSConstraintVisitor makeVisitor(CGNode node) {
-//	    return new AndroidHybridJSConstraintVisitor(this, node);
-//	  }
-//	
+
 	private Map<Atom, GlobalObjectKey> jsGlobalMap;
 	
 	public Collection<GlobalObjectKey> getGlobalObjects(Atom language){
@@ -689,6 +698,7 @@ public class AndroidHybridCallGraphBuilder extends
 	      }
 	    };
 	  }
+	
 	
 	class AndroidHybridJSConstraintVisitor extends JSConstraintVisitor{
 		public AndroidHybridJSConstraintVisitor(AstSSAPropagationCallGraphBuilder builder, CGNode node) {
@@ -795,42 +805,7 @@ public class AndroidHybridCallGraphBuilder extends
 		public AndroidHybridJSImplicitPointsToSetVisitor(AstPointerAnalysisImpl analysis, LocalPointerKey lpk) {
 			super(analysis, lpk);
 		}
-
-		@Override
-		public void visitJavaScriptInvoke(JavaScriptInvoke instruction) {
-
-		}
-
-		@Override
-		public void visitTypeOf(JavaScriptTypeOfInstruction instruction) {
-
-		}
-
-		@Override
-		public void visitJavaScriptPropertyRead(JavaScriptPropertyRead instruction) {
-
-		}
-
-		@Override
-		public void visitJavaScriptPropertyWrite(JavaScriptPropertyWrite instruction) {
-
-		}
-
-		@Override
-		public void visitJavaScriptInstanceOf(JavaScriptInstanceOf instruction) {
-
-		}
-
-		@Override
-		public void visitCheckRef(JavaScriptCheckReference instruction) {
-
-		}
-
-		@Override
-		public void visitWithRegion(JavaScriptWithRegion instruction) {
-
-		}
-
+		
 		@Override
 		public void visitAstGlobalRead(AstGlobalRead instruction) {
 			FieldReference field = makeNonGlobalFieldReference(instruction.getDeclaredField());
@@ -869,14 +844,6 @@ public class AndroidHybridCallGraphBuilder extends
 					}
 					pointsToSet = new OrdinalSet<InstanceKey>(S, analysis.getInstanceKeyMapping());
 			}
-		}
-
-		@Override
-		public void visitSetPrototype(SetPrototype instruction) {
-		}
-
-		@Override
-		public void visitPrototypeLookup(PrototypeLookup instruction) {
 		}
 	};
 }

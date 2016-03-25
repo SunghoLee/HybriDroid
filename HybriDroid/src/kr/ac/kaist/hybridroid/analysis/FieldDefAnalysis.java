@@ -1,5 +1,6 @@
 package kr.ac.kaist.hybridroid.analysis;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,7 +36,7 @@ import kr.ac.kaist.hybridroid.util.data.Pair;
  * Analyze which fields are defined in which nodes. This analysis result can be
  * used for finding instructions that define the field of an object.
  * 
- * @author LeeSH
+ * @author Sungho Lee
  */
 public class FieldDefAnalysis {
 	//entry basic block number in CFG.
@@ -246,16 +247,21 @@ public class FieldDefAnalysis {
 		Set<PointerKey> fieldKeys = new HashSet<PointerKey>();
 		IClassHierarchy cha = pa.getClassHierarchy();
 		FieldReference fr = inst.getDeclaredField();
+		IField f = cha.resolveField(fr);
+		
+		if(f == null) //cannot find the field corresponding fr
+			return Collections.emptySet();
 		
 		if(inst.isStatic()){
-			PointerKey fieldPK = pa.getHeapModel().getPointerKeyForStaticField(cha.resolveField(fr));
-			fieldKeys.add(fieldPK);
+			if(fr != null){
+				PointerKey fieldPK = pa.getHeapModel().getPointerKeyForStaticField(cha.resolveField(fr));
+				fieldKeys.add(fieldPK);
+			}
 		}else{
 			int owner = inst.getUse(0);
 			
 			PointerKey ownerPK = pa.getHeapModel().getPointerKeyForLocal(node, owner);
 			for(InstanceKey ownerIK : (OrdinalSet<InstanceKey>)pa.getPointsToSet(ownerPK)){
-				IField f = cha.resolveField(fr);
 				if(f != null){
 					PointerKey fieldPK = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, f);
 					fieldKeys.add(fieldPK);
@@ -444,7 +450,7 @@ public class FieldDefAnalysis {
 //			System.out.println("all contains!");
 			return res;
 		}else{
-			System.out.println("fail contains!");
+//			System.out.println("fail contains!");
 			return res;
 		}
 		//

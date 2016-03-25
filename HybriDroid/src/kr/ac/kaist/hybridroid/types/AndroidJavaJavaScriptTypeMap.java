@@ -100,7 +100,8 @@ public class AndroidJavaJavaScriptTypeMap {
 		}else if(jsTr.equals(JS_STRING)){
 			if(declaredTr.equals(JAVA_PRI_STRING) || declaredTr.equals(JAVA_APP_STRING))
 				javaTr = declaredTr;
-		}
+		}else if(jsTr.equals(declaredTr))
+			javaTr = declaredTr;
 		
 		return javaTr;
 	}

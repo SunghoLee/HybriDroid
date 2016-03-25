@@ -127,10 +127,6 @@ public class PointsToSetVariable extends IntSetVariable<PointsToSetVariable> {
         InstanceKey ik = instanceKeys.getMappedObject(x);
         IClass concreteType = ik.getConcreteType();
         if (!cha.isAssignableFrom(type, concreteType)) {
-          System.err.println("BOOM");
-          System.err.println(ir);
-          System.err.println(lpk + " type " + type);
-          System.err.println(ik + " type " + concreteType);
           Assertions.UNREACHABLE();
         }
       }

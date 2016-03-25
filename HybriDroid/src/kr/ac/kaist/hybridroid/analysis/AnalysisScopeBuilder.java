@@ -2,6 +2,7 @@ package kr.ac.kaist.hybridroid.analysis;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,15 +17,15 @@ import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 public class AnalysisScopeBuilder {
 	private File target;
 	private boolean flag;
-	private Set<File> jsFiles;
+	private Set<URL> htmls;
 	
-	static public AnalysisScopeBuilder build(File target, boolean droidelFlag, Set<File> jsFiles){
-		return ((droidelFlag)? buildDroidelAnalysisScopeBuilder(target, jsFiles) : new AnalysisScopeBuilder(target, jsFiles));
+	static public AnalysisScopeBuilder build(File target, boolean droidelFlag, Set<URL> htmls){
+		return ((droidelFlag)? buildDroidelAnalysisScopeBuilder(target, htmls) : new AnalysisScopeBuilder(target, htmls));
 	}
 	
-	private AnalysisScopeBuilder(File target, Set<File> jsFiles){
+	private AnalysisScopeBuilder(File target, Set<URL> htmls){
 		this.target = target;
-		this.jsFiles = jsFiles;
+		this.htmls = htmls;
 	}
 		
 	private static void removeDestinationFolder(String path){
@@ -59,7 +60,7 @@ public class AnalysisScopeBuilder {
 		}
 	}
 	
-	private static AnalysisScopeBuilder buildDroidelAnalysisScopeBuilder(File target, Set<File> jsFiles){
+	private static AnalysisScopeBuilder buildDroidelAnalysisScopeBuilder(File target, Set<URL> jsFiles){
 		System.err.println("[DROIDEL] transforming " + target.getName());
 		String droidel_path = Shell.walaProperties.getProperty(WalaProperties.DROIDEL_TOOL);
 		System.err.println("#DROIDEL path: " + droidel_path);
@@ -99,15 +100,7 @@ public class AnalysisScopeBuilder {
 	}
 		
 	public AndroidHybridAnalysisScope makeScope() throws IOException{
-		if(flag){
-			String targetpath = target.getCanonicalPath();
-			return AndroidHybridAnalysisScope.setUpDroidelAnalysisScope(target.toURI(),
-					CallGraphTestUtil.REGRESSION_EXCLUSIONS, targetpath.substring(0, targetpath.lastIndexOf("/")), LocalFileReader.androidDexLibs(Shell.walaProperties));
-		}else{
-			return AndroidHybridAnalysisScope.setUpAndroidHybridAnalysisScope(target.toURI(), jsFiles, 
+			return AndroidHybridAnalysisScope.setUpAndroidHybridAnalysisScope(target.toURI(), htmls, 
 					CallGraphTestUtil.REGRESSION_EXCLUSIONS, LocalFileReader.androidDexLibs(Shell.walaProperties));
-//			return AndroidHybridAnalysisScope.setUpAndroidAnalysisScope(target.toURI(),
-//					CallGraphTestUtil.REGRESSION_EXCLUSIONS, LocalFileReader.androidDexLibs(Shell.walaProperties));
-		}
 	}
 }

@@ -56,18 +56,29 @@ public class HybridAPIMisusesChecker {
 	 */
 	public boolean typeOverloadingCheck(IClass objClass, Collection<IMethod> methods){
 		final Set<IMethod> possibleMethods = new HashSet<IMethod>();
-		methods.forEach(new Consumer<IMethod>(){
-			@Override
-			public void accept(IMethod t) {
-				// TODO Auto-generated method stub
-				if(t.getAnnotations() != null)
-					for (Annotation ann : t.getAnnotations()) {
-						Atom className = ann.getType().getName().getClassName();
-						if (className.equals(Atom.findOrCreateAsciiAtom("JavascriptInterface")))
-							possibleMethods.add(t);
-					}
-			}
-		});
+		
+		for(IMethod t : methods){
+			if(t.getAnnotations() != null)
+				for (Annotation ann : t.getAnnotations()) {
+					Atom className = ann.getType().getName().getClassName();
+					if (className.equals(Atom.findOrCreateAsciiAtom("JavascriptInterface")))
+						possibleMethods.add(t);
+				}
+		}
+
+		//only for java 8
+//		methods.forEach(new Consumer<IMethod>(){
+//			@Override
+//			public void accept(IMethod t) {
+//				// TODO Auto-generated method stub
+//				if(t.getAnnotations() != null)
+//					for (Annotation ann : t.getAnnotations()) {
+//						Atom className = ann.getType().getName().getClassName();
+//						if (className.equals(Atom.findOrCreateAsciiAtom("JavascriptInterface")))
+//							possibleMethods.add(t);
+//					}
+//			}
+//		});
 		
 		Map<Pair<String, Integer>, Set<IMethod>> methodMap = new HashMap<Pair<String, Integer>, Set<IMethod>>();
 		for(IMethod m : possibleMethods){

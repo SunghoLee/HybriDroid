@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
 import com.ibm.wala.cast.js.html.IHtmlCallback;
@@ -15,6 +17,9 @@ import com.ibm.wala.cast.js.html.jericho.JerichoHtmlParser;
 import com.ibm.wala.cast.js.html.jericho.JerichoTag;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
 import com.ibm.wala.util.collections.Pair;
+import com.ibm.wala.util.debug.Assertions;
+
+import kr.ac.kaist.hybridroid.util.file.OnlineFileReader;
 
 
 /**
@@ -50,36 +55,32 @@ public class JSScriptMerger {
 	}
 	
 	/**
+	 * Check which the html file is a online file or not 
+	 * @param htmlPath path of a html file
+	 * @return true if the html file is a online file, or false
+	 */
+	public boolean isOnlineHtml(String htmlPath){
+		if(htmlPath.startsWith("http://") || htmlPath.startsWith("https://"))
+			return true;
+		return false;
+	}
+	
+	/**
 	 * Merge the javascript codes in the html file to a file
 	 * @param dirPath path of decompiled project directory
 	 * @param htmlPath path of the html file
 	 * @return a file object contains all javascript codes
 	 */
-	public Pair<String,File> merge(String dirPath, String htmlPath){
-		if(!htmlPath.startsWith("file:///") || (!htmlPath.endsWith(".html") && !htmlPath.endsWith(".htm"))){
-			if(htmlPath.startsWith("javascript:")){
-				System.out.println("#JavaScript code: " + htmlPath);
-			}else{
-				System.out.println("#Not Local Html: " + htmlPath);
-			}
-			return null;
-		}
-
-		System.out.println("#HTML: " + htmlPath);
-		String path = dirPath + File.separator + htmlPath.replace("file:///", "").replace("android_asset", "assets");
-		System.out.println("\tpath: " + path);
-		
-		File html = null;
-		try
-		{
-			html = getHtmlFile(path);
-		}catch(InternalError e){
-			System.out.println(e.getMessage());
-			return null;
-		}
-		
+	public File merge(File html){
 		String script = "";
+		String path = null;
 		
+		try {
+			path = html.getCanonicalPath();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// parse the html file and get javascript codes related with the html
 		// file.
 		JerichoHtmlParser parser = new JerichoHtmlParser();
@@ -104,7 +105,48 @@ public class JSScriptMerger {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return Pair.make(htmlPath, newJS);
+		return newJS;
+	}
+	
+	/**
+	 * Merge the javascript codes in the html file to a file
+	 * @param dirPath path of decompiled project directory
+	 * @param htmlPath path of the html file
+	 * @return a file object contains all javascript codes
+	 */
+	public File merge(String dir, String path){
+		String script = "";
+		
+		// parse the html file and get javascript codes related with the html
+		// file.
+		JerichoHtmlParser parser = new JerichoHtmlParser();
+		try {
+			ScriptCallback scb = new ScriptCallback(dir);
+			if(isLocalHtml(path))
+				parser.parse(null, new FileReader(new File(path)), scb, "");
+			else if(isOnlineHtml(path))
+				parser.parse(null, new InputStreamReader((new URL(path)).openStream()), scb, "");
+			else
+				Assertions.UNREACHABLE("html file must be a local or online file: " + path);
+			script = scb.getScript();
+		} catch (Error | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// make a new javascript file which contains the javascript codes.
+		File newJS = new File(dir + File.separator + path.substring(path.lastIndexOf(File.separator) + 1, ((path.lastIndexOf(".") > path.lastIndexOf(File.separator))? path.lastIndexOf(".") : path.length())) + "_merge.js");
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(newJS));
+			bw.write(script);
+			bw.flush();
+			bw.close();
+			System.out.println(" merged to " + newJS.getCanonicalPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return newJS;
 	}
 	
 	/**
@@ -142,10 +184,30 @@ public class JSScriptMerger {
 					script += tag.getBodyText().snd + "\n";
 				}else{
 					String txt = p.fst;
+					txt = txt.replace(" ", "");
+					if(txt.startsWith("http")){
+						OnlineFileReader ofr = new OnlineFileReader(txt);
+						try {
+							script += ofr.readData() + "\n";
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						return;
+					}else if(txt.startsWith("//")){
+						
+					}
+					
 					try {
 						if(txt.startsWith("./")) //remove current directory descriptor
 							txt = txt.substring(2);
-						BufferedReader br = new BufferedReader(new FileReader(new File(path + File.separator + txt)));
+						
+						File f = new File(path + File.separator + txt);
+						if(!f.exists()){
+							System.err.println("[Warning] missing JavaScript file: " + path + File.separator + txt);
+						}
+						
+						BufferedReader br = new BufferedReader(new FileReader(f));
 						String s;
 						while((s = br.readLine()) != null){
 							script += s + "\n";
@@ -158,6 +220,8 @@ public class JSScriptMerger {
 						e.printStackTrace();
 					}
 				}
+			}else if(tag.getName().equals("body")){
+				
 			}
 		}
 		

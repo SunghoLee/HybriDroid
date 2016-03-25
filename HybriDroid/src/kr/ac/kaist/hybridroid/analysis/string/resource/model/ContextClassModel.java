@@ -1,10 +1,12 @@
 package kr.ac.kaist.hybridroid.analysis.string.resource.model;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ssa.SSAInvokeInstruction;
+import com.ibm.wala.ssa.SymbolTable;
+import com.ibm.wala.types.Selector;
 
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.AssignOpNode;
@@ -13,16 +15,10 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstType;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.analysis.string.model.AbstractClassModel;
-import kr.ac.kaist.hybridroid.analysis.string.model.IClassModel;
 import kr.ac.kaist.hybridroid.analysis.string.model.IMethodModel;
-import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
-
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.SSAInvokeInstruction;
-import com.ibm.wala.ssa.SymbolTable;
-import com.ibm.wala.types.Selector;
 
 public class ContextClassModel extends AbstractClassModel{
+	public static boolean DEBUG = false;
 	private static ContextClassModel instance;
 
 	private AndroidResourceAnalysis ra;
@@ -67,13 +63,16 @@ public class ContextClassModel extends AbstractClassModel{
 			if(value != null)
 				return value;
 			else{
-				System.err.println("[Warning] the undefined string resource for " + addr);
+				if(DEBUG)
+					System.err.println("[Warning] the undefined string resource for " + addr);
 				return "RESOURCE";
 			}
 		}
 		
-		System.err.println("" + (ra != null));
-		System.err.println("[Warning] resource access by using unconstant value.");
+		if(DEBUG){
+			System.err.println("" + (ra != null));
+			System.err.println("[Warning] resource access by using unconstant value.");
+		}
 		// if the variable does not have constant value, we do not calculate it; just return "RESOURCE" string value.
 		return "RESOURCE";
 	}

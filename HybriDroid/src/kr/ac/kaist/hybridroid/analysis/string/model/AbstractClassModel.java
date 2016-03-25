@@ -20,7 +20,7 @@ abstract public class AbstractClassModel implements IClassModel {
 		// TODO Auto-generated method stub
 		if(methodMap.containsKey(mSelector))
 			return methodMap.get(mSelector);
-		System.err.println("Unkwon method: " + mSelector);
+//		System.err.println("Unkwon method: " + mSelector);
 		return null;
 	}
 

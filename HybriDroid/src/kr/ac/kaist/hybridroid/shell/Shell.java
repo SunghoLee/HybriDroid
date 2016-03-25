@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,18 +22,18 @@ import com.ibm.wala.properties.WalaProperties;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
-import com.ibm.wala.util.collections.Pair;
 
 import kr.ac.kaist.hybridroid.analysis.AnalysisScopeBuilder;
 import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
-import kr.ac.kaist.hybridroid.analysis.string.constraint.IBox;
 import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
 import kr.ac.kaist.hybridroid.command.CommandArguments;
-import kr.ac.kaist.hybridroid.js.merger.JSScriptMerger;
+import kr.ac.kaist.hybridroid.util.file.FileCollector;
+import kr.ac.kaist.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 
 /**
@@ -63,7 +64,6 @@ public class Shell {
 			ClassHierarchyException, IllegalArgumentException, CancelException,
 			ParseException, Invalid {
 		CommandArguments cArgs = new CommandArguments(args);
-		
 		// Load wala property. Now, 'PROP_ARG' is essential option, so else
 		// branch cannot be reached.
 		if (cArgs.has(CommandArguments.PROP_ARG)) {
@@ -92,6 +92,16 @@ public class Shell {
 		if (cArgs.has(CommandArguments.CFG_ARG)) {
 			AndroidResourceAnalysis ra = new AndroidResourceAnalysis(targetPath);
 			String dirPath = ra.getDir();
+			Set<URL> jsFiles = new HashSet<URL>();
+			
+			Set<File> htmls = FileCollector.collectFiles(new File(dirPath), "html", "htm");
+			Map<File,URL> htmlToJsMap = new HashMap<File, URL>();
+			
+			for(File f : htmls){
+				URL js = f.toURI().toURL();
+				jsFiles.add(js);
+				htmlToJsMap.put(f, js);
+			}
 			
 			AndroidStringAnalysis asa = new AndroidStringAnalysis(ra);
 			asa.setupAndroidLibs(LocalFileReader.androidJar(Shell.walaProperties).getPath());
@@ -99,20 +109,46 @@ public class Shell {
 			asa.addAnalysisScope(targetPath);
 			List<Hotspot> hotspots = new ArrayList<Hotspot>();
 			hotspots.add(new ArgumentHotspot(ClassLoaderReference.Application, "android/webkit/WebView", "loadUrl(Ljava/lang/String;)V", 0));
-			asa.analyze(hotspots);
-			JSScriptMerger jssm = new JSScriptMerger();
-			Map<IBox, Set<String>> loadPages = asa.getSpotString();
+//			hotspots.add(new ArgumentHotspot(ClassLoaderReference.Application, "android/webkit/WebView", "loadData(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", 0));
+//			hotspots.add(new ArgumentHotspot(ClassLoaderReference.Application, "android/webkit/WebView", "loadDataWithBaseURL(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", 0));
+//			hotspots.add(new ArgumentHotspot(ClassLoaderReference.Application, "android/webkit/WebView", "loadDataWithBaseURL(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", 1));
+//			hotspots.add(new ArgumentHotspot(ClassLoaderReference.Application, "android/webkit/WebView", "loadDataWithBaseURL(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", 2));
+//			hotspots.add(new ArgumentHotspot(ClassLoaderReference.Application, "android/webkit/WebView", "loadDataWithBaseURL(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", 3));
+			asa.analyze(hotspots);		
 			
-			Set<File> jsFiles = new HashSet<File>();
-			Map<String, String> htmlJsPathMap = new HashMap<String, String>(); 
-			for(Set<String> pageSet : loadPages.values()){
-				for(String page : pageSet){
-					Pair<String, File> p = jssm.merge(dirPath, page); 
-					if(p != null){
-						jsFiles.add(p.snd);
-						htmlJsPathMap.put(p.fst, p.snd.getName());
+			//make javascript code as seperate js file
+			int i = 1;
+			for(HotspotDescriptor hd : asa.getAllDescriptors()){
+				System.out.println(hd);
+				Set<String> vs = hd.getValues();
+				Map<String, String> chMap = new HashMap<String, String>();
+				
+				for(String v : vs){
+					if(v.startsWith("javascript:")){ // if it is javascript code, then
+						File js = FileWriter.makeFile(dirPath, "js_" + (i++) + ".js", v.substring(v.indexOf(":")+1));
+						jsFiles.add(js.toURI().toURL());
+						chMap.put(v, js.getCanonicalPath()); 
+					}else if(v.startsWith("http")){ // if it is online html file, then
+						URL url = new URL(v);
+						jsFiles.add(new URL(v));
+						chMap.put(v, url.getFile());
+					}else if(v.startsWith("file:///")){
+						String nPath = dirPath + File.separator + v.replace("file:///", "").replace("android_asset", "assets");
+						if(htmlToJsMap.containsKey(new File(nPath))){
+							chMap.put(v, htmlToJsMap.get(new File(nPath)).getFile());
+						}
 					}
 				}
+				
+				for(String s : chMap.keySet()){
+					vs.remove(s);
+					vs.add(chMap.get(s));
+				}
+			}
+			
+			if(jsFiles.isEmpty()){
+				System.out.println("It does not have local html files or js codes");
+				System.exit(-1);
 			}
 			
 			AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
@@ -125,7 +161,7 @@ public class Shell {
 			}
 
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			cfgAnalysis.main(scopeBuilder.makeScope(), asa, htmlJsPathMap);
+			cfgAnalysis.main(scopeBuilder.makeScope(), asa, ra);
 		} else {
 			// TODO: support several functions
 		}

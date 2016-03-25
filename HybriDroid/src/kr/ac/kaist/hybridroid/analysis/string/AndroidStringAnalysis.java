@@ -19,7 +19,6 @@ import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.JarFileModule;
-import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.dalvik.classLoader.DexFileModule;
 import com.ibm.wala.dalvik.classLoader.DexIRFactory;
 import com.ibm.wala.dalvik.ipa.callgraph.impl.AndroidEntryPoint;
@@ -33,7 +32,6 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
-import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
@@ -75,7 +73,7 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.Str
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
 import kr.ac.kaist.hybridroid.analysis.string.model.StringModel;
 import kr.ac.kaist.hybridroid.callgraph.ResourceCallGraphBuilder;
-import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
+import kr.ac.kaist.hybridroid.print.NodePrinter;
 import kr.ac.kaist.hybridroid.util.data.Pair;
 
 /**
@@ -90,6 +88,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	private Map<IConstraintNode, Set<String>> result;
 	private Map<Hotspot, Set<HotspotDescriptor>> descMap;
 	private BridgeInfo bi;
+	private AndroidResourceAnalysis ara;
 	
 	public AndroidStringAnalysis(){
 		scopeInit();
@@ -101,6 +100,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	
 	public AndroidStringAnalysis(AndroidResourceAnalysis ra){
 		this();
+		this.ara = ra;
 		StringModel.setResourceAnalysis(ra, null);
 	}
 	
@@ -177,28 +177,30 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		this.hotspots = hotspots;
 		Pair<CallGraph, PointerAnalysis<InstanceKey>> p = buildCG();
 		CallGraph cg = p.fst();
+		test(cg, p.snd());
 		PointerAnalysis<InstanceKey> pa = p.snd();
-		WalaCGVisualizer vis = new WalaCGVisualizer();
-		vis.visualize(cg, "cfg_test.dot");
-		vis.printLabel("label.txt");
+//		WalaCGVisualizer vis = new WalaCGVisualizer();
+//		vis.visualize(cg, "cfg_test.dot");
+//		vis.printLabel("label.txt");
 		Set<IBox> boxSet = findHotspots(cg, pa, hotspots);
 		this.spotBoxSet = boxSet;
 		IBox[] boxes = boxSet.toArray(new IBox[0]);
-		for(IBox box : boxes){
-			System.err.println("Spot: " + box);
-		}
+//		for(IBox box : boxes){
+//			System.err.println("Spot: " + box);
+//		}
 		System.err.println("Field Def analysis...");
 		FieldDefAnalysis fda = new FieldDefAnalysis(cg, pa);
 		System.err.println("Build Constraint Graph...");
 		
-		int targetN = 6;
+//		int targetN = 6;
 //		IBox[] targets = new IBox[]{boxes[targetN]};
 		IBox[] targets = boxes;
 //		Box[] targets = boxes;
 		ConstraintGraph graph = buildConstraintGraph(cg, fda, targets);
-		System.err.println("Print Constraint Graph...");
+//		System.err.println("Print Constraint Graph...");
 //		ConstraintGraphVisualizer cgvis = new ConstraintGraphVisualizer();
 //		cgvis.visualize(graph, "const0.dot", targets);
+		System.err.println("Optimize Constraint Graph...");
 		graph.optimize();
 //		cgvis.visualize(graph, "const_op"+targetN+".dot", targets);
 		
@@ -207,12 +209,30 @@ public class AndroidStringAnalysis implements StringAnalysis{
 			System.out.println("[Warning] " + warning);
 		}
 		System.out.println("------------");
+		System.err.println("Solving the constraints...");
 		solve(graph);
 		makeDescriptors();
 		collectBridgeInfo(cg, pa);
 	}
 	
-	
+	private void test(CallGraph cg, PointerAnalysis<InstanceKey> pa){
+		
+		
+//		for(CGNode n : cg){
+////			if(n.toString().contains("Node: < Application, Lmp/a/a/a, a(Landroid/app/Dialog;Lmp/a/a/ab;Lmp/MpActivity;Lmp/a/a/y;)V > Context: Everywhere")){
+//			if(n.getMethod().getDeclaringClass().toString().contains("Lmp/a/a/a")){
+//				NodePrinter.printInsts(n);
+////				PointerKey v8 = pa.getHeapModel().getPointerKeyForLocal(n, 8);
+////				PointerKey v21 = pa.getHeapModel().getPointerKeyForLocal(n, 21);
+////				
+////				for(InstanceKey ik : pa.getPointsToSet(v8))
+////					System.out.println("v8 => " + ik);
+////				for(InstanceKey ik : pa.getPointsToSet(v21))
+////					System.out.println("v21 => " + ik);
+//				System.exit(-1);
+//			}
+//		}
+	}
 	
 	private void collectBridgeInfo(CallGraph cg, PointerAnalysis<InstanceKey> pa){
 		final TypeReference wvType = TypeReference.find(ClassLoaderReference.Application, "Landroid/webkit/WebView");
@@ -312,7 +332,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		options.setSelector(new ClassHierarchyMethodTargetSelector(cha));
 //		CallGraphBuilder cgb = new nCFABuilder(0, cha, options, cache, null, null);
 //		CallGraphBuilder cgb = ZeroXCFABuilder.make(cha, options, cache, null, null, 0);
-		CallGraphBuilder cgb = ResourceCallGraphBuilder.make(cha, options, cache, null, null, 0);
+		CallGraphBuilder cgb = ResourceCallGraphBuilder.make(cha, options, cache, null, null, 0, ara);
 		return Pair.make(cgb.makeCallGraph(options, null), cgb.getPointerAnalysis());
 	}
 	
@@ -452,9 +472,9 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	}
 	
 	private ConstraintGraph buildConstraintGraph(CallGraph cg, FieldDefAnalysis fda, IBox... initials){
-		for(IBox box : initials){
-			System.err.println("TargetSpot: " + box);
-		}
+//		for(IBox box : initials){
+//			System.err.println("TargetSpot: " + box);
+//		}
 		
 		StringModel.init(cg.getClassHierarchy());
 		ConstraintGraph graph = new ConstraintGraph();
@@ -572,7 +592,13 @@ public class AndroidStringAnalysis implements StringAnalysis{
 				return Collections.emptySet();
 		}
 		
-		
+		@Override
+		public String toString(){
+			String res = "[HD]\n";
+			res += "\tNode: " + constNode + "\n";
+			res += "\tValue: " + values;
+			return res;
+		}
 	}
 	
 	public static class Pointing{

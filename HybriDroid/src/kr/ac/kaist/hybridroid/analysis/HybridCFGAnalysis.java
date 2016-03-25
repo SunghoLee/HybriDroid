@@ -1,6 +1,8 @@
 package kr.ac.kaist.hybridroid.analysis;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,6 +36,7 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.strings.Atom;
 
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
 import kr.ac.kaist.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
@@ -44,7 +47,6 @@ import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.hybridroid.test.TaintAnalysisForHybrid;
-import kr.ac.kaist.hybridroid.utils.VisualizeCGTest;
 
 /**
  * Build Control-flow graph for the target Android hybrid application. Now, it
@@ -133,7 +135,7 @@ public class HybridCFGAnalysis {
 	 * @throws IllegalArgumentException
 	 * @throws CancelException
 	 */
-	public void main(AndroidHybridAnalysisScope scope, AndroidStringAnalysis asa, Map<String, String> pathMap) throws IOException,
+	public void main(AndroidHybridAnalysisScope scope, AndroidStringAnalysis asa, AndroidResourceAnalysis ara) throws IOException,
 			ClassHierarchyException, IllegalArgumentException, CancelException {
 		
 		JSCallGraphUtil.setTranslatorFactory(new CAstRhinoTranslatorFactory());
@@ -158,7 +160,7 @@ public class HybridCFGAnalysis {
 		addHybridDispatchLogic(options, scope, cha);
 
 		AndroidHybridCallGraphBuilder b = new AndroidHybridCallGraphBuilder(
-				cha, options, cache, HybridAPIMisusesChecker.getInstance(), asa, pathMap);
+				cha, options, cache, HybridAPIMisusesChecker.getInstance(), asa, ara);
 
 		CallGraph cg = b.makeCallGraph(options);
 
