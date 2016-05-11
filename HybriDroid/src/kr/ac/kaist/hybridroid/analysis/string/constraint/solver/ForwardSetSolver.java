@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.ibm.wala.util.debug.Assertions;
+import com.ibm.wala.util.debug.UnimplementedError;
 
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstBox;
 import kr.ac.kaist.hybridroid.analysis.string.constraint.ConstraintGraph;
@@ -37,6 +38,8 @@ import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.domain.value.Str
 import kr.ac.kaist.hybridroid.analysis.string.constraint.solver.model.ISolverMonitor;
 
 public class ForwardSetSolver implements IStringConstraintSolver<IConstraintNode, IValue> {
+	public static boolean DO_NOT_STOP = true;
+	
 	private IStringDomain strDomain;
 	private IIntegerDomain intDomain;
 	private IDoubleDomain doubleDomain;
@@ -157,7 +160,14 @@ public class ForwardSetSolver implements IStringConstraintSolver<IConstraintNode
 					vs[0] = strMap.get(inEdge.from());
 				}				
 			}
+			try{
 			nVal = opn.apply(vs);
+			}catch(UnimplementedError e){
+				if(DO_NOT_STOP)
+					nVal = StringTopValue.getInstance();
+				else
+					e.printStackTrace();
+			}
 		}
 		
 		if(nVal == null){

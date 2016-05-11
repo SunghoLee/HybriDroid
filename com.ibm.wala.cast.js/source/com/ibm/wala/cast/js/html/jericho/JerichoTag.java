@@ -124,7 +124,13 @@ public class JerichoTag implements ITag {
 	public Pair<Integer, String> getBodyText() {
 		Segment content = innerElement.getContent();
 		Integer lineNum = innerElement.getSource().getRow(content.getBegin());
-		String body = content.toString().replace(content.getSource().getNewLine(), "\n");
+		
+		String body = "";
+		if(content.getSource().getNewLine() == null)
+		  body = content.toString();
+		else
+		  body = content.toString().replace(content.getSource().getNewLine(), "\n"); 
+		
 		return Pair.make(lineNum, body);
 	}
 

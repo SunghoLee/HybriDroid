@@ -88,9 +88,7 @@ public class JavaCompatibleClassFilter implements TypeFilter {
 						}
 						
 						int newX = system.findOrCreateIndexForInstanceKey(convertedKey);
-						
 						MutableIntSet set = (MutableIntSet)system.getInstanceKeysForClass(jsClass);
-//						System.err.println("\t=>" + convertedKey.getConcreteType());
 						set.add(newX);
 						xs.add(newX);
 					}else if(DEBUG_CLASS_FILTER){
@@ -107,7 +105,6 @@ public class JavaCompatibleClassFilter implements TypeFilter {
         for(int value : xs){
         	convertedR.add(value);
         }
-        
         return convertedR;
 	}
 	
@@ -121,11 +118,11 @@ public class JavaCompatibleClassFilter implements TypeFilter {
 		IntSet f = null;
 		
 		for(IClass pClass : possibleClasses){
+			
 			if(f == null)
 				f = system.getInstanceKeysForClass(pClass);
 			else
 				f = f.union(system.getInstanceKeysForClass(pClass));
-//			System.err.println("#class: " + pClass);
 		}
 		
 		if(DEBUG_CLASS_FILTER){
@@ -136,7 +133,6 @@ public class JavaCompatibleClassFilter implements TypeFilter {
 				System.err.println("\t"+system.getInstanceKey(index));
 			}
 		}
-//        return (f == null) ? false : L.addAllInIntersection(convertedR, f);
 		return (f == null) ? false : L.addAllInIntersection(convertedR, f);
 	}
 
@@ -160,6 +156,8 @@ public class JavaCompatibleClassFilter implements TypeFilter {
 	      // SJF: this is horribly inefficient. we really don't want to do
 	      // diffs in here. TODO: fix it. probably keep not(f) cached and
 	      // use addAllInIntersection
+	      System.out.println("IL: " + L);
+			System.out.println("IR: " + R);
 	      return (f == null) ? L.addAll(convertedR) : L.addAll(IntSetUtil.diff(convertedR.getValue(), f));
 	}
 

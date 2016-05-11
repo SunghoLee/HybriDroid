@@ -176,4 +176,8 @@ public class DexIField implements IField {
 		return DexUtil.getAnnotations(myClass.getAnnotations(eField.field), myClass.getClassLoader().getReference());
 	}
 
+	@Override
+	public String toString(){
+		return getReference().toString();
+	}
 }

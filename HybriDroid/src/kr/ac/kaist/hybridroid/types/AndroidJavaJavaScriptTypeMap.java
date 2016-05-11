@@ -118,7 +118,8 @@ public class AndroidJavaJavaScriptTypeMap {
 			jsTr = JS_NUMBER;
 		
 		else if(javaTr.equals(JAVA_PRI_B) || javaTr.equals(JAVA_APP_B) ||
-				javaTr.equals(JAVA_PRI_BOOLEAN) || javaTr.equals(JAVA_APP_BOOLEAN))
+				javaTr.equals(JAVA_PRI_BOOLEAN) || javaTr.equals(JAVA_APP_BOOLEAN) ||
+				javaTr.equals(JAVA_PRI_Z) || javaTr.equals(JAVA_APP_Z))
 			jsTr = JS_BOOLEAN;
 		
 		else if(javaTr.equals(JAVA_PRI_STRING) || javaTr.equals(JAVA_APP_STRING))

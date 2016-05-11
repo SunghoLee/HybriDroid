@@ -40,8 +40,11 @@ public class VisualizeCGTest {
 //				return true;
 			if(fromLoader(_node.getMethod().getDeclaringClass(), JavaScriptTypes.jsLoader))
 				return true;
-			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Primordial))
+			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Primordial)){
+				if(_node.toString().contains("setWebView") || _node.toString().contains("addJavascriptInterface"))
+					return true;
 				return false;
+			}
 			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Extension))
 				return false;
 			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Application))
@@ -58,6 +61,11 @@ public class VisualizeCGTest {
 				&& !_node.toString().contains("prologue.js")) {
 			if(fromLoader(_node.getMethod().getDeclaringClass(), JavaScriptTypes.jsLoader))
 				return true;
+			else if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Primordial)){
+				if(_node.toString().contains("setWebView") || _node.toString().contains("addJavascriptInterface"))
+					return true;
+				return false;
+			}
 //			if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Primordial))
 //				return false;
 //			if(fromLoader(_node.getMethod().getDeclaringClass(), ClassLoaderReference.Extension))

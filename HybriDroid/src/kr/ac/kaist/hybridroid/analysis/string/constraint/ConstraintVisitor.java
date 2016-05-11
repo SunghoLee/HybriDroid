@@ -387,7 +387,14 @@ final public class ConstraintVisitor implements IBoxVisitor<Set<IBox>> {
 		IR ir = node.getIR();
 		SymbolTable symTab = ir.getSymbolTable();
 		if(symTab.isConstant(var)){
-			return symTab.getConstantValue(var);
+			if(symTab.isNullConstant(var))
+				return "null";
+			else if(symTab.isFalse(var))
+				return false;
+			else if(symTab.isTrue(var))
+				return true;
+			else
+				return symTab.getConstantValue(var);
 		}
 		return null;
 	}

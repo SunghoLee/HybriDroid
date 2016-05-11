@@ -12,11 +12,13 @@ import org.apache.commons.cli.ParseException;
 public class CommandArguments {
 	static private Options options;
 	static final public String PROP_ARG = "p";
+	static final public String MODEL_ARG = "m";
 	static final public String TARGET_ARG = "t";
 	static final public String DROIDEL_ARG = "droidel";
 	static final public String MANIFEST_ARG = "manifest";
 	static final public String CFG_ARG = "cfg";
 	static final public String PRE_STRING_ARG = "prestr";
+	static final public String ONLY_JS_ARG = "jsonly";
 	
 	static{
 		options = new Options();
@@ -28,6 +30,12 @@ public class CommandArguments {
 		Option propOp = new Option(PROP_ARG, true, "set the wala property file");
 		propOp.setRequired(true);
 		options.addOption(propOp);
+		
+		Option modelOp = new Option(MODEL_ARG, true, "set the wala property file");
+		options.addOption(modelOp);
+		
+		Option jsOp = new Option(ONLY_JS_ARG, false, "set the wala property file");
+		options.addOption(jsOp);
 		
 		OptionGroup functions = new OptionGroup();
 		functions.addOption(new Option(CFG_ARG, false, "construct cfg for the android application"));

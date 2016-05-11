@@ -18,12 +18,14 @@ public class AnalysisScopeBuilder {
 	private File target;
 	private boolean flag;
 	private Set<URL> htmls;
+	private String dir;
 	
-	static public AnalysisScopeBuilder build(File target, boolean droidelFlag, Set<URL> htmls){
-		return ((droidelFlag)? buildDroidelAnalysisScopeBuilder(target, htmls) : new AnalysisScopeBuilder(target, htmls));
+	static public AnalysisScopeBuilder build(String dir, File target, boolean droidelFlag, Set<URL> htmls){
+		return ((droidelFlag)? buildDroidelAnalysisScopeBuilder(target, htmls) : new AnalysisScopeBuilder(dir, target, htmls));
 	}
 	
-	private AnalysisScopeBuilder(File target, Set<URL> htmls){
+	private AnalysisScopeBuilder(String dir, File target, Set<URL> htmls){
+		this.dir = dir;
 		this.target = target;
 		this.htmls = htmls;
 	}
@@ -96,11 +98,11 @@ public class AnalysisScopeBuilder {
 		}
 		System.err.println("[DROIDEL] done.");
 		
-		return new AnalysisScopeBuilder(target, jsFiles);
+		return new AnalysisScopeBuilder("", target, jsFiles);
 	}
 		
 	public AndroidHybridAnalysisScope makeScope() throws IOException{
-			return AndroidHybridAnalysisScope.setUpAndroidHybridAnalysisScope(target.toURI(), htmls, 
+			return AndroidHybridAnalysisScope.setUpAndroidHybridAnalysisScope(dir, target.toURI(), htmls, 
 					CallGraphTestUtil.REGRESSION_EXCLUSIONS, LocalFileReader.androidDexLibs(Shell.walaProperties));
 	}
 }

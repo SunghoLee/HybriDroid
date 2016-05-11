@@ -30,8 +30,12 @@ public class SmaliParser {
 					String nameWithType = line.substring(0, line.lastIndexOf("=")).replace(" ", "");
 					String value = line.substring(line.lastIndexOf("=") + 1, line.length()).replace(" ", "");
 					String name = nameWithType.substring(0, nameWithType.lastIndexOf(":"));
-					int intValue = Integer.parseInt(value.replace("0x", ""), 16);
-					resourceMap.put(name, intValue);
+					try{
+						int intValue = Integer.parseInt(value.replace("0x", ""), 16);
+						resourceMap.put(name, intValue);
+					}catch(NumberFormatException nfe){
+						continue;
+					}
 				}
 			}
 		} catch (IOException e) {

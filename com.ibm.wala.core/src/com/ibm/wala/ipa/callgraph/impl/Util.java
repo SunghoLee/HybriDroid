@@ -127,7 +127,7 @@ public class Util {
     MethodTargetSelector ms = new BypassMethodTargetSelector(options.getMethodTargetSelector(), summary.getSummaries(), 
         summary.getIgnoredPackages(), cha);
     options.setSelector(ms);
-
+//summary.getSummaries().get(null).
     ClassTargetSelector cs = new BypassClassTargetSelector(options.getClassTargetSelector(), summary.getAllocatableClasses(), cha,
         cha.getLoader(scope.getLoader(Atom.findOrCreateUnicodeAtom("Synthetic"))));
     options.setSelector(cs);

@@ -1,8 +1,7 @@
 package kr.ac.kaist.hybridroid.callgraph;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +18,10 @@ import com.ibm.wala.cast.ir.ssa.AstGlobalWrite;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSConstraintVisitor;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSPointerAnalysisImpl.JSImplicitPointsToSetVisitor;
+import com.ibm.wala.cast.js.ipa.callgraph.TransitivePrototypeKey;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
+import com.ibm.wala.cast.js.ssa.JavaScriptInvoke;
+import com.ibm.wala.cast.js.types.JavaScriptMethods;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.util.TargetLanguageSelector;
@@ -28,6 +30,7 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.NewSiteReference;
+import com.ibm.wala.fixpoint.UnaryOperator;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -43,6 +46,7 @@ import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory;
 import com.ibm.wala.ipa.callgraph.propagation.PointsToMap;
+import com.ibm.wala.ipa.callgraph.propagation.PointsToSetVariable;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationSystem;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
@@ -62,8 +66,12 @@ import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.CancelRuntimeException;
+import com.ibm.wala.util.MonitorUtil;
+import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.intset.IntSet;
+import com.ibm.wala.util.intset.IntSetAction;
 import com.ibm.wala.util.intset.MutableMapping;
 import com.ibm.wala.util.intset.MutableSparseIntSet;
 import com.ibm.wala.util.intset.OrdinalSet;
@@ -96,6 +104,8 @@ import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 public class AndroidHybridCallGraphBuilder extends
 		JavaJavaScriptHybridCallGraphBuilder {
 
+	public static boolean DEBUG = true;
+	public static boolean NO_STOP = true;
 	public static boolean ALL_HTML_FOR_UNKNOWN = true;
 	
 	private final HybridAPIMisusesChecker typeChecker;
@@ -105,9 +115,11 @@ public class AndroidHybridCallGraphBuilder extends
 	private final IClass jsinterAnnClass;
 	private final Selector addjsSelector;
 	private final BridgeInfo bi;
+	private final Set<String> mismatchW;
+	private final boolean annVersion;
 	
 	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
-			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, AndroidResourceAnalysis ara) {
+			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, AndroidResourceAnalysis ara, boolean annVersion) {
 		super(cha, options, cache);
 		
 		if((options.getAnalysisScope() instanceof AndroidHybridAnalysisScope) == false)
@@ -115,6 +127,7 @@ public class AndroidHybridCallGraphBuilder extends
 		this.typeChecker = typeChecker;
 		this.asa = asa;
 		this.ara = ara;
+		this.annVersion = annVersion;
 		
 		jsGlobalMap = new HashMap<Atom, GlobalObjectKey>();
 		globalInit(((AndroidHybridAnalysisScope)options.getAnalysisScope()).getJavaScriptNames());
@@ -126,6 +139,7 @@ public class AndroidHybridCallGraphBuilder extends
 		jsinterAnnClass = cha.lookupClass(jsinterAnnTR);
 		addjsSelector = Selector.make("addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V");
 		bi = asa.getBridgeInfo();
+		mismatchW = new HashSet<String>();
 	}
 
 	private void globalInit(Collection<Atom> files){
@@ -271,13 +285,15 @@ public class AndroidHybridCallGraphBuilder extends
 	 *         otherwise.
 	 */
 	private boolean hasJavascriptInterfaceAnnotation(IMethod m) {
-		if(m.getAnnotations() != null)
+		if(annVersion && m.getAnnotations() != null){
 			for (Annotation ann : m.getAnnotations()) {
 				TypeReference annTr= ann.getType();
 				if (jsinterAnnClass.equals(cha.lookupClass(annTr)))
 					return true;
 			}
-		return false;
+			return false;
+		}else
+			return true;
 	}
 	
 	private Atom getJSOfHtml(String html){
@@ -303,8 +319,19 @@ public class AndroidHybridCallGraphBuilder extends
 			// checking invoked method is 'addJavascriptInterface' of WebView
 			// class
 			
-			if (wvClass.equals(receiver)
+			if(addjsSelector.equals(targetMethod)){
+				System.out.println("----");
+				System.out.println("#AddJavascriptInterface");
+				System.out.println("#receiver: " + receiver);
+				System.out.println("#caller: " + caller);
+				System.out.println("#callsite: " + site);
+				System.out.println("----");
+			}
+			if ((receiver != null && (wvClass.equals(receiver) || cha.isSubclassOf(receiver, wvClass)))
 					&& addjsSelector.equals(targetMethod)) {
+				
+				System.out.println("Invoked addJavascriptInterface.");
+				
 				IR ir = caller.getIR();
 				SSAAbstractInvokeInstruction[] invokes = ir.getCalls(site);
 				SymbolTable symTab = ir.getSymbolTable();
@@ -322,17 +349,6 @@ public class AndroidHybridCallGraphBuilder extends
 							String name = (String) symTab
 									.getConstantValue(nameUse);
 							
-//							NewSiteReference newSite = getLocalCreationSite(ir.getInstructions(), caller.getDU(), objUse);
-//							
-//							if(newSite == null){
-//								try {
-//									throw new NotLocalCreationException(caller, invoke, objUse);
-//								} catch (NotLocalCreationException e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
-//							}
-							
 							Set<BridgeDescription> bdSet = bi.getDescriptionsOfBridge(node, objUse);
 								
 							if(bdSet.isEmpty()){
@@ -346,6 +362,7 @@ public class AndroidHybridCallGraphBuilder extends
 							
 							int objIndex = 0;
 							for(BridgeDescription bd : bdSet){
+								System.out.println("\tbridge: " + bd.getTypeReference());
 								TypeReference tr = bd.getTypeReference();
 								IClass objClass = cha.lookupClass(tr);
 								InterfaceClass wClass = wrappingClass(objClass);
@@ -354,22 +371,6 @@ public class AndroidHybridCallGraphBuilder extends
 								objKeys[objIndex] = new ConcreteTypeKey(wClass);
 								AndroidHybridAppModel.addJSInterface(name, objKeys[objIndex++]);
 							}
-							
-//							TypeReference tr = newSite.getDeclaredType();
-//							
-//							IClass objClass = cha.lookupClass(tr);
-//							InterfaceClass wClass = wrappingClass(objClass);
-//							cha.addClass(wClass);
-//							
-//							Collection<IMethod> methods = wClass.getAllMethods();
-//							
-//							InstanceKey objKey = new AllocationSite(
-//									caller.getMethod(), newSite, wClass);
-//							AndroidHybridAppModel.addJSInterface(name, objKey);
-							
-//							System.err.println("#InterfaceName: " + name);
-//							System.err.println("#InterfaceClass: "
-//									+ wClass.getName().getClassName());
 
 							/*
 							 * make mock-up object for Android Java methods of
@@ -392,15 +393,25 @@ public class AndroidHybridCallGraphBuilder extends
 										
 								Collection<IMethod> methods = wClass.getAllMethods();
 								
+								Set<Pair<String, Integer>> overloadChecker = new HashSet<Pair<String, Integer>>();
+
 								for (IMethod method : methods) {
 									if (hasJavascriptInterfaceAnnotation(method)) {
 										wClass.addMethodAsField(method);
 										String mname = method.getName().toString();
+										int params = method.getNumberOfParameters();
+										Pair<String, Integer> p = Pair.make(mname, params);
+										if(overloadChecker.contains(p)){
+											mismatchW.add("[Error] the method is overloaded by type: " + wClass.getName() + ": " + mname + "(" + params + ")");
+										}
+										overloadChecker.add(p);
+										
 										IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
 										
 										PointerKey constantPK = builder.getPointerKeyForInstanceField(objKeys[i], f);
 										InstanceKey ik = makeMockupInstanceKey(method);
 										
+										System.out.println("\t\tBridgeMethod: " + constantPK + " -> " + ik);
 										system.findOrCreateIndexForInstanceKey(ik);
 										
 										system.newConstraint(constantPK, ik);
@@ -409,32 +420,12 @@ public class AndroidHybridCallGraphBuilder extends
 								}
 							}
 							
-//							for (IMethod method : methods) {
-//								if (hasJavascriptInterfaceAnnotation(method)) {
-//									wClass.addMethodAsField(method);
-//									String mname = method.getName().toString();
-//									IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
-//									
-//									PointerKey constantPK = builder.getPointerKeyForInstanceField(objKey, f);
-//									InstanceKey ik = makeMockupInstanceKey(method);
-//									
-//									system.findOrCreateIndexForInstanceKey(ik);
-//									
-//									system.newConstraint(constantPK, ik);
-//									system.newConstraint(typePK, ik);
-//								}
-//							}
-
-							
 							/*
 							 * there could be multiple global objects, because a
 							 * webview has a global ojbect repectively. the
 							 * global objects are seperated by javascript file
 							 * name.
 							 */
-							
-//							System.out.println("#INVOKE: " + instruction);
-//							System.out.println("#NODE: " + node);
 							Set<HotspotDescriptor> descSet = asa.getAllDescriptors();
 							Set<GlobalObjectKey> globalObjs = new HashSet<GlobalObjectKey>();
 							Set<String> htmls = null;
@@ -447,14 +438,22 @@ public class AndroidHybridCallGraphBuilder extends
 									}else if (!htmls.isEmpty()) {
 										boolean isOnlineConnection = false;
 										for (String html : htmls) {
-											if((isOnlineConnection |= html.startsWith("http")) == true)
-												System.out.println("Load online page: " + html +", we do not deal with it.");
+//											if((isOnlineConnection |= html.startsWith("http")) == true)
+//												if(DEBUG)
+//													System.out.println("Load online page: " + html +", we do not deal with it.");
 											
 											Atom js = getJSOfHtml(html);
 											
 											if(js != null){
 												globalObjs.add(getGlobalObject(JavaScriptTypes.jsName, js));
-												System.out.println("HtmlLoaded: " + html);
+												if(DEBUG){
+													String objs = "";
+													for(InstanceKey ik : objKeys)
+														objs += ik + ", ";
+													objs = objs.substring(0, objs.lastIndexOf(","));
+													
+													System.out.println("HtmlLoaded: " + html + " [" + objs + "]");
+												}
 											}
 										}
 										
@@ -462,13 +461,17 @@ public class AndroidHybridCallGraphBuilder extends
 											return;
 										}
 									}
+								}else{
+									
 								}
 							}
 							
 							if(globalObjs.isEmpty()){								
 								if(ALL_HTML_FOR_UNKNOWN){
 									System.err.println("Loaded html is unknown.\n Every local html files may be loaded.");
+									System.err.println("\t" + getHtmls());
 									globalObjs.addAll(getGlobalObjects(JavaScriptTypes.jsName));
+									
 								}else{
 									Assertions.UNREACHABLE("Unknown html page: " + htmls);
 								}
@@ -511,6 +514,7 @@ public class AndroidHybridCallGraphBuilder extends
 								for(int i=0; i<objKeys.length; i++)
 									system.newConstraint(fieldPtr, objKeys[i]);							
 							}
+							
 						} else {
 							// TODO: Support non-constant string value
 							System.err.println("-------");
@@ -521,6 +525,7 @@ public class AndroidHybridCallGraphBuilder extends
 							System.err.println("\tis constant? "
 									+ symTab.isConstant(nameUse));
 							System.err.println("-------");
+							if(!NO_STOP)
 							Assertions
 									.UNREACHABLE("now, only support constant value of 'addJavascriptInterface' name parameter.");
 						}
@@ -643,6 +648,10 @@ public class AndroidHybridCallGraphBuilder extends
 		return jsGlobalMap.values();
 	}
 	
+	public Collection<Atom> getHtmls(){
+		return jsGlobalMap.keySet();
+	}
+	
 	public GlobalObjectKey getGlobalObject(Atom language, Atom file){
 		assert language.equals(JavaScriptTypes.jsName);
 		
@@ -706,6 +715,156 @@ public class AndroidHybridCallGraphBuilder extends
 		}
 
 		@Override
+	    public void visitJavaScriptInvoke(JavaScriptInvoke instruction) {
+	      if (instruction.getDeclaredTarget().equals(JavaScriptMethods.dispatchReference)) {
+	        handleJavascriptDispatch(instruction);
+	      } else {
+//	        if (! instruction.getDeclaredTarget().equals(JavaScriptMethods.ctorReference)) {
+//	          System.err.println(instruction);
+//	        }
+	        visitInvokeInternal(instruction, new DefaultInvariantComputer());
+	      }
+	    }
+
+		private void handleJavascriptDispatch(final JavaScriptInvoke instruction) {
+		      int receiverVn = instruction.getUse(1);
+		      PointerKey receiverKey = getPointerKeyForLocal(receiverVn);
+		     
+		      if (contentsAreInvariant(symbolTable, du, receiverVn)) {
+		          system.recordImplicitPointsToSet(receiverKey);
+		          InstanceKey[] ik = getInvariantContents(receiverVn);
+		          for (int i = 0; i < ik.length; i++) {
+		            handleJavascriptDispatch(instruction, ik[i]);
+		          }
+		      } else {
+		        class ReceiverForDispatchOp extends UnaryOperator<PointsToSetVariable> {
+		          private JavaScriptInvoke getInstruction() {
+		            return instruction;
+		          }
+		          
+		          @Override
+		          public byte evaluate(PointsToSetVariable lhs, PointsToSetVariable rhs) {
+
+		            if (rhs.getValue() != null) {
+		              rhs.getValue().foreach(new IntSetAction() {
+		                @Override
+		                public void act(int x) {
+		                  try {
+		                    MonitorUtil.throwExceptionIfCanceled(getBuilder().monitor);
+		                  } catch (CancelException e) {
+		                    throw new CancelRuntimeException(e);
+		                  }
+		                  InstanceKey ik = system.getInstanceKey(x);
+		                  handleJavascriptDispatch(instruction, ik);
+		                }
+		              });
+		            }
+		            return NOT_CHANGED;
+		          }
+
+		          @Override
+		          public int hashCode() {
+		            return instruction.hashCode(); 
+		          }
+
+		          @Override
+		          public boolean equals(Object o) {
+		            return o instanceof ReceiverForDispatchOp && ((ReceiverForDispatchOp)o).getInstruction()==getInstruction();
+		          }
+
+		          @Override
+		          public String toString() {
+		            return "receiver for dispatch: " + instruction;
+		          }
+		        }
+
+		        system.newSideEffect(new ReceiverForDispatchOp(), receiverKey);
+		      }
+		    }
+		
+		private void handleJavascriptDispatch(final JavaScriptInvoke instruction, final InstanceKey receiverType) {
+		      int functionVn = instruction.getFunction();
+
+		      ReflectedFieldAction fieldDispatchAction = new ReflectedFieldAction() {
+		        @Override
+		        public void action(final AbstractFieldPointerKey fieldKey) {
+		            class FieldValueDispatch extends UnaryOperator<PointsToSetVariable> {
+		              private JavaScriptInvoke getInstruction() { return instruction; }
+		              private InstanceKey getReceiver() { return receiverType; }
+		              private AbstractFieldPointerKey getProperty() { return fieldKey; }
+		              private CGNode getNode() { return node; }
+		              
+		              @Override
+		              public byte evaluate(PointsToSetVariable lhs, PointsToSetVariable ptrs) {
+		                if(receiverType.getConcreteType() instanceof InterfaceClass){
+		                	if(DEBUG)
+		                		System.out.println(fieldKey + " (" + ptrs.getValue() + ")");
+		                	if(ptrs.getValue() == null)
+		                		mismatchW.add("[Error] the " + fieldKey + " is not matched.");
+		                }
+		                
+		                if (ptrs.getValue() != null) {
+		                  ptrs.getValue().foreach(new IntSetAction() {
+		                    @Override
+		                    public void act(int x) {
+		                      final InstanceKey functionObj = system.getInstanceKey(x);
+		                      visitInvokeInternal(instruction, new DefaultInvariantComputer() {
+		                        @Override
+		                        public InstanceKey[][] computeInvariantParameters(SSAAbstractInvokeInstruction call) {
+		                          InstanceKey[][] x = super.computeInvariantParameters(call);
+		                          if (x == null) {
+		                            x = new InstanceKey[call.getNumberOfUses()][];
+		                          }
+		                          x[0] = new InstanceKey[]{ functionObj };
+		                          x[1] = new InstanceKey[]{ receiverType };
+		                          return x;
+		                        }
+		                      });
+		                    } 
+		                  });
+		                }
+		                return NOT_CHANGED;
+		              }
+		              @Override
+		              public int hashCode() {
+		                return instruction.hashCode() * fieldKey.hashCode() * receiverType.hashCode();
+		              }
+		              @Override
+		              public boolean equals(Object o) {
+		                return o instanceof FieldValueDispatch &&
+		                ((FieldValueDispatch)o).getNode().equals(node) &&
+		                ((FieldValueDispatch)o).getInstruction() == instruction &&
+		                ((FieldValueDispatch)o).getProperty().equals(fieldKey) &&
+		                ((FieldValueDispatch)o).getReceiver().equals(receiverType);
+		              }
+		              @Override
+		              public String toString() {
+		                return "sub-dispatch for " + instruction + ": " + receiverType + ", " + fieldKey;
+		              } 
+		            };
+		          
+		            system.newSideEffect(new FieldValueDispatch(), fieldKey);
+		        }
+		        @Override
+		        public void dump(AbstractFieldPointerKey fieldKey, boolean constObj, boolean constProp) {
+		          System.err.println("dispatch to " + receiverType + "." + fieldKey + " for " + instruction);
+		        }
+		      };
+
+		      TransitivePrototypeKey prototypeObjs = new TransitivePrototypeKey(receiverType);
+		      InstanceKey[] objKeys = new InstanceKey[]{ receiverType };
+		      if (contentsAreInvariant(symbolTable, du, functionVn)) {
+		        InstanceKey[] fieldsKeys = getInvariantContents(functionVn);
+		        newFieldOperationObjectAndFieldConstant(true, fieldDispatchAction, objKeys, fieldsKeys);
+		        newFieldOperationOnlyFieldConstant(true, fieldDispatchAction, prototypeObjs, fieldsKeys);
+		      } else {
+		        PointerKey fieldKey = getPointerKeyForLocal(functionVn);
+		        newFieldOperationOnlyObjectConstant(true, fieldDispatchAction, fieldKey, objKeys);
+		        newFieldFullOperation(true, fieldDispatchAction, prototypeObjs, fieldKey);
+		      }
+		    }
+		
+		@Override
 		public void visitAstGlobalRead(AstGlobalRead instruction) {
 			// TODO Auto-generated method stub
 			int lval = instruction.getDef();
@@ -721,7 +880,7 @@ public class AndroidHybridCallGraphBuilder extends
 				IMethod method = node.getMethod();
 				if ((method instanceof AstMethod) == false)
 					Assertions.UNREACHABLE("Global read must be invoked in AstMethod: " + method.getClass().getName());
-				String fn = ((AstMethod) method).getSourcePosition().getURL().getFile();
+				String fn = getFileName((AstMethod) method);
 
 				if (fn.endsWith("preamble.js") || fn.endsWith("prologue.js")) {
 					for (InstanceKey globalObj : builder.getGlobalObjects(JavaScriptTypes.jsName)) {
@@ -762,7 +921,7 @@ public class AndroidHybridCallGraphBuilder extends
 			IMethod method = node.getMethod();
 			if ((method instanceof AstMethod) == false)
 				Assertions.UNREACHABLE("Global read must be invoked in AstMethod: " + method.getClass().getName());
-			String fn = ((AstMethod) method).getSourcePosition().getURL().getFile();
+			String fn = getFileName((AstMethod) method);
 
 			if (fn.endsWith("preamble.js") || fn.endsWith("prologue.js")) {
 				for (InstanceKey globalObj : builder.getGlobalObjects(JavaScriptTypes.jsName)) {
@@ -800,6 +959,16 @@ public class AndroidHybridCallGraphBuilder extends
 		}
 	}
 	
+	private String getFileName(AstMethod m){
+		String url = m.getSourcePosition().getURL().getFile();
+		try {
+			return java.net.URLDecoder.decode(url, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			return url;
+		}
+	}
+	
 	public class AndroidHybridJSImplicitPointsToSetVisitor extends JSImplicitPointsToSetVisitor {
 
 		public AndroidHybridJSImplicitPointsToSetVisitor(AstPointerAnalysisImpl analysis, LocalPointerKey lpk) {
@@ -817,7 +986,7 @@ public class AndroidHybridCallGraphBuilder extends
 			IMethod method = node.getMethod();
 			if ((method instanceof AstMethod) == false)
 				Assertions.UNREACHABLE("Global read must be invoked in AstMethod: " + method.getClass().getName());
-			String fn = ((AstMethod) method).getSourcePosition().getURL().getFile();
+			String fn = getFileName((AstMethod) method);
 
 			if (fn.endsWith("preamble.js") || fn.endsWith("prologue.js")) {
 				for (InstanceKey globalObj : getGlobalObjects(JavaScriptTypes.jsName)) {
@@ -846,4 +1015,8 @@ public class AndroidHybridCallGraphBuilder extends
 			}
 		}
 	};
+	
+	public Set<String> getWarning(){
+		return mismatchW;
+	}
 }

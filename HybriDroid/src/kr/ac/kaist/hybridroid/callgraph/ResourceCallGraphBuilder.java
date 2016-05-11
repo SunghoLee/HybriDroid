@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -45,6 +44,7 @@ import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.debug.UnimplementedError;
 
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
@@ -88,6 +88,8 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 		private final IClassHierarchy cha;
 		private final AndroidResourceAnalysis ara;
 		private final Map<Integer, ResourceInstanceKey> resKeyMap;
+		private final TypeReference fakeRootTR;
+		
 		public ResourceVisitor(SSAPropagationCallGraphBuilder builder, CGNode node, AndroidResourceAnalysis ara) {
 			super(builder, node);
 			// TODO Auto-generated constructor stub
@@ -100,7 +102,8 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 			TypeReference dialogTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/app/Dialog");
 			TypeReference viewTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/view/View");
 			TypeReference windowTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/view/Window");
-
+			fakeRootTR = TypeReference.findOrCreate(ClassLoaderReference.Primordial, "Lcom/ibm/wala/FakeRootClass");
+			
 			activityClass = cha.lookupClass(activityTR);
 			viewClass = cha.lookupClass(viewTR);
 			dialogClass = cha.lookupClass(dialogTR);
@@ -114,7 +117,17 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 		public void visitInvoke(SSAInvokeInstruction instruction) {
 			// TODO Auto-generated method stub
 			MethodReference target = instruction.getDeclaredTarget();
-			IClass mainClass = cha.lookupClass(target.getDeclaringClass());
+			TypeReference targetTR = target.getDeclaringClass();
+			
+			if(targetTR.equals(fakeRootTR)){
+				super.visitInvoke(instruction);
+				return;
+			}
+			
+			IClass mainClass = cha.lookupClass(targetTR);
+			
+//			if(mainClass == null)	
+//				Assertions.UNREACHABLE(target.getDeclaringClass() + " does not exist.");
 			
 			if (fvbiSelector.equals(target.getSelector()) && mainClass != null
 					&& (cha.isSubclassOf(mainClass, activityClass) || 
@@ -132,7 +145,10 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 					if(ccInst != null){
 						// at this point, instancekey may be exploit when the result is not converted to concrete type.
 						for(TypeReference tr : ccInst.getDeclaredResultTypes()){
-							ResourceInstanceKey rik = new ResourceInstanceKey(node, cha.lookupClass(tr), instruction.iindex, v);
+							IClass klass = cha.lookupClass(tr);
+							if(klass == null)
+								Assertions.UNREACHABLE(tr +" does not exist.");
+							ResourceInstanceKey rik = new ResourceInstanceKey(node, klass, instruction.iindex, v);
 							system.newConstraint(builder.getPointerKeyForLocal(node, defVar), rik);
 						}
 						return;
@@ -157,6 +173,9 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 						int v = resId;
 						if(ccInst != null){
 							for(TypeReference tr : ccInst.getDeclaredResultTypes()){
+								IClass klass = cha.lookupClass(tr);
+								if(klass == null)
+									Assertions.UNREACHABLE(tr +" does not exist.");
 								ResourceInstanceKey rik = new ResourceInstanceKey(node, cha.lookupClass(tr), instruction.iindex, v);
 								system.newConstraint(builder.getPointerKeyForLocal(node, defVar), rik);
 							}
@@ -185,7 +204,11 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 				}else{
 					if(symTab.isParameter(receiverVar)){
 						TypeReference tr = node.getMethod().getParameterType(receiverVar);
-						ResourceInstanceKey rik = new ResourceInstanceKey(node, cha.lookupClass(tr), instruction.iindex, v);
+						IClass klass = cha.lookupClass(tr);
+						if(klass == null)
+							Assertions.UNREACHABLE(tr +" does not exist.");
+						
+						ResourceInstanceKey rik = new ResourceInstanceKey(node, klass, instruction.iindex, v);
 						system.newConstraint(builder.getPointerKeyForLocal(node, receiverVar), rik);
 					}else{
 						SSAInstruction defInst = node.getDU().getDef(receiverVar);
@@ -332,7 +355,11 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 						
 						if(wtr.has()){
 							PointerKey pk = builder.getPointerKeyForLocal(node, receiverVar);
-							ResourceInstanceKey rik = new ResourceInstanceKey(node, cha.lookupClass(wtr.getObject()), instruction.iindex, v);
+							IClass klass = cha.lookupClass(wtr.getObject());
+							if(klass == null)
+								Assertions.UNREACHABLE(wtr.getObject() +" does not exist.");
+							
+							ResourceInstanceKey rik = new ResourceInstanceKey(node, klass, instruction.iindex, v);
 							
 							try{
 								system.newConstraint(pk, rik);

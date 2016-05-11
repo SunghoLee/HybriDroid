@@ -10,10 +10,12 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
+import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.strings.Atom;
 
 public class AndroidHybridMethodTargetSelector extends
 		CrossLanguageMethodTargetSelector {
+	public static boolean DEBUG = false;
 	
 	public AndroidHybridMethodTargetSelector(
 			Map<Atom, MethodTargetSelector> languageSelectors) {
@@ -26,10 +28,18 @@ public class AndroidHybridMethodTargetSelector extends
 		
 		if(receiver instanceof MockupClass){
 			IMethod target = ((MockupClass)receiver).getMethod();
-			
-//			System.err.println("@calling: " + target);
+			if(DEBUG){
+				System.err.println("@caller: " + caller);
+				System.err.println("@site: " + site);
+				System.err.println("@receiver: " + receiver);
+				System.err.println("@target: " + target);
+			}
 			return target;
-		}else{
+		}
+//		else if(caller.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Application)){
+//			return super.getCalleeTarget(caller, site, receiver);
+//		}
+		else{
 			return super.getCalleeTarget(caller, site, receiver);
 		}
 	}	

@@ -126,7 +126,7 @@ public class InterfaceClass extends AstClass implements IClass {
 		mFields.put(method.getName(), f);
 	}
 	
-	private int getAccessFlagForMethod(IMethod method){
+	private short getAccessFlagForMethod(IMethod method){
 		if(method.isPrivate()){
 			return Constants.ACC_PRIVATE;
 		}else if(method.isProtected()){
@@ -134,7 +134,8 @@ public class InterfaceClass extends AstClass implements IClass {
 		}else if(method.isPublic()){
 			return Constants.ACC_PUBLIC;
 		}else{
-			throw new InternalError("Access flag cannot be set: " + method);
+			//throw new InternalError("Access flag cannot be set: " + method);
+			return Constants.ACC_PUBLIC;
 		}
 	}
 	

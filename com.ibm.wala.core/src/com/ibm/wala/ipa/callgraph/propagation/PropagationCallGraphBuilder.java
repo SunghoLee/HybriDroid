@@ -624,6 +624,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
 
       boolean changed = false;
       FilteredPointerKey.TypeFilter filter = pk.getTypeFilter();
+//      System.out.println("#FilterType: " + filter.getClass().getName());
       changed = filter.addFiltered(system, lhs, rhs);
 
       if (DEBUG_FILTER) {

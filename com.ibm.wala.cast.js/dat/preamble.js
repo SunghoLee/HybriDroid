@@ -299,6 +299,9 @@ document = new DOMHTMLDocument();
 
 // Creating the root window object
 window = new DOMWindow();
+//Lee: model to point to the global object by window variable.
+window = this;
+//Lee
 
 document.body = new Object();
 

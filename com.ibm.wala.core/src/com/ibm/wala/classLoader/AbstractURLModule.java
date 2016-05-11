@@ -52,7 +52,6 @@ public abstract class AbstractURLModule implements Module, ModuleEntry {
   @Override
   public InputStream getInputStream() {
     try {
-//      System.out.println("#URL: "+url);
       return url.openConnection().getInputStream();
     } catch (IOException e) {
       Assertions.UNREACHABLE();
