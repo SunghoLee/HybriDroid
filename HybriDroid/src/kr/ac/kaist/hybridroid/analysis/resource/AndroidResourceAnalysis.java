@@ -78,7 +78,7 @@ public class AndroidResourceAnalysis {
 		Set<File> rSet = getFiles(smaliDir, "R$string.smali", "R.java");
 		if(rSet.isEmpty())
 			throw new InternalError("there is no R$string.smali file.");
-		
+//		
 		
 		for(File f : rSet){
 			String classpath = getClassPath(f);

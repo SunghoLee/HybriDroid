@@ -11,14 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
 import com.ibm.wala.cast.ipa.cha.CrossLanguageClassHierarchy;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.ipa.callgraph.JavaScriptConstructTargetSelector;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
-import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
@@ -67,6 +65,7 @@ import kr.ac.kaist.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.hybridroid.util.file.YMLParser.YMLData;
 import kr.ac.kaist.hybridroid.utils.LocalFileReader;
+import kr.ac.kaist.hybridroid.utils.VisualizeCGTest;
 
 /**
  * Build Control-flow graph for the target Android hybrid application. Now, it
@@ -306,7 +305,7 @@ public class HybridCFGAnalysis {
 		
 		System.out.println("Done");
 
-//		VisualizeCGTest.visualizeCallGraph(cg, "cg_dex", true);
+		VisualizeCGTest.visualizeCallGraph(cg, "cg_dex", true);
 		System.out.println("===== Not Found Error =====");
 		for(String s : b.getWarning()){
 			System.out.println(s);

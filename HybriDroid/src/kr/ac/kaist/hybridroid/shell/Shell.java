@@ -16,6 +16,7 @@ import com.ibm.wala.cast.js.ipa.callgraph.JSCFABuilder;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.test.JSCallGraphBuilderUtil;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
+import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -111,7 +112,7 @@ public class Shell {
 				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
 				
 				PrivateLeakageDetector pld = new PrivateLeakageDetector(mcg, p.snd);
-				pld.solve();
+				pld.analyze();
 				Shell.END = System.currentTimeMillis();
 				System.out.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
 				for(String s : pld.getWarnings()){

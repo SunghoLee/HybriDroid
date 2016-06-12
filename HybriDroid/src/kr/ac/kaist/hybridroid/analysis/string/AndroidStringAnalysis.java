@@ -157,8 +157,8 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	@SuppressWarnings("unchecked")
 	private void solve(ConstraintGraph cg){
 		ForwardSetSolver fss = new ForwardSetSolver();
-//		Map<IConstraintNode, IValue> res = fss.solve(cg);
-		Map<IConstraintNode, IValue> res = Collections.emptyMap();
+		Map<IConstraintNode, IValue> res = fss.solve(cg);
+//		Map<IConstraintNode, IValue> res = Collections.emptyMap();
 		for(IBox n : spotBoxSet){
 			IValue v = res.get(n);
 			if(v instanceof IStringValue && (v instanceof StringTopValue) == false && (v instanceof StringBotValue) == false){

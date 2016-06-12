@@ -53,7 +53,7 @@ public class StringModel {
 		else
 			classMap.put(cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/content/Context")), ContextClassModel.getInstance());
 		
-		classMap.put(cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Llibcore/net/UriCodec")), UriCodecClassModel.getInstance());
+//		classMap.put(cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Llibcore/net/UriCodec")), UriCodecClassModel.getInstance());
 		classMap.put(cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/net/URI")), UriClassModel.getInstance());
 		classMap.put(cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/lang/Object")), ObjectClassModel.getInstance());
 	}
