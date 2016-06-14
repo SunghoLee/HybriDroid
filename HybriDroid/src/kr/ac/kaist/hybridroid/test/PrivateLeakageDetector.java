@@ -12,6 +12,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer.GraphType;
 
 import com.ibm.wala.cast.ir.ssa.AstAssertInstruction;
 import com.ibm.wala.cast.ir.ssa.AstEchoInstruction;
@@ -65,7 +67,6 @@ import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.StaticFieldKey;
 import com.ibm.wala.ipa.cfg.BasicBlockInContext;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.sourcepos.Position;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAArrayLengthInstruction;
@@ -102,6 +103,7 @@ import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.intset.EmptyIntSet;
 import com.ibm.wala.util.intset.IntSet;
@@ -1616,10 +1618,52 @@ public class PrivateLeakageDetector {
 	public class LeakWarning{
 		private List<PointerKey> path;
 		private SSAInstruction sinkPoint;
+		private List<Pair<CGNode, Pair<String, String>>> pathFlow; 
 		
 		public LeakWarning(List<PointerKey> path, SSAInstruction sinkPoint){
+			pathFlow = new ArrayList<Pair<CGNode, Pair<String, String>>>();
 			this.path = path;
 			this.sinkPoint = sinkPoint;
+			buildPathFlow();
+		}
+		
+		private void buildPathFlow(){
+			String res = "[Warning] private leakage detected.";
+			for(int i=0; i < path.size(); i++){
+				if(i != 0)
+					res += "\n\t\t=>";
+				PointerKey pk = path.get(i);
+				if(pk instanceof LocalPointerKey){
+					
+					LocalPointerKey lpk = (LocalPointerKey) pk;
+					CGNode n = lpk.getNode();
+					int var = lpk.getValueNumber();
+					SSAInstruction defInst = n.getDU().getDef(var);
+					if(defInst instanceof SSAAbstractInvokeInstruction && defInst.getDef() == var && path.get(i - 1) instanceof LocalPointerKey && !((LocalPointerKey) path.get(i - 1)).getNode().equals(n)){
+						PointerKey ppk = path.get(i - 1);
+						LocalPointerKey lppk = (LocalPointerKey) ppk;
+						for(Iterator<SSAInstruction> ipinst = lppk.getNode().getDU().getUses(lppk.getValueNumber()); ipinst.hasNext(); ){
+							SSAInstruction pinst = ipinst.next();
+							if(pinst instanceof SSAReturnInstruction){
+								pathFlow.add(Pair.make(lppk.getNode(), Pair.make(getInstString(lppk.getNode(), pinst), getVarString(lppk.getNode(), pinst, lppk.getValueNumber()))));
+								pathFlow.add(Pair.make(n, Pair.make(getInstString(n, defInst), getVarString(n, defInst, var))));
+							}
+						}
+					}else{
+						pathFlow.add(Pair.make(n, Pair.make(getInstString(n, defInst), getVarString(n, defInst, var))));
+					}
+				}else if(pk instanceof SeedKey){
+					res += "\n\tSeed";
+				}else{
+					Assertions.UNREACHABLE("Please implement string output method");
+				}
+			}
+			
+			LocalPointerKey lastPK = (LocalPointerKey)path.get(path.size()-1);
+			CGNode n = lastPK.getNode();
+			int var = lastPK.getValueNumber();
+			
+			pathFlow.add(Pair.make(n, Pair.make(getInstString(n, sinkPoint), getVarString(n, sinkPoint, var))));
 		}
 		
 		private String getVarString(CGNode n, SSAInstruction inst, int var){
@@ -1726,6 +1770,58 @@ public class PrivateLeakageDetector {
 			if(o instanceof LeakWarning)
 				return path.equals(((LeakWarning) o).path);
 			return false;
+		}
+		
+		public void printPathFlow(String out){
+			Visualizer vis = Visualizer.getInstance();
+			vis.setType(GraphType.Digraph);
+			
+			for(int i=0; i < pathFlow.size()-1; i++){
+				Pair<CGNode, Pair<String, String>> pp = pathFlow.get(i);
+				CGNode n = pp.fst;
+				String inst = pp.snd.fst;
+				String var = pp.snd.snd;
+				
+				Pair<CGNode, Pair<String, String>> npp = pathFlow.get(i+1);
+				CGNode nn = npp.fst;
+				String ninst = npp.snd.fst;
+				String nvar = npp.snd.snd;
+				
+				String s = "";
+				if(n.getMethod().getDeclaringClass().getClassLoader().getReference().equals(JavaScriptTypes.jsLoader)){
+					
+					String nname = n.toString();
+					String fstname = nname.substring(0, nname.indexOf("/")-2);
+					String lastname = nname.substring(nname.lastIndexOf("/")+1, nname.length());
+					String middlename = nname.substring(nname.indexOf("/")+1, nname.lastIndexOf("/"));
+					
+//					System.out.println("fst: " + fstname);
+//					System.out.println("midd: " + middlename.substring(middlename.lastIndexOf("/")+1, middlename.length()));
+//					System.out.println("last: " + lastname);
+					s = nname + fstname + middlename.substring(middlename.lastIndexOf("/")+1, middlename.length()) + lastname; 
+				}else
+					s = n.toString();
+				System.out.println("s: "+s);
+				s += "\nInst: " + inst;
+				s += "\nVariable: " + var;
+				
+				String ns = "";
+				if(nn.getMethod().getDeclaringClass().getClassLoader().getReference().equals(JavaScriptTypes.jsLoader)){
+					String nname = nn.toString();
+					String fstname = nname.substring(0, nname.indexOf("/")-2);
+					String lastname = nname.substring(nname.lastIndexOf("/")+1, nname.length());
+					String middlename = nname.substring(nname.indexOf("/")+1, nname.lastIndexOf("/"));
+					
+					ns = nname + fstname + middlename.substring(middlename.lastIndexOf("/")+1, middlename.length()) + lastname;
+				}else
+					ns = nn.toString();
+				
+				ns += "\nInst: " + ninst;
+				ns += "\nVariable: " + nvar;
+				
+				vis.fromAtoB(s, ns);
+			}
+			vis.printGraph(out);
 		}
 	}
 }

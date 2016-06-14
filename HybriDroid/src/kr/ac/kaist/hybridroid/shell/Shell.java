@@ -15,6 +15,8 @@ import kr.ac.kaist.hybridroid.command.CommandArguments;
 import kr.ac.kaist.hybridroid.test.ModeledCallGraphForTaint;
 import kr.ac.kaist.hybridroid.test.PrivateLeakageDetector;
 import kr.ac.kaist.hybridroid.test.PrivateLeakageDetector.LeakWarning;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer.GraphType;
 
 import org.apache.commons.cli.ParseException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
@@ -118,7 +120,10 @@ public class Shell {
 					System.out.println("=========");
 					System.out.println(w);
 					System.out.println("=========");
-				}				
+					w.printPathFlow("leak.dot");
+				}
+				
+				SDG<InstanceKey> sdg = new SDG<InstanceKey>();
 			}
 		} else {
 			// TODO: support several functions

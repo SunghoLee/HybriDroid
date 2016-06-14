@@ -130,7 +130,7 @@ public class Visualizer {
 		String edge = "";
 		
 		if(type == null)
-			throw new InternalError("GraphType is not decided.");
+			type = GraphType.Digraph;
 		else
 			switch(type){
 			case Digraph:
