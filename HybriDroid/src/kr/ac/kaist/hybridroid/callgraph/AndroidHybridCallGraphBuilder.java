@@ -104,7 +104,7 @@ import kr.ac.kaist.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 public class AndroidHybridCallGraphBuilder extends
 		JavaJavaScriptHybridCallGraphBuilder {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	public static boolean NO_STOP = true;
 	public static boolean ALL_HTML_FOR_UNKNOWN = true;
 	
@@ -319,18 +319,21 @@ public class AndroidHybridCallGraphBuilder extends
 			// checking invoked method is 'addJavascriptInterface' of WebView
 			// class
 			
-			if(addjsSelector.equals(targetMethod)){
-				System.out.println("----");
-				System.out.println("#AddJavascriptInterface");
-				System.out.println("#receiver: " + receiver);
-				System.out.println("#caller: " + caller);
-				System.out.println("#callsite: " + site);
-				System.out.println("----");
+			if(DEBUG){
+				if(addjsSelector.equals(targetMethod)){
+					System.out.println("----");
+					System.out.println("#AddJavascriptInterface");
+					System.out.println("#receiver: " + receiver);
+					System.out.println("#caller: " + caller);
+					System.out.println("#callsite: " + site);
+					System.out.println("----");
+				}
 			}
 			if ((receiver != null && (wvClass.equals(receiver) || cha.isSubclassOf(receiver, wvClass)))
 					&& addjsSelector.equals(targetMethod)) {
 				
-				System.out.println("Invoked addJavascriptInterface.");
+				if(DEBUG)
+					System.out.println("Invoked addJavascriptInterface.");
 				
 				IR ir = caller.getIR();
 				SSAAbstractInvokeInstruction[] invokes = ir.getCalls(site);
@@ -362,7 +365,8 @@ public class AndroidHybridCallGraphBuilder extends
 							
 							int objIndex = 0;
 							for(BridgeDescription bd : bdSet){
-								System.out.println("\tbridge: " + bd.getTypeReference());
+								if(DEBUG)
+									System.out.println("\tbridge: " + bd.getTypeReference());
 								TypeReference tr = bd.getTypeReference();
 								IClass objClass = cha.lookupClass(tr);
 								InterfaceClass wClass = wrappingClass(objClass);
@@ -411,7 +415,8 @@ public class AndroidHybridCallGraphBuilder extends
 										PointerKey constantPK = builder.getPointerKeyForInstanceField(objKeys[i], f);
 										InstanceKey ik = makeMockupInstanceKey(method);
 										
-										System.out.println("\t\tBridgeMethod: " + constantPK + " -> " + ik);
+										if(DEBUG)
+											System.out.println("\t\tBridgeMethod: " + constantPK + " -> " + ik);
 										system.findOrCreateIndexForInstanceKey(ik);
 										
 										system.newConstraint(constantPK, ik);

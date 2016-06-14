@@ -5,22 +5,20 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.ibm.wala.classLoader.IClass;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer;
+import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer.GraphType;
+
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.ClassLoaderReference;
-import com.ibm.wala.types.MethodReference;
-import com.ibm.wala.types.TypeReference;
-
-import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer;
-import kr.ac.kaist.hybridroid.util.graph.visualize.Visualizer.GraphType;
 
 public class WalaCGVisualizer {
 	
@@ -38,6 +36,26 @@ public class WalaCGVisualizer {
 		return false;
 	}
 	
+	private boolean isFiltered(CGNode n){
+		if(n.toString().contains("ctor") || n.toString().contains("preamble.js") || n.toString().contains("prologue.js") || n.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Primordial) || n.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Extension))
+			return true;
+		return false;
+	}
+	
+	private Set<CGNode> getNonFilteredNodes(CallGraph cg, CGNode n){
+		Set<CGNode> s = new HashSet<CGNode>();
+		
+		for(Iterator<CGNode> ipred = cg.getPredNodes(n); ipred.hasNext(); ){
+			CGNode pred = ipred.next();
+			if(isFiltered(pred)){
+				s.addAll(getNonFilteredNodes(cg, pred));
+			}else{
+				s.add(pred);
+			}
+		}
+		return s;
+	}
+	
 	public File visualize(CallGraph cg, String out, Set<CGNode> s){
 	Visualizer vis = Visualizer.getInstance();
 		
@@ -45,16 +63,17 @@ public class WalaCGVisualizer {
 		vis.setType(GraphType.Digraph);
 		
 		for(CGNode node : cg){
-			if(node.toString().contains("preamble.js") || node.toString().contains("prologue.js") || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Primordial) || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Extension))
-				continue;
-			if(!s.contains(node) && isAndroidLibrary(node))
-				continue;
-			Iterator<CGNode> iPredNodes = cg.getPredNodes(node);
-			while(iPredNodes.hasNext()){
-				CGNode predNode = iPredNodes.next();
-				if(predNode.toString().contains("preamble.js") || predNode.toString().contains("prologue.js") || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Primordial) || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Extension))
-					continue;
-				vis.fromAtoB(getLabel(cg, predNode), getLabel(cg, node));
+			if(!isFiltered(node)){
+				Iterator<CGNode> iPredNodes = cg.getPredNodes(node);
+				while(iPredNodes.hasNext()){
+					CGNode predNode = iPredNodes.next();
+					if(isFiltered(predNode)){
+						for(CGNode n : getNonFilteredNodes(cg, predNode)){
+							vis.fromAtoB(getLabel(cg, n), getLabel(cg, node));
+						}
+					}else
+						vis.fromAtoB(getLabel(cg, predNode), getLabel(cg, node));
+				}
 			}
 		}
 		vis.printGraph(out);
@@ -69,14 +88,17 @@ public class WalaCGVisualizer {
 		vis.setType(GraphType.Digraph);
 		
 		for(CGNode node : cg){
-			if(node.toString().contains("preamble.js") || node.toString().contains("prologue.js") || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Primordial) || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Extension))
-				continue;
-			Iterator<CGNode> iPredNodes = cg.getPredNodes(node);
-			while(iPredNodes.hasNext()){
-				CGNode predNode = iPredNodes.next();
-				if(predNode.toString().contains("preamble.js") || predNode.toString().contains("prologue.js") || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Primordial) || node.getMethod().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Extension))
-					continue;
-				vis.fromAtoB(getLabel(cg, predNode), getLabel(cg, node));
+			if(!isFiltered(node)){
+				Iterator<CGNode> iPredNodes = cg.getPredNodes(node);
+				while(iPredNodes.hasNext()){
+					CGNode predNode = iPredNodes.next();
+					if(isFiltered(predNode)){
+						for(CGNode n : getNonFilteredNodes(cg, predNode)){
+							vis.fromAtoB(getLabel(cg, n), getLabel(cg, node));
+						}
+					}else
+						vis.fromAtoB(getLabel(cg, predNode), getLabel(cg, node));
+				}
 			}
 		}
 		vis.printGraph(out);
@@ -128,5 +150,24 @@ public class WalaCGVisualizer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public File transforms(File f, String tname) throws IOException{
+		String dir = f.getCanonicalPath().substring(0, f.getCanonicalPath().lastIndexOf("/"));
+		ProcessBuilder pb = new ProcessBuilder("/usr/local/bin/dot","-Tsvg","-o", tname, "-v", f.getCanonicalPath());
+		pb.directory(new File(dir));
+		Map<String,String> envs = pb.environment();
+//		envs.put("PATH", envs.get("PATH") + ":" + "/usr/local/bin/");
+		System.err.println("#translating " + f.getCanonicalPath() + " to " + dir + File.separator + tname);
+		try {
+			Process tr = pb.start();
+			int result = tr.waitFor();
+//			System.err.println("\tTranslation result: " + result);
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return new File(dir + File.separator + tname);
 	}
 }

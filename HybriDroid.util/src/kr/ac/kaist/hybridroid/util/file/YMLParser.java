@@ -112,6 +112,7 @@ public class YMLParser {
 		
 		private String toString(String indent, boolean root){
 			String res = "";
+			
 			if(!root)
 				res = name + ": " + ((value != null)? value : "");
 			

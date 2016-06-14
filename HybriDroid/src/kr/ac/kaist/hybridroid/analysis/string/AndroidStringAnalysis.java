@@ -81,6 +81,7 @@ import kr.ac.kaist.hybridroid.util.data.Pair;
  * @author Sungho Lee
  */
 public class AndroidStringAnalysis implements StringAnalysis{
+	public static boolean DEBUG = false;
 	private AnalysisScope scope;
 	private WorkList worklist;
 	private List<Hotspot> hotspots;
@@ -500,12 +501,14 @@ public class AndroidStringAnalysis implements StringAnalysis{
 			for(IBox next : res)
 				worklist.add(next);
 		}
-		System.out.println("--- constraint visitor warning ---");
-		for(String str : v.getWarnings()){
-			System.out.println("[Warning] " + str);
-		}
-		System.out.println("----------");
 		
+		if(DEBUG){
+			System.out.println("--- constraint visitor warning ---");
+			for(String str : v.getWarnings()){
+				System.out.println("[Warning] " + str);
+			}
+			System.out.println("----------");
+		}
 		return graph;
 	}
 

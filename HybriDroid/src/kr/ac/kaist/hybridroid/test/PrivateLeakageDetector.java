@@ -1,5 +1,6 @@
 package kr.ac.kaist.hybridroid.test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+
+import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
 
 import com.ibm.wala.cast.ir.ssa.AstAssertInstruction;
 import com.ibm.wala.cast.ir.ssa.AstEchoInstruction;
@@ -30,6 +33,8 @@ import com.ibm.wala.cast.js.ssa.JavaScriptWithRegion;
 import com.ibm.wala.cast.js.ssa.PrototypeLookup;
 import com.ibm.wala.cast.js.ssa.SetPrototype;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
+import com.ibm.wala.cast.loader.AstMethod;
+import com.ibm.wala.cast.util.SourceBuffer;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
@@ -60,6 +65,7 @@ import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.StaticFieldKey;
 import com.ibm.wala.ipa.cfg.BasicBlockInContext;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.sourcepos.Position;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAArrayLengthInstruction;
@@ -102,8 +108,6 @@ import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.MutableSparseIntSet;
 import com.ibm.wala.util.intset.SparseIntSet;
 
-import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
-
 public class PrivateLeakageDetector {
 	private final ICFGSupergraph supergraph;
 	private final CallGraph cg;
@@ -139,7 +143,38 @@ public class PrivateLeakageDetector {
 	public static boolean DEBUG = false;
 	private final PointerKey dummy = new PointerKey(){};
 	
-	private final List<String> warn = new ArrayList<String>();
+	private final Map<PointerKey, Set<PointerKey>> toFromMap = new HashMap<PointerKey, Set<PointerKey>>();
+	
+	private final Set<LeakWarning> warn = new HashSet<LeakWarning>();
+	
+	private void fromTo(PointerKey from, PointerKey to){
+		if(!toFromMap.containsKey(to)){
+			toFromMap.put(to, new HashSet<PointerKey>());
+		}
+		
+		toFromMap.get(to).add(from);
+	}
+	
+	private Set<List<PointerKey>> calcPath(PointerKey pk){
+		if(pk instanceof SeedKey){
+			Set<List<PointerKey>> sl = new HashSet<List<PointerKey>>();
+			List<PointerKey> l = new ArrayList<PointerKey>();
+			l.add(pk);
+			sl.add(l);
+			return sl;
+		}
+		
+		Set<List<PointerKey>> sl = new HashSet<List<PointerKey>>();
+		List<PointerKey> l = new ArrayList<PointerKey>();
+		for(PointerKey pred : toFromMap.get(pk)){
+			sl.addAll(calcPath(pred));
+		}
+		for(List<PointerKey> lpk : sl){
+			lpk.add(pk);
+		}
+		return sl;
+	}
+	
 	private static MethodReference[] mSourceRefs = {
 			//for wifi information
 			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Application, "Landroid/telephony/TelephonyManager"), Selector.make("getLine1Number()Ljava/lang/String;")),
@@ -428,6 +463,7 @@ public class PrivateLeakageDetector {
 							if(initInst != null){
 								int def = newInst.getDef();
 								int d = domain.add(pa.getHeapModel().getPointerKeyForLocal(n, def));
+								fromTo(new SeedKey(), pa.getHeapModel().getPointerKeyForLocal(n, def));
 								
 								for(BasicBlockInContext<IExplodedBasicBlock> entry : supergraph.getEntriesForProcedure(n)){
 									for(Iterator<BasicBlockInContext<IExplodedBasicBlock>> isucc = supergraph.getSuccNodes(entry); isucc.hasNext(); ){
@@ -514,6 +550,7 @@ public class PrivateLeakageDetector {
 										if(mr.equals(callInst.getDeclaredTarget())){
 											BasicBlockInContext<IExplodedBasicBlock> callBlock = getBlockForCall(n, callInst);
 											int defVar = callInst.getDef();
+											fromTo(new SeedKey(), pa.getHeapModel().getPointerKeyForLocal(n, defVar));
 											int d = domain.add(pa.getHeapModel().getPointerKeyForLocal(n, defVar));
 											
 //											for(BasicBlockInContext<IExplodedBasicBlock> entrybb : supergraph.getEntriesForProcedure(cg.getFakeRootNode())){
@@ -612,11 +649,13 @@ public class PrivateLeakageDetector {
 											for(int i=0; i < phiInst.getNumberOfUses(); i++){
 												int use = phiInst.getUse(i);
 												if(use == -1){
+													fromTo(pk, defPK);
 													int d2 = domain.add(defPK);
 													ds.add(d2);
 												}else{
 													PointerKey usePK = pa.getHeapModel().getPointerKeyForLocal(node, use);
 													if(pk.equals(usePK)){
+														fromTo(pk, defPK);
 														int d2 = domain.add(defPK);
 														ds.add(d2);
 													}
@@ -631,6 +670,7 @@ public class PrivateLeakageDetector {
 										PointerKey arrPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getUse(0));
 										if(pk.equals(arrPK)){
 											PointerKey defPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getDef());
+											fromTo(pk, defPK);
 											ds.add(domain.add(defPK));
 										}
 									}
@@ -641,6 +681,7 @@ public class PrivateLeakageDetector {
 										PointerKey valuePK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getUse(2));
 										if(pk.equals(valuePK)){
 											PointerKey arrPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getUse(0));
+											fromTo(pk, arrPK);
 											ds.add(domain.add(arrPK));
 										}
 									}
@@ -663,6 +704,7 @@ public class PrivateLeakageDetector {
 										PointerKey usePK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getUse(0));
 										if(pk.equals(usePK)){
 											PointerKey defPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getDef());
+											fromTo(pk, defPK);
 											ds.add(domain.add(defPK));
 										}
 									}
@@ -702,6 +744,7 @@ public class PrivateLeakageDetector {
 											if(sField != null)
 												if(pk.equals(sfPK)){
 													PointerKey defPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getDef());
+													fromTo(pk, defPK);
 													ds.add(domain.add(defPK));
 												}
 										}else{
@@ -724,6 +767,7 @@ public class PrivateLeakageDetector {
 												IField sField = cg.getClassHierarchy().resolveField(instruction.getDeclaredField());
 												if(sField != null){
 													PointerKey sfPK = pa.getHeapModel().getPointerKeyForStaticField(sField);
+													fromTo(pk, sfPK);
 													ds.add(domain.add(sfPK));
 												}
 											}
@@ -733,6 +777,7 @@ public class PrivateLeakageDetector {
 												IField iField = cg.getClassHierarchy().resolveField(instruction.getDeclaredField());
 												if(iField != null){
 													GlobalFieldKey gfk = new GlobalFieldKey(iField);
+													fromTo(pk, gfk);
 													ds.add(domain.add(gfk));
 												}
 											}
@@ -777,6 +822,7 @@ public class PrivateLeakageDetector {
 										if(pk.equals(usePK)){
 											int def = instruction.getDef();
 											PointerKey defPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), def);
+											fromTo(pk, defPK);
 											int d2 = domain.add(defPK);
 											ds.add(d2);
 										}
@@ -795,6 +841,7 @@ public class PrivateLeakageDetector {
 											PointerKey usePK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getUse(i));
 											if(pk.equals(usePK)){
 												PointerKey defPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), instruction.getDef());
+												fromTo(pk, defPK);
 												ds.add(domain.add(defPK));
 												break;
 											}
@@ -976,9 +1023,9 @@ public class PrivateLeakageDetector {
 								PointerKey tpk = domain.getMappedObject(d1);
 								for(int i=0; i<src.getLastInstruction().getNumberOfUses(); i++)
 									if(pa.getHeapModel().getPointerKeyForLocal(src.getNode(), src.getLastInstruction().getUse(i)).equals(tpk)){
-										warn.add("[Warning] private leakage detected at " + src.getNode());
-										warn.add("\tinst: " + src.getLastInstruction());
-										warn.add("\tPK: " + tpk);
+										for(List<PointerKey> l : calcPath(tpk)){
+											warn.add(new LeakWarning(l, src.getLastInstruction()));
+										}
 									}	
 								return EmptyIntSet.instance;
 							}
@@ -1078,10 +1125,12 @@ public class PrivateLeakageDetector {
 										else
 											return SparseIntSet.singleton(d1);
 									else if(destSelector.equals(onActivityResultSelector)){
-										if(tpk instanceof LocalPointerKey)
+										if(tpk instanceof LocalPointerKey){
+											fromTo(tpk, pa.getHeapModel().getPointerKeyForLocal(destNode, 4));
 											return SparseIntSet.singleton(domain.add(pa.getHeapModel().getPointerKeyForLocal(destNode, 4)));
-										else{
+										}else{
 											SparseIntSet s =SparseIntSet.singleton(d1);
+											fromTo(tpk, pa.getHeapModel().getPointerKeyForLocal(destNode, 4));
 											return s.add(s, domain.add(pa.getHeapModel().getPointerKeyForLocal(destNode, 4)));
 										}
 									}
@@ -1169,6 +1218,7 @@ public class PrivateLeakageDetector {
 							PointerKey pk = domain.getMappedObject(d1);
 							
 							if(pkSet.contains(pk)){
+								fromTo(domain.getMappedObject(d1), pa.getHeapModel().getPointerKeyForLocal(call.getNode(), call.getLastInstruction().getDef()));
 								int d = domain.add(pa.getHeapModel().getPointerKeyForLocal(call.getNode(), call.getLastInstruction().getDef()));
 								if(pk instanceof LocalPointerKey){
 									return SparseIntSet.singleton(d);
@@ -1226,12 +1276,14 @@ public class PrivateLeakageDetector {
 												}else if(pk instanceof StaticFieldKey){
 													StaticFieldKey stpk = (StaticFieldKey) pk;
 													if(stpk.getField().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Application) && !isAndroidLibrary(stpk.getField().getDeclaringClass())){
+														fromTo(domain.getMappedObject(d1), pk);
 														int d = domain.add(pk);
 														s = s.add(s, d);
 													}
 												}else if(pk instanceof InstanceFieldKey){
 													InstanceFieldKey itpk = (InstanceFieldKey) pk;
 													if(itpk.getField().getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Application) && !isAndroidLibrary(itpk.getField().getDeclaringClass())){
+														fromTo(domain.getMappedObject(d1), pk);
 														int d = domain.add(pk);
 														s = s.add(s, d);
 													}
@@ -1382,6 +1434,7 @@ public class PrivateLeakageDetector {
 								for(int i = 0; i < invokeInst.getNumberOfUses(); i++){
 									int use = invokeInst.getUse(i);
 									PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), use);
+									fromTo(domain.getMappedObject(d1), pk);
 									int d3 = domain.add(pk);
 									s.add(d3);
 								}
@@ -1389,6 +1442,7 @@ public class PrivateLeakageDetector {
 								if(invokeInst.hasDef()){
 									int def = invokeInst.getDef();
 									PointerKey defPK = pa.getHeapModel().getPointerKeyForLocal(src.getNode(), def);
+									fromTo(domain.getMappedObject(d1), defPK);
 									int d2 = domain.add(defPK);
 									s.add(d2);
 								}
@@ -1434,6 +1488,7 @@ public class PrivateLeakageDetector {
 							PointerKey pk = domain.getMappedObject(d1);
 							
 							if(pkSet.contains(pk)){
+								fromTo(pk, pa.getHeapModel().getPointerKeyForLocal(call.getNode(), call.getLastInstruction().getDef()));
 								int d = domain.add(pa.getHeapModel().getPointerKeyForLocal(call.getNode(), call.getLastInstruction().getDef()));
 								if(pk instanceof LocalPointerKey){
 									return SparseIntSet.singleton(d);
@@ -1546,16 +1601,131 @@ public class PrivateLeakageDetector {
 		}
 	}
 	
-	public List<String> getWarnings(){
+	public Set<LeakWarning> getWarnings(){
 		return warn;
 	}
 	
+	class SeedKey implements PointerKey{
+		
+		@Override
+		public String toString(){
+			return "SEED";
+		}
+	}
+	
 	public class LeakWarning{
-		private BasicBlockInContext<IExplodedBasicBlock> sinkPoint;
-		private List<BasicBlockInContext<IExplodedBasicBlock>> path;
-		public LeakWarning(BasicBlockInContext<IExplodedBasicBlock> bb, List<BasicBlockInContext<IExplodedBasicBlock>> path){
-			this.sinkPoint = bb;
+		private List<PointerKey> path;
+		private SSAInstruction sinkPoint;
+		
+		public LeakWarning(List<PointerKey> path, SSAInstruction sinkPoint){
 			this.path = path;
+			this.sinkPoint = sinkPoint;
+		}
+		
+		private String getVarString(CGNode n, SSAInstruction inst, int var){
+			SymbolTable symTab = n.getIR().getSymbolTable();
+			String[] names = n.getIR().getLocalNames(inst.iindex, var);
+			if(names == null || names.length == 0)
+				return var + "";
+			
+			String res = "";
+			for(String name : names){
+				res += name + " ";
+			}
+			return res;
+		}
+		
+		private String getInstString(CGNode n, SSAInstruction inst){
+			IMethod m = n.getMethod();
+			int instIndex = inst.iindex;
+			int i = instIndex + 1;
+			for(; i < n.getIR().getInstructions().length; i++){
+				if(n.getIR().getInstructions()[i] == null)
+					continue;
+				break;
+			}
+			
+			instIndex = i - 1;
+			
+			if(m instanceof AstMethod){
+				
+				com.ibm.wala.cast.tree.CAstSourcePositionMap.Position p = ((AstMethod)m).getSourcePosition(instIndex);
+				SourceBuffer buf;
+				try {
+					buf = new SourceBuffer(p);
+					return buf.toString();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else{
+				return inst.toString(n.getIR().getSymbolTable());
+			}
+			return inst.toString();
+		}
+		
+		public String toString(){
+			String res = "[Warning] private leakage detected.";
+			for(int i=0; i < path.size(); i++){
+				if(i != 0)
+					res += "\n\t\t=>";
+				PointerKey pk = path.get(i);
+				if(pk instanceof LocalPointerKey){
+					
+					LocalPointerKey lpk = (LocalPointerKey) pk;
+					CGNode n = lpk.getNode();
+					int var = lpk.getValueNumber();
+					SSAInstruction defInst = n.getDU().getDef(var);
+					if(defInst instanceof SSAAbstractInvokeInstruction && defInst.getDef() == var && path.get(i - 1) instanceof LocalPointerKey && !((LocalPointerKey) path.get(i - 1)).getNode().equals(n)){
+						PointerKey ppk = path.get(i - 1);
+						LocalPointerKey lppk = (LocalPointerKey) ppk;
+						for(Iterator<SSAInstruction> ipinst = lppk.getNode().getDU().getUses(lppk.getValueNumber()); ipinst.hasNext(); ){
+							SSAInstruction pinst = ipinst.next();
+							if(pinst instanceof SSAReturnInstruction){
+								res += "\n\tNode: " + lppk.getNode();
+								res += "\n\tVar: " + getVarString(lppk.getNode(), pinst, lppk.getValueNumber());
+								res += "\n\tInst: " + getInstString(lppk.getNode(), pinst);
+								
+								res += "\n\t\t=>";
+								
+								res += "\n\tNode: " + n;
+								res += "\n\tVar: " + getVarString(n, defInst, var);
+								res += "\n\tInst: " + getInstString(n, defInst);
+							}
+						}
+					}else{
+						res += "\n\tNode: " + n;
+						res += "\n\tVar: " + getVarString(n, defInst, var);
+						res += "\n\tInst: " + getInstString(n, defInst);
+					}
+				}else if(pk instanceof SeedKey){
+					res += "\n\tSeed";
+				}else{
+					Assertions.UNREACHABLE("Please implement string output method");
+				}
+			}
+			
+			LocalPointerKey lastPK = (LocalPointerKey)path.get(path.size()-1);
+			CGNode n = lastPK.getNode();
+			int var = lastPK.getValueNumber();
+			res += "\n\t\t=>";
+			res += "\n\tNode: " + n;
+			res += "\n\tVar: " + getVarString(n, sinkPoint, var);
+			res += "\n\tInst: " + getInstString(n, sinkPoint);
+			
+			return res;
+		}
+		
+		@Override
+		public int hashCode(){
+			return path.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof LeakWarning)
+				return path.equals(((LeakWarning) o).path);
+			return false;
 		}
 	}
 }

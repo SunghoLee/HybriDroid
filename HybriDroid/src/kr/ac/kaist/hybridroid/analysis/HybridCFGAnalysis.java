@@ -11,6 +11,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
+import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
+import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
+import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
+import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
+import kr.ac.kaist.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
+import kr.ac.kaist.hybridroid.callgraph.AndroidHybridMethodTargetSelector;
+import kr.ac.kaist.hybridroid.callgraph.HybridClassLoaderFactory;
+import kr.ac.kaist.hybridroid.callgraph.HybridIRFactory;
+import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
+import kr.ac.kaist.hybridroid.command.CommandArguments;
+import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
+import kr.ac.kaist.hybridroid.shell.Shell;
+import kr.ac.kaist.hybridroid.test.TaintAnalysisForHybrid;
+import kr.ac.kaist.hybridroid.util.file.FileCollector;
+import kr.ac.kaist.hybridroid.util.file.FileWriter;
+import kr.ac.kaist.hybridroid.util.file.YMLParser;
+import kr.ac.kaist.hybridroid.util.file.YMLParser.YMLData;
+import kr.ac.kaist.hybridroid.utils.LocalFileReader;
+
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
 import com.ibm.wala.cast.ipa.cha.CrossLanguageClassHierarchy;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
@@ -42,30 +66,6 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.strings.Atom;
-
-import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
-import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
-import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
-import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
-import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
-import kr.ac.kaist.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
-import kr.ac.kaist.hybridroid.callgraph.AndroidHybridMethodTargetSelector;
-import kr.ac.kaist.hybridroid.callgraph.HybridClassLoaderFactory;
-import kr.ac.kaist.hybridroid.callgraph.HybridIRFactory;
-import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
-import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
-import kr.ac.kaist.hybridroid.command.CommandArguments;
-import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
-import kr.ac.kaist.hybridroid.shell.Shell;
-import kr.ac.kaist.hybridroid.test.TaintAnalysisForHybrid;
-import kr.ac.kaist.hybridroid.util.file.FileCollector;
-import kr.ac.kaist.hybridroid.util.file.FileWriter;
-import kr.ac.kaist.hybridroid.util.file.YMLParser;
-import kr.ac.kaist.hybridroid.util.file.YMLParser.YMLData;
-import kr.ac.kaist.hybridroid.utils.LocalFileReader;
-import kr.ac.kaist.hybridroid.utils.VisualizeCGTest;
 
 /**
  * Build Control-flow graph for the target Android hybrid application. Now, it
@@ -183,7 +183,7 @@ public class HybridCFGAnalysis {
 		//make javascript code as seperate js file
 		int i = 1;
 		for(HotspotDescriptor hd : asa.getAllDescriptors()){
-			System.out.println(hd);
+
 			Set<String> vs = hd.getValues();
 			Map<String, String> chMap = new HashMap<String, String>();
 			
@@ -302,15 +302,18 @@ public class HybridCFGAnalysis {
 
 		CallGraph cg = b.makeCallGraph(options);
 		PointerAnalysis<InstanceKey> pa = b.getPointerAnalysis();
-		
-		System.out.println("Done");
 
-		VisualizeCGTest.visualizeCallGraph(cg, "cg_dex", true);
-		System.out.println("===== Not Found Error =====");
-		for(String s : b.getWarning()){
-			System.out.println(s);
-		}
-		System.out.println("===========================");
+		WalaCGVisualizer vis = new WalaCGVisualizer();
+		File viscgDex = vis.visualize(cg, "cg_new.dex");
+		vis.transforms(viscgDex, "cg_new.svg");
+//		VisualizeCGTest.visualizeCallGraph(cg, "cg_dex", true);
+		
+		//print warning
+//		System.out.println("===== Not Found Error =====");
+//		for(String s : b.getWarning()){
+//			System.out.println(s);
+//		}
+//		System.out.println("===========================");
 		
 		printTypeWarning(b.getWarnings());
 
@@ -354,43 +357,13 @@ public class HybridCFGAnalysis {
 		return nodes;
 	}
 
-	private static Set<CGNode> printNodeInsts(CallGraph cg, String className,
-			String methodName) {
-		Set<CGNode> nodes = new HashSet<CGNode>();
-		// System.out.println(cg);
-		for (CGNode node : cg) {
-			if (((methodName != null) ? node.getMethod().getName().toString()
-					.contains(methodName) : true)
-					&& ((className != null) ? node.getMethod()
-							.getDeclaringClass().getName().getClassName()
-							.toString().contains(className) : true)) {
-				nodes.add(node);
-				System.out.println("=======");
-				System.out.println("\t#Node: " + node);
-				IR ir = node.getIR();
-				if (ir != null) {
-					int index = 1;
-					for (SSAInstruction inst : ir.getInstructions()) {
-						System.out.println("\t\t(" + (index++) + ") " + inst);
-					}
-				}
-				System.out.println("=======");
-				System.out.println();
-			}
-		}
-		if (nodes.size() == 0)
-			System.out.println("Not found the Method: " + methodName + "( "
-					+ className + " )");
-
-		return nodes;
-	}
-
 	private static void printTypeWarning(Set<Warning> warnings) {
 		// TODO Auto-generated method stub
-		System.out.println("=== Type mismatch warnings ===");
-		for (Warning tw : warnings) {
-			System.out.println(tw);
-		}
-		System.out.println("==============================");
+		//for type mismatch printing
+//		System.out.println("=== Type mismatch warnings ===");
+//		for (Warning tw : warnings) {
+//			System.out.println(tw);
+//		}
+//		System.out.println("==============================");
 	}
 }
