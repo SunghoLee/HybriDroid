@@ -81,7 +81,7 @@ import com.ibm.wala.util.strings.StringStuff;
 public final /* singleton */ class AndroidEntryPointManager implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(AndroidEntryPointManager.class);
 
-    public static final AndroidEntryPointManager MANAGER = new AndroidEntryPointManager();
+    public static AndroidEntryPointManager MANAGER = new AndroidEntryPointManager();
     public static List<AndroidEntryPoint> ENTRIES = new ArrayList<AndroidEntryPoint>();
     /**
      * This is TRANSIENT!
@@ -103,7 +103,12 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
         return false;
     }
 
-    private AndroidEntryPointManager() {} 
+    private AndroidEntryPointManager() {}
+
+    public static void reset() {
+        ENTRIES = new ArrayList<AndroidEntryPoint>();
+        MANAGER = new AndroidEntryPointManager();
+    }
 
     public Set<TypeReference> getComponents() {
         if (ENTRIES.isEmpty()) {
@@ -247,7 +252,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
         return prev;
     }
 
-    private Class<? extends AbstractAndroidModel> abstractAndroidModel = LoopAndroidModel.class;
+    private Class abstractAndroidModel = LoopAndroidModel.class;
     /**
      *  What special handling to insert into the model.
      *
@@ -266,7 +271,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
             return new LoopAndroidModel(body, insts, paramManager, entryPoints);
         } else {
             try {
-                final Constructor<? extends AbstractAndroidModel> ctor = this.abstractAndroidModel.getDeclaredConstructor(
+                final Constructor<AbstractAndroidModel> ctor = this.abstractAndroidModel.getDeclaredConstructor(
                     VolatileMethodSummary.class, TypeSafeInstructionFactory.class, SSAValueManager.class,
                     Iterable.class);
                 if (ctor == null) {
@@ -295,7 +300,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
      *
      *  @return null or the class set using setModelBehavior
      */
-    public Class<?> getModelBehavior() {
+    public Class getModelBehavior() {
         return this.abstractAndroidModel;
     }
 
@@ -304,7 +309,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
      *
      *  @throws IllgealArgumentException if the abstractAndroidModel does not subclass AbstractAndroidModel
      */
-    public void setModelBehavior(Class<? extends AbstractAndroidModel> abstractAndroidModel) {
+    public void setModelBehavior(Class abstractAndroidModel) {
         if (abstractAndroidModel == null) {
             throw new IllegalArgumentException("abstractAndroidModel may not be null. Use SequentialAndroidModel " +
                     "if no special handling shall be inserted.");

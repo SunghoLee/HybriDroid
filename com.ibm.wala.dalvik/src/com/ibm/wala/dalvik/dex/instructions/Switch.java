@@ -49,13 +49,10 @@
 package com.ibm.wala.dalvik.dex.instructions;
 
 import org.jf.dexlib.Code.Opcode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ibm.wala.dalvik.classLoader.DexIMethod;
 
 public class Switch extends Instruction {
-	private static final Logger logger = LoggerFactory.getLogger(Switch.class);
 
     public final int regA;
     public final int tableAddressOffset;
@@ -78,16 +75,13 @@ public class Switch extends Instruction {
 
     private void computeCasesAndLabels() {
         casesAndLabels = pad.getLabelsAndOffsets();
+ 
         for (int i = 1; i < casesAndLabels.length; i+=2)
-            casesAndLabels[i] = method.getInstructionIndex(pc+casesAndLabels[i]);
-
-        defaultLabel = method.getInstructionIndex(pc + pad.getDefaultOffset());
-        logger.debug("SwitchInstruction");
-        for (int i = 0; i < casesAndLabels.length; i+=2) {
-        	logger.debug("\tcase: " + casesAndLabels[i] + 
-        			" label: "+casesAndLabels[i+1]);
-        }
-        logger.debug("\tdefaultLabel: " + defaultLabel);
+//            casesAndLabels[i] = method.getInstructionIndex(pc+casesAndLabels[i]);
+        	casesAndLabels[i] = pc+casesAndLabels[i];
+        
+        // defaultLabel = method.getInstructionIndex(pc + pad.getDefaultOffset());
+        defaultLabel = pc + pad.getDefaultOffset();
     }
 
     public int[] getOffsets()
@@ -107,9 +101,9 @@ public class Switch extends Instruction {
     @Override
     public int[] getBranchTargets() {
         int[] r = new int[casesAndLabels.length / 2 + 1];
-        r[0] = defaultLabel;
+        r[0] = method.getInstructionIndex(defaultLabel);
         for (int i = 1; i < r.length; i++) {
-            r[i] = casesAndLabels[(i - 1) * 2 + 1];
+            r[i] = method.getInstructionIndex(casesAndLabels[(i - 1) * 2 + 1]);
         }
         return r;
     }

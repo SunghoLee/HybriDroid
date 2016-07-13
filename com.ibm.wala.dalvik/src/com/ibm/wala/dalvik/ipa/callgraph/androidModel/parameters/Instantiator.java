@@ -107,7 +107,7 @@ public class Instantiator implements IInstantiator {
     }
 
     private boolean isExcluded(IClass cls) {
-        if (this.analysisScope.getExclusions().contains(cls.getName().toString())) {   // XXX FUUUUU
+        if (this.analysisScope.getExclusions() != null && this.analysisScope.getExclusions().contains(cls.getName().toString())) {   // XXX FUUUUU
             logger.info("Hit exclusions with {}", cls);
             return true;
         } else {
@@ -138,9 +138,9 @@ public class Instantiator implements IInstantiator {
         }
 
         { // Special type?
-            final SpecializedInstantiator sInst = new SpecializedInstantiator(body, instructionFactory, pm,
-                    cha, scope, analysisScope, this);
-            if (sInst.understands(T)) {
+            if (SpecializedInstantiator.understands(T)) {
+                final SpecializedInstantiator sInst = new SpecializedInstantiator(body, instructionFactory, pm,
+                        cha, scope, analysisScope, this);
                 return sInst.createInstance(T, asManaged, key, seen);
             }
         }

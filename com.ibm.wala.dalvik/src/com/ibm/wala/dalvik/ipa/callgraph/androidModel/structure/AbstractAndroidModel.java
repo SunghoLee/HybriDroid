@@ -90,26 +90,6 @@ public abstract class AbstractAndroidModel  {
     //
 
     /**
-     *  Breaks a basic block.
-     *
-     *  When inserting loops into the model you have to assure a new basic block starts at the
-     *  target of the jump.
-     *  <p>
-     *  An endless loop is a really silly way to do that, but it worked for static analysis.
-     *
-     *  @return The PC after insertion.
-     *  @deprecated The GoTo instruction breaks basic blocks by itself now, no need to call this
-     *      function any longer
-     */
-    @Deprecated
-    protected int makeBrakingNOP(int PC) {
-        logger.info("Adding Jump-Target at " + PC);
-        body.addStatement(insts.GotoInstruction(PC, PC));
-        PC++;
-        return PC;
-    }
-
-    /**
      *  Return a List of all Types returned by functions between start (inclusive) and end (exclusive).
      *
      *  @return That list

@@ -11,3 +11,8 @@ com\/ibm\/security\/.*
 org\/apache\/xerces\/.*
 dalvik\/.*
 java\/io\/ObjectStreamClass*
+apple\/.*
+com\/apple\/.*
+jdk\/.*
+org\/omg\/.*
+org\/w3c\/.*

@@ -42,12 +42,13 @@ public final class WalaProperties {
   public final static String ANDROID_RT_JAVA_JAR = "android_rt_jar";
 
   public final static String ANDROID_DEX_TOOL = "android_dx_tool";
-
+  
   public final static String ANDROID_APK_TOOL = "android_apk_tool";
   
   public final static String DROIDEL_TOOL = "droidel_tool";
   
   public final static String DROIDEL_ANDROID_JAR = "droidel_android_jar";
+
   /**
    * Determine the classpath noted in wala.properties for J2SE standard libraries
    * 
@@ -64,7 +65,10 @@ public final class WalaProperties {
     }
 
     String dir = p.getProperty(WalaProperties.J2SE_DIR);
-    Assertions.productionAssertion(dir != null);
+    if (dir == null || !(new File(dir)).isDirectory()) {
+      System.err.println("WARNING: java_runtime_dir " + dir + " in wala.properties is invalid.  Using boot class path instead.");
+      return PlatformUtil.getBootClassPathJars();      
+    }
     return getJarsInDirectory(dir);
   }
 
@@ -131,7 +135,6 @@ public final class WalaProperties {
       throw new IllegalArgumentException("null fileName");
     }
     final InputStream propertyStream = loader.getResourceAsStream(fileName);
-
     if (propertyStream == null) {
       // create default properties
       Properties defprop = new Properties();

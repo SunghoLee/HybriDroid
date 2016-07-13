@@ -152,10 +152,20 @@ public final class AndroidEntryPointLocator {
         int dummy = 0;  // for the progress monitor
         for (IClass cls : cha) {
             mon.worked(dummy++);
+            if (cls.getName().toString().contains("MainActivity")) {
+            	System.err.println("got here");
+            }
             if (isExcluded(cls)) continue;
-            if (!cls.isInterface() && !cls.isAbstract() && cls.getClassLoader().getName().equals(AnalysisScope.APPLICATION)) {
+            if (!cls.isInterface() && 
+            	!cls.isAbstract() && 
+            	!( cls.getClassLoader().getName().equals(AnalysisScope.PRIMORDIAL) ||
+            	   cls.getClassLoader().getName().equals(AnalysisScope.EXTENSION)
+            	 )) {
 nextMethod:
                 for (final IMethod m : cls.getDeclaredMethods()) {
+                    if (cls.getName().toString().contains("MainActivity")) {
+                    	System.err.println("got here: " + m);
+                    }
                 	// If there is a Method signature in the possible entry points use thatone
                     for (AndroidPossibleEntryPoint e: possibleEntryPoints) {
                         if (e.name.equals(m.getName().toString()) ) {
@@ -189,7 +199,6 @@ nextMethod:
                     }
                 } else {
                     // Restrict the set
-                    bases.add(AndroidTypes.Handler);
                     bases.add(AndroidTypes.Application);
                     bases.add(AndroidTypes.Activity);
                     /** @todo TODO: add Fragments in getEntryPoints */
@@ -353,10 +362,7 @@ nextMethod:
                     final Collection<IMethod> ifMethods = iFace.getDeclaredMethods();
                     for (final IMethod ifMethod : ifMethods) {
                         final IMethod method = appClass.getMethod(ifMethod.getSelector());
-                        if (method == null || method.isAbstract()) {
-                        	continue;
-                        }
-                        if (method.getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Application)) {
+                        if (method != null && method.getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Application)) {
                             // The function is overridden
                             final AndroidEntryPoint ep = new AndroidEntryPoint(selectPositionForHeuristic(method), method, cha);
 
@@ -403,7 +409,8 @@ nextMethod:
     }
 
     private boolean isAPIComponent(final IClass cls) {
-        if (cls.getClassLoader().getReference().equals(ClassLoaderReference.Application)) {
+        ClassLoaderReference clr = cls.getClassLoader().getReference();
+		if (! (clr.equals(ClassLoaderReference.Primordial) || clr.equals(ClassLoaderReference.Extension))) {
             if (cls.getName().toString().startsWith("Landroid/")) {
                 return true;
             }
@@ -415,9 +422,12 @@ nextMethod:
 
     private boolean isExcluded(final IClass cls) {
     	final SetOfClasses set = cls.getClassHierarchy().getScope().getExclusions();
-    	final String clsName = cls.getReference().getName().toString().substring(1);
-    	
-        return set.contains(clsName);
+    	if (set == null) {
+    		return false; // exclusions null ==> no exclusions ==> no class is excluded
+    	} else {
+    		final String clsName = cls.getReference().getName().toString().substring(1);
+    		return set.contains(clsName);
+    	}
     }
 
     /**
@@ -474,7 +484,10 @@ nextMethod:
      */
     private void populatePossibleEntryPoints() {
         // Populate the list of possible EntryPoints
-
+    	if (possibleEntryPoints.size() > 0) {
+    		// already populated
+    		return;
+    	}
         ApplicationEP.populate(possibleEntryPoints);
 		ActivityEP.populate(possibleEntryPoints);
 		ServiceEP.populate(possibleEntryPoints);

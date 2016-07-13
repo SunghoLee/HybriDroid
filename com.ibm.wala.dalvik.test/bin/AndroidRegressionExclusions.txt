@@ -1,8 +1,0 @@
-java\/awt\/.*
-javax\/swing\/.*
-org\/apache\/xerces\/.*
-libcore\/.*
-com\/android\/internal\/.*
-com\/htc\/.*
-dalvik\/.*
-java\/io\/Object.*

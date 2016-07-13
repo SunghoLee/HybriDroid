@@ -10,5 +10,10 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.rhino"/>
 	<classpathentry kind="lib" path="libs/htmlparser-1.4.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.rhino.test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.testdata"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -260,11 +260,8 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
     
 /** BEGIN Custom change: throw exception on empty entry points. This is a severe issue that should not go undetected! */
     if (entrypointCallSites.isEmpty()) {
-      throw new IllegalStateException("Could not create a entrypoint callsites."
-          + " This happens when some parameters of the method can not be generated automatically "
-          + "(e.g. when they refer to an interface or an abstract class).");
-    }
-    
+      throw new IllegalStateException("Could not create a entrypoint callsites: " +   Warnings.asString());
+    }  
 /** END Custom change: throw exception on empty entry points. This is a severe issue that should not go undetected! */
     customInit();
 
@@ -624,7 +621,6 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
 
       boolean changed = false;
       FilteredPointerKey.TypeFilter filter = pk.getTypeFilter();
-//      System.out.println("#FilterType: " + filter.getClass().getName());
       changed = filter.addFiltered(system, lhs, rhs);
 
       if (DEBUG_FILTER) {

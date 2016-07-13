@@ -28,6 +28,7 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cfg.ExceptionPrunedCFG;
+import com.ibm.wala.ipa.cfg.PrunedCFG;
 import com.ibm.wala.ipa.modref.DelegatingExtendedHeapModel;
 import com.ibm.wala.ipa.modref.ExtendedHeapModel;
 import com.ibm.wala.ipa.modref.ModRef;
@@ -62,6 +63,7 @@ import com.ibm.wala.util.collections.MapUtil;
 import com.ibm.wala.util.config.SetOfClasses;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.debug.UnimplementedError;
+import com.ibm.wala.util.graph.GraphUtil;
 import com.ibm.wala.util.graph.NumberedGraph;
 import com.ibm.wala.util.graph.dominators.Dominators;
 import com.ibm.wala.util.graph.labeled.SlowSparseNumberedLabeledGraph;
@@ -73,7 +75,7 @@ import com.ibm.wala.util.intset.OrdinalSet;
 /**
  * Program dependence graph for a single call graph node
  */
-public class PDG implements NumberedGraph<Statement> {
+public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
 
 /** BEGIN Custom change: control deps */                
   public enum Dependency {CONTROL_DEP, DATA_AND_CONTROL_DEP};
@@ -104,7 +106,7 @@ public class PDG implements NumberedGraph<Statement> {
 
   private final Collection<PointerKey> locationsHandled = HashSetFactory.make();
 
-  private final PointerAnalysis<InstanceKey> pa;
+  private final PointerAnalysis<T> pa;
 
   private final ExtendedHeapModel heapModel;
 
@@ -130,7 +132,7 @@ public class PDG implements NumberedGraph<Statement> {
    * @param ref the set of heap locations which may be read (transitively) by this node. These are logically parameters in the SDG.
    * @throws IllegalArgumentException if node is null
    */
-  public PDG(final CGNode node, PointerAnalysis<InstanceKey> pa, Map<CGNode, OrdinalSet<PointerKey>> mod,
+  public PDG(final CGNode node, PointerAnalysis<T> pa, Map<CGNode, OrdinalSet<PointerKey>> mod,
       Map<CGNode, OrdinalSet<PointerKey>> ref, DataDependenceOptions dOptions, ControlDependenceOptions cOptions,
       HeapExclusions exclusions, CallGraph cg, ModRef modRef) {
     this(node, pa, mod, ref, dOptions, cOptions, exclusions, cg, modRef, false);
@@ -142,7 +144,7 @@ public class PDG implements NumberedGraph<Statement> {
    * @param ref the set of heap locations which may be read (transitively) by this node. These are logically parameters in the SDG.
    * @throws IllegalArgumentException if node is null
    */
-  public PDG(final CGNode node, PointerAnalysis<InstanceKey> pa, Map<CGNode, OrdinalSet<PointerKey>> mod,
+  public PDG(final CGNode node, PointerAnalysis<T> pa, Map<CGNode, OrdinalSet<PointerKey>> mod,
       Map<CGNode, OrdinalSet<PointerKey>> ref, DataDependenceOptions dOptions, ControlDependenceOptions cOptions,
       HeapExclusions exclusions, CallGraph cg, ModRef modRef, boolean ignoreAllocHeapDefs) {
 
@@ -233,14 +235,18 @@ public class PDG implements NumberedGraph<Statement> {
     }
     ControlFlowGraph<SSAInstruction, ISSABasicBlock> controlFlowGraph = ir.getControlFlowGraph();
     if (cOptions.equals(ControlDependenceOptions.NO_EXCEPTIONAL_EDGES)) {
-      controlFlowGraph = ExceptionPrunedCFG.make(controlFlowGraph);
-      // In case the CFG has no nodes left because the only control dependencies
-      // were
-      // exceptional, simply return because at this point there are no nodes.
+      PrunedCFG<SSAInstruction, ISSABasicBlock> prunedCFG = ExceptionPrunedCFG.make(controlFlowGraph);
+      // In case the CFG has only the entry and exit nodes left 
+      // and no edges because the only control dependencies
+      // were exceptional, simply return because at this point there are no nodes.
       // Otherwise, later this may raise an Exception.
-      if (controlFlowGraph.getNumberOfNodes() == 0) {
+      if (prunedCFG.getNumberOfNodes() == 2 
+          && prunedCFG.containsNode(controlFlowGraph.entry()) 
+          && prunedCFG.containsNode(controlFlowGraph.exit())
+          && GraphUtil.countEdges(prunedCFG) == 0) {
         return;
       }
+      controlFlowGraph = prunedCFG;
     } else {
       Assertions.productionAssertion(cOptions.equals(ControlDependenceOptions.FULL));
     }
@@ -686,7 +692,7 @@ public class PDG implements NumberedGraph<Statement> {
     };
     Collection<Statement> relevantStatements = Iterator2Collection.toSet(new FilterIterator<Statement>(iterator(), f));
 
-    Map<Statement, OrdinalSet<Statement>> heapReachingDefs = new HeapReachingDefs(modRef, heapModel).computeReachingDefs(node, ir, pa, mod,
+    Map<Statement, OrdinalSet<Statement>> heapReachingDefs = new HeapReachingDefs<T>(modRef, heapModel).computeReachingDefs(node, ir, pa, mod,
         relevantStatements, new HeapExclusions(SetComplement.complement(new SingletonSet(t))), cg);
 
     for (Statement st : heapReachingDefs.keySet()) {
@@ -927,7 +933,19 @@ public class PDG implements NumberedGraph<Statement> {
   private void createCalleeParams() {
     if (paramCalleeStatements == null) {
       ArrayList<Statement> list = new ArrayList<Statement>();
-      for (int i = 1; i <= node.getMethod().getNumberOfParameters(); i++) {
+      int paramCount = node.getMethod().getNumberOfParameters();
+      
+      for (Iterator<CGNode> callers = cg.getPredNodes(node); callers.hasNext(); ) {
+        CGNode caller = callers.next();
+        IR callerIR = caller.getIR();
+        for (Iterator<CallSiteReference> sites = cg.getPossibleSites(caller, node); sites.hasNext(); ) {
+          for (SSAAbstractInvokeInstruction inst : callerIR.getCalls(sites.next())) {
+           paramCount = Math.max(paramCount, inst.getNumberOfParameters()-1);
+          }
+        }
+      }
+      
+      for (int i = 1; i <= paramCount; i++) {
         ParamCallee s = new ParamCallee(node, i);
         delegate.addNode(s);
         list.add(s);

@@ -30,7 +30,6 @@ import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.classLoader.ShrikeClass;
-import com.ibm.wala.classLoader.SourceURLModule;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.FieldReference;
@@ -231,12 +230,13 @@ public class ClassHierarchy implements IClassHierarchy {
         if (langNames.contains(ref.getLanguage())) {
           IClassLoader icl = factory.getLoader(ref, this, scope);
           loaders[idx++] = icl;
+
           if (progressMonitor != null) {
             progressMonitor.worked(idx);
           }
         }
       }
-            
+
       for (IClassLoader icl : loaders) {
         if (progressMonitor != null) {
           progressMonitor.subTask("From " + icl.getName().toString());
@@ -286,6 +286,7 @@ public class ClassHierarchy implements IClassHierarchy {
       }
     }
     loader.removeAll(toRemove);
+
   }
 
   /**

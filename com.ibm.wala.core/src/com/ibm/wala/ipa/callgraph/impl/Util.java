@@ -38,6 +38,7 @@ import com.ibm.wala.ipa.callgraph.propagation.rta.BasicRTABuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ipa.summaries.BypassClassTargetSelector;
 import com.ibm.wala.ipa.summaries.BypassMethodTargetSelector;
+import com.ibm.wala.ipa.summaries.LambdaMethodTargetSelector;
 import com.ibm.wala.ipa.summaries.XMLMethodSummaryReader;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.Descriptor;
@@ -76,7 +77,7 @@ public class Util {
     if (options == null) {
       throw new IllegalArgumentException("options is null");
     }
-    options.setSelector(new ClassHierarchyMethodTargetSelector(cha));
+    options.setSelector(new LambdaMethodTargetSelector(new ClassHierarchyMethodTargetSelector(cha)));
     options.setSelector(new ClassHierarchyClassTargetSelector(cha));
   }
 
@@ -127,7 +128,7 @@ public class Util {
     MethodTargetSelector ms = new BypassMethodTargetSelector(options.getMethodTargetSelector(), summary.getSummaries(), 
         summary.getIgnoredPackages(), cha);
     options.setSelector(ms);
-//summary.getSummaries().get(null).
+
     ClassTargetSelector cs = new BypassClassTargetSelector(options.getClassTargetSelector(), summary.getAllocatableClasses(), cha,
         cha.getLoader(scope.getLoader(Atom.findOrCreateUnicodeAtom("Synthetic"))));
     options.setSelector(cs);

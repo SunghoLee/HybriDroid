@@ -438,7 +438,6 @@ public class TabulationSolver<T, P, F> {
             propToReturnSite(c, entries, retSite, d4, D5);
           }
         };
-        //lee finds bug!
         D4.foreach(action);
       }
     }

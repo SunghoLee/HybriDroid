@@ -538,20 +538,18 @@ public class AndroidManifestXMLReader {
         @Override
         public void leave() {
             Set<Tag> allowedTags = EnumSet.copyOf(self.getAllowedSubTags());
-            String url = null;
-            String name = null;
-
+            Set<String> urls = new HashSet<String>();
+            Set<String> names = new HashSet<String>();
             while (parserStack.peek() != self) {
                 Tag current = parserStack.pop();
                 if (allowedTags.contains(current)) {
-                    allowedTags.remove(current);    // TODO: Does this always fit?
                     if (current == Tag.ACTION) {
                         Object oName = attributesHistory.get(Attr.NAME).peek();
                         if (oName == null) {
                              throw new IllegalStateException("The currently parsed Action did not leave the required 'name' Attribute" +
                                      " on the Stack! Attributes-Stack for name is: " + attributesHistory.get(Attr.NAME));
                         } else if (oName instanceof String) {
-                            name = (String) oName;
+                            names.add((String) oName);
                         } else {
                             throw new IllegalStateException("Unexpected Attribute type for name: " + oName.getClass().toString());
                         }
@@ -560,7 +558,7 @@ public class AndroidManifestXMLReader {
                         if (oUrl == null) {
                             // TODO
                         } else if (oUrl instanceof String) {
-                            url = (String) oUrl;
+                            urls.add((String) oUrl);
                         } else {
                             throw new IllegalStateException("Unexpected Attribute type for name: " + oUrl.getClass().toString());
                         }
@@ -583,10 +581,15 @@ public class AndroidManifestXMLReader {
                 pack = null;
             }
 
-            if (name != null) {
-                logger.info("New Intent ({}, {})", name, url);
-                final Intent intent = AndroidSettingFactory.intent(name, url);
-                attributesHistory.get(self).push(intent);
+            if (!names.isEmpty()) {
+                for (String name : names) {
+                    if (urls.isEmpty()) urls.add(null);
+                    for (String url : urls) {
+                        logger.info("New Intent ({}, {})", name, url);
+                        final Intent intent = AndroidSettingFactory.intent(name, url);
+                        attributesHistory.get(self).push(intent);
+                    }
+            }
             } else {
                 throw new IllegalStateException("Error in parser implementation! The required attribute 'name' which should have been " +
                         "defined in ACTION could not be retrieved. This should have been thrown before as it is a required attribute for " +

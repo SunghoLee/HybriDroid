@@ -17,6 +17,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
@@ -30,7 +33,7 @@ import com.ibm.wala.core.tests.util.WalaTestCase;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.properties.WalaProperties;
-import com.ibm.wala.shrike.cg.DynamicCallGraph;
+import com.ibm.wala.shrike.cg.OfflineDynamicCallGraph;
 import com.ibm.wala.shrikeBT.analysis.Analyzer.FailureException;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.types.ClassLoaderReference;
@@ -43,6 +46,8 @@ import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.io.TemporaryFile;
 
 public abstract class DynamicCallGraphTestBase extends WalaTestCase {
+  
+  protected boolean testPatchCalls = false;
   
   protected static String getClasspathEntry(String elt) {
     for (String s : System.getProperty("java.class.path").split(File.pathSeparator)) {
@@ -61,9 +66,9 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
   
   private boolean instrumentedJarBuilt = false;
   
-  private static String instrumentedJarLocation = System.getProperty("java.io.tmpdir") + File.separator + "test.jar";
+  private String instrumentedJarLocation = System.getProperty("java.io.tmpdir") + File.separator + "test.jar";
 
-  private static String cgLocation = System.getProperty("java.io.tmpdir") + File.separator + "cg.txt";
+  private String cgLocation = System.getProperty("java.io.tmpdir") + File.separator + "cg.txt";
 
   protected void instrument(String testJarLocation) throws IOException, ClassNotFoundException, InvalidClassFileException, FailureException {
     if (! instrumentedJarBuilt) {
@@ -80,10 +85,15 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
         }
       }
       
-      DynamicCallGraph.main(
-          rtJar == null?
-            new String[]{testJarLocation, "-o", instrumentedJarLocation}:
-            new String[]{testJarLocation, "-o", instrumentedJarLocation, "--rt-jar", rtJar});
+      List<String> args = new ArrayList<String>();
+      args.addAll(Arrays.asList(testJarLocation, "-o", instrumentedJarLocation));
+      if (rtJar != null) {
+        args.addAll(Arrays.asList("--rt-jar", rtJar));
+      }
+      if (testPatchCalls) {
+        args.add("--patch-calls");
+      }
+      OfflineDynamicCallGraph.main(args.toArray(new String[ args.size() ]));
       Assert.assertTrue("expected to create /tmp/test.jar", new File(instrumentedJarLocation).exists());   
       instrumentedJarBuilt = true;
     }
@@ -116,8 +126,14 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
     childJvm.setFailonerror(true);
     childJvm.setFork(true);
     
+    if (new File(cgLocation).exists()) {
+      new File(cgLocation).delete();
+    }
+    
     childJvm.init();
-    Process x = Runtime.getRuntime().exec(childJvm.getCommandLine().toString());
+    String commandLine = childJvm.getCommandLine().toString();
+    System.err.println(commandLine);
+    Process x = Runtime.getRuntime().exec(commandLine);
     x.waitFor();
     
     Assert.assertTrue("expected to create call graph", new File(cgLocation).exists());
@@ -140,18 +156,16 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
     check(staticCG, new EdgesTest() {
       @Override
       public void edgesTest(CallGraph staticCG, CGNode caller, MethodReference calleeRef) {
-        if (! calleeRef.getName().equals(MethodReference.clinitName)) {
           Set<CGNode> nodes = staticCG.getNodes(calleeRef);
-          Assert.assertEquals(1, nodes.size());
+          Assert.assertEquals("expected one node for " + calleeRef, 1, nodes.size());
           CGNode callee = nodes.iterator().next();
         
           Assert.assertTrue("no edge for " + caller + " --> " + callee, staticCG.getPossibleSites(caller, callee).hasNext());
           Pair<CGNode,CGNode> x = Pair.make(caller, callee);
           if (! edges.contains(x)) {
             edges.add(x);
-            System.err.println("found expected edge" + caller + " --> " + callee);
+            System.err.println("found expected edge " + caller + " --> " + callee);
           }
-        }
       }
     }, filter);
   }
@@ -189,6 +203,10 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
       String callerClass = edge.nextToken();
       if ("root".equals(callerClass)) {
         caller = staticCG.getFakeRootNode();
+      } else if ("clinit".equals(callerClass)) {
+          caller = staticCG.getFakeWorldClinitNode();
+      } else if ("callbacks".equals(callerClass)) {
+          continue loop;
       } else {
         String callerMethod = edge.nextToken();
         MethodReference callerRef = MethodReference.findOrCreate(TypeReference.findOrCreate(ClassLoaderReference.Application, "L" + callerClass), Selector.make(callerMethod));

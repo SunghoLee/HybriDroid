@@ -53,7 +53,7 @@ import com.ibm.wala.util.intset.OrdinalSet;
  * 
  * Prototype implementation. Not efficient.
  */
-public class SDG extends AbstractNumberedGraph<Statement> implements ISDG {
+public class SDG<T extends InstanceKey> extends AbstractNumberedGraph<Statement> implements ISDG {
 
   /**
    * Turn this flag on if you don't want eagerConstruction() to be called.
@@ -78,7 +78,7 @@ public class SDG extends AbstractNumberedGraph<Statement> implements ISDG {
   /**
    * governing pointer analysis
    */
-  private final PointerAnalysis<InstanceKey> pa;
+  private final PointerAnalysis<T> pa;
 
   /**
    * keeps track of PDG for each call graph node
@@ -122,16 +122,16 @@ public class SDG extends AbstractNumberedGraph<Statement> implements ISDG {
    */
   private boolean eagerComputed = false;
 
-  public SDG(final CallGraph cg, PointerAnalysis<InstanceKey> pa, DataDependenceOptions dOptions, ControlDependenceOptions cOptions) {
+  public SDG(final CallGraph cg, PointerAnalysis<T> pa, DataDependenceOptions dOptions, ControlDependenceOptions cOptions) {
     this(cg, pa, ModRef.make(), dOptions, cOptions, null);
   }
 
-  public SDG(final CallGraph cg, PointerAnalysis<InstanceKey> pa, ModRef modRef, DataDependenceOptions dOptions,
+  public SDG(final CallGraph cg, PointerAnalysis<T> pa, ModRef modRef, DataDependenceOptions dOptions,
       ControlDependenceOptions cOptions) {
     this(cg, pa, modRef, dOptions, cOptions, null);
   }
 
-  public SDG(CallGraph cg, PointerAnalysis<InstanceKey> pa, ModRef modRef, DataDependenceOptions dOptions, ControlDependenceOptions cOptions,
+  public SDG(CallGraph cg, PointerAnalysis<T> pa, ModRef modRef, DataDependenceOptions dOptions, ControlDependenceOptions cOptions,
       HeapExclusions heapExclude) throws IllegalArgumentException {
     super();
     if (dOptions == null) {
@@ -700,7 +700,7 @@ public class SDG extends AbstractNumberedGraph<Statement> implements ISDG {
             // don't track reflection into reflective invokes
             return false;
           }
-          for (int i = 0; i < calleeNode.getMethod().getNumberOfParameters(); i++) {
+          for (int i = 0; i < call.getNumberOfParameters(); i++) {
             if (call.getUse(i) == caller.getValueNumber()) {
               if (callee.getValueNumber() == i + 1) {
                 return true;
@@ -820,7 +820,7 @@ public class SDG extends AbstractNumberedGraph<Statement> implements ISDG {
     return cg.getClassHierarchy();
   }
 
-  public PointerAnalysis<InstanceKey> getPointerAnalysis() {
+  public PointerAnalysis<? extends InstanceKey> getPointerAnalysis() {
     return pa;
   }
 

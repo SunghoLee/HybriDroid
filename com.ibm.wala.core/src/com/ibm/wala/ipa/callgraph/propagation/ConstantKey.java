@@ -36,8 +36,7 @@ public final class ConstantKey<T> implements InstanceKey {
   public boolean equals(Object obj) {
     if (obj instanceof ConstantKey) {
       ConstantKey other = (ConstantKey) obj;
-//      return value == null ? other.value == null : value.equals(other.value);
-      return (value == null ? other.value == null : value.equals(other.value)) && valueClass.equals(other.valueClass);
+      return value == null ? other.value == null : value.equals(other.value) && valueClass.equals(other.valueClass);
     } else {
       return false;
     }
@@ -45,8 +44,7 @@ public final class ConstantKey<T> implements InstanceKey {
 
   @Override
   public int hashCode() {
-//    return value == null ? 65535 : 1877 * value.hashCode();
-    return value == null ? 65535 : 1877 * value.hashCode() + 173 * valueClass.hashCode();
+    return value == null ? 65535 : 1877 * value.hashCode();
   }
 
   @Override
@@ -54,8 +52,7 @@ public final class ConstantKey<T> implements InstanceKey {
     if (value == null)
       return "[ConstantKey:null]";
     else
-//      return "[ConstantKey:" + value + ":" + value.getClass() + "]";
-      return "[ConstantKey:" + value + ":" + valueClass + "]";
+      return "[ConstantKey:" + value + ":" + value.getClass() + "]";
   }
 
   /*
