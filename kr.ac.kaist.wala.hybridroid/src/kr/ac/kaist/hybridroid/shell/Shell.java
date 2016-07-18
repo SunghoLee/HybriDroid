@@ -40,6 +40,7 @@ import kr.ac.kaist.hybridroid.command.CommandArguments;
 import kr.ac.kaist.hybridroid.test.ModeledCallGraphForTaint;
 import kr.ac.kaist.hybridroid.test.PrivateLeakageDetector;
 import kr.ac.kaist.hybridroid.test.PrivateLeakageDetector.LeakWarning;
+import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 
 /**
  * HybriDroid is a Android hybrid application analysis framework based-on WALA.
@@ -112,7 +113,7 @@ public class Shell {
 				
 				Shell.START = System.currentTimeMillis();
 				HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-				Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(targetPath);
+				Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(targetPath, LocalFileReader.androidJar(Shell.walaProperties).getPath());
 				PointerAnalysis<InstanceKey> pa = p.snd;
 				Shell.END = System.currentTimeMillis();
 				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");

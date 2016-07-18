@@ -111,8 +111,8 @@ public class AnalysisScopeBuilder {
 		return new AnalysisScopeBuilder("", target, jsFiles);
 	}
 		
-	public AndroidHybridAnalysisScope makeScope() throws IOException{
+	public AndroidHybridAnalysisScope makeScope(String libPath) throws IOException{
 			return AndroidHybridAnalysisScope.setUpAndroidHybridAnalysisScope(dir, target.toURI(), htmls, 
-					CallGraphTestUtil.REGRESSION_EXCLUSIONS, LocalFileReader.androidDexLibs(Shell.walaProperties));
+					CallGraphTestUtil.REGRESSION_EXCLUSIONS, (new File(libPath)).toURI());
 	}
 }

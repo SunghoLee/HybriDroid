@@ -229,7 +229,8 @@ public class AnalysisScope {
       throw new IllegalArgumentException("null m");
     }
     List<Module> s = MapUtil.findOrCreateList(moduleMap, loader);
-    if (DEBUG_LEVEL > 0) {
+//    if (DEBUG_LEVEL > 0) {
+    if(true){
       System.err.println(("AnalysisScope: add module " + m));
     }
     s.add(m);

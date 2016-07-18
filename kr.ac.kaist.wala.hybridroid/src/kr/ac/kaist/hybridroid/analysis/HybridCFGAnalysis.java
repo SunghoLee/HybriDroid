@@ -16,34 +16,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
-import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
-import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
-import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
-import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
-import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
-import kr.ac.kaist.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
-import kr.ac.kaist.hybridroid.callgraph.AndroidHybridMethodTargetSelector;
-import kr.ac.kaist.hybridroid.callgraph.HybridClassLoaderFactory;
-import kr.ac.kaist.hybridroid.callgraph.HybridIRFactory;
-import kr.ac.kaist.hybridroid.callgraph.graphutils.WalaCGVisualizer;
-import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
-import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker.Warning;
-import kr.ac.kaist.hybridroid.command.CommandArguments;
-import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
-import kr.ac.kaist.hybridroid.shell.Shell;
-import kr.ac.kaist.hybridroid.test.TaintAnalysisForHybrid;
-import kr.ac.kaist.hybridroid.util.file.FileCollector;
-import kr.ac.kaist.hybridroid.util.file.FileWriter;
-import kr.ac.kaist.hybridroid.util.file.YMLParser;
-import kr.ac.kaist.hybridroid.util.file.YMLParser.YMLData;
-import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
 import com.ibm.wala.cast.ipa.cha.CrossLanguageClassHierarchy;
@@ -58,24 +33,38 @@ import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions.ReflectionOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
-import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ComposedEntrypoints;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.IRFactory;
-import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.strings.Atom;
+
+import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
+import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
+import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
+import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
+import kr.ac.kaist.hybridroid.appinfo.XMLManifestReader;
+import kr.ac.kaist.hybridroid.callgraph.AndroidHybridAnalysisScope;
+import kr.ac.kaist.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
+import kr.ac.kaist.hybridroid.callgraph.AndroidHybridMethodTargetSelector;
+import kr.ac.kaist.hybridroid.callgraph.HybridClassLoaderFactory;
+import kr.ac.kaist.hybridroid.callgraph.HybridIRFactory;
+import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
+import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
+import kr.ac.kaist.hybridroid.util.file.FileCollector;
+import kr.ac.kaist.hybridroid.util.file.FileWriter;
+import kr.ac.kaist.hybridroid.util.file.YMLParser;
+import kr.ac.kaist.hybridroid.util.file.YMLParser.YMLData;
 
 /**
  * Build Control-flow graph for the target Android hybrid application. Now, it
@@ -91,6 +80,7 @@ import com.ibm.wala.util.strings.Atom;
  * @author Sungho Lee
  */
 public class HybridCFGAnalysis {
+	private Set<String> warnings;
 	
 	public HybridCFGAnalysis() {
 
@@ -121,48 +111,13 @@ public class HybridCFGAnalysis {
 		options.setUseConstantSpecificKeys(true);
 	}
 
-	/**
-	 * For debugging.
-	 * @param cg
-	 * @param pa
-	 */
-	public static void check(CallGraph cg, PointerAnalysis<InstanceKey> pa) {
-		boolean find = false;
-		for (CGNode node : cg) {
-
-			if (node.toString()
-					.contains(
-							"< Application, Lcom/example/hellohybrid/JavascriptBridge, sendName(Ljava/lang/String;)V > Context: Everywhere")) {
-				System.out.println("===========================>");
-				find = true;
-				for (int i = 1; i < 4; i++) {
-					PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(
-							node, i);
-					Iterator<InstanceKey> ikIter = pa.getPointsToSet(pk)
-							.iterator();
-					System.out.println("#" + i + ": "
-							+ pa.getPointsToSet(pk).size());
-					while (ikIter.hasNext()) {
-						InstanceKey ik = ikIter.next();
-						System.out.println("### v" + i + ": " + ik);
-						System.out.println("\t" + ik.getClass().getName());
-					}
-				}
-				System.out.println("<===========================");
-			}
-		}
-		if (find == false) {
-			System.out.println(" Incomplete Call Graph!");
-		}
-	}
-
 	private AndroidResourceAnalysis analyzeResource(String targetPath){
 		return new AndroidResourceAnalysis(targetPath);
 	}
 	
-	private AndroidStringAnalysis analyzeString(String targetPath, AndroidResourceAnalysis ara) throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
+	private AndroidStringAnalysis analyzeString(String libPath, String targetPath, AndroidResourceAnalysis ara) throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
 		AndroidStringAnalysis asa = new AndroidStringAnalysis(ara);
-		asa.setupAndroidLibs(LocalFileReader.androidJar(Shell.walaProperties).getPath());
+		asa.setupAndroidLibs(libPath);
 		asa.setExclusion(CallGraphTestUtil.REGRESSION_EXCLUSIONS);
 		asa.addAnalysisScope(targetPath);
 		List<Hotspot> hotspots = new ArrayList<Hotspot>();
@@ -177,7 +132,7 @@ public class HybridCFGAnalysis {
 		return asa;
 	}
 	
-	private AndroidHybridAnalysisScope makeScope(String targetPath, AndroidResourceAnalysis ara, AndroidStringAnalysis asa) throws IOException{
+	private AndroidHybridAnalysisScope makeScope(String libPath, String targetPath, AndroidResourceAnalysis ara, AndroidStringAnalysis asa) throws IOException{
 		String dirPath = ara.getDir();
 		Set<URL> jsFiles = new HashSet<URL>();
 		
@@ -220,10 +175,10 @@ public class HybridCFGAnalysis {
 				vs.add(chMap.get(s));
 			}
 		}
-		if(Shell.args.has(CommandArguments.MODEL_ARG)){
-			String modelingPath = Shell.args.get(CommandArguments.MODEL_ARG);
-			jsFiles.add(new File(modelingPath).toURI().toURL());
-		}
+//		if(Shell.args.has(CommandArguments.MODEL_ARG)){
+//			String modelingPath = Shell.args.get(CommandArguments.MODEL_ARG);
+//			jsFiles.add(new File(modelingPath).toURI().toURL());
+//		}
 		
 		if(jsFiles.isEmpty()){
 			System.out.println("It does not have local html files or js codes");
@@ -233,7 +188,7 @@ public class HybridCFGAnalysis {
 		AnalysisScopeBuilder scopeBuilder = AnalysisScopeBuilder.build(
 				dirPath, new File(targetPath), false, jsFiles);
 		
-		return scopeBuilder.makeScope();
+		return scopeBuilder.makeScope(libPath);
 	}
 	
 	private void xmlAnalyze(String targetPath) {
@@ -279,7 +234,7 @@ public class HybridCFGAnalysis {
 	 * @throws IllegalArgumentException
 	 * @throws CancelException
 	 */
-	public Pair<CallGraph, PointerAnalysis<InstanceKey>> main(String targetPath) throws IOException,
+	public Pair<CallGraph, PointerAnalysis<InstanceKey>> main(String targetPath, String libPath) throws IOException,
 			ClassHierarchyException, IllegalArgumentException, CancelException {
 		
 		AndroidResourceAnalysis ara = analyzeResource(targetPath);
@@ -292,8 +247,8 @@ public class HybridCFGAnalysis {
 		System.out.println("====================");
 		if(!annVersion)
 			System.out.println("[Warning] the target of this app is less than Android JELLY_BEAN_MR1; all public bridge methods is allowed by JS access");
-		AndroidStringAnalysis asa = analyzeString(targetPath, ara);
-		AndroidHybridAnalysisScope scope = makeScope(targetPath, ara, asa);
+		AndroidStringAnalysis asa = analyzeString(libPath, targetPath, ara);
+		AndroidHybridAnalysisScope scope = makeScope(libPath, targetPath, ara, asa);
 		
 		JSCallGraphUtil.setTranslatorFactory(new CAstRhinoTranslatorFactory());
 		HybridClassLoaderFactory loaders = new HybridClassLoaderFactory();
@@ -312,68 +267,19 @@ public class HybridCFGAnalysis {
 
 		CallGraph cg = b.makeCallGraph(options);
 		PointerAnalysis<InstanceKey> pa = b.getPointerAnalysis();
-
-		WalaCGVisualizer vis = new WalaCGVisualizer();
-		File viscgDex = vis.visualize(cg, "cg_new.dex");
-		vis.transforms(viscgDex, "cg_new.svg");
-//		VisualizeCGTest.visualizeCallGraph(cg, "cg_dex", true);
 		
+		warnings = b.getWarning();
 		//print warning
 		System.out.println("===== Not Found Error =====");
-		for(String s : b.getWarning()){
+		for(String s : warnings){
 			System.out.println(s);
 		}
 		System.out.println("===========================");
-		
-		printTypeWarning(b.getWarnings());
 
-		// printNodeInsts(cg, null, "send");
-
-		// taintTest(cg);
-		
-//		for(GlobalObjectKey gok : b.getGlobalObjects(JavaScriptTypes.jsName)){
-//			pa.getHeapModel().
-//		}
 		return Pair.make(cg, pa);
 	}
-
-	private static void taintTest(CallGraph cg) {
-		TaintAnalysisForHybrid tAnalyzer = new TaintAnalysisForHybrid(cg);
-		tAnalyzer.analyze();
-	}
-
-	private static Set<CGNode> printNodeInsts(CallGraph cg, String nodeStr) {
-		Set<CGNode> nodes = new HashSet<CGNode>();
-		// System.out.println(cg);
-		for (CGNode node : cg) {
-			if (node.toString().contains(nodeStr)) {
-				nodes.add(node);
-				System.out.println("=======");
-				System.out.println("\t#Node: " + node);
-				IR ir = node.getIR();
-				if (ir != null) {
-					int index = 1;
-					for (SSAInstruction inst : ir.getInstructions()) {
-						System.out.println("\t\t(" + (index++) + ") " + inst);
-					}
-				}
-				System.out.println("=======");
-				System.out.println();
-			}
-		}
-		if (nodes.size() == 0)
-			System.out.println("Not found the Method: " + nodeStr);
-
-		return nodes;
-	}
-
-	private static void printTypeWarning(Set<Warning> warnings) {
-		// TODO Auto-generated method stub
-		//for type mismatch printing
-//		System.out.println("=== Type mismatch warnings ===");
-//		for (Warning tw : warnings) {
-//			System.out.println(tw);
-//		}
-//		System.out.println("==============================");
+	
+	public Set<String> getWarnings(){
+		return warnings;
 	}
 }
