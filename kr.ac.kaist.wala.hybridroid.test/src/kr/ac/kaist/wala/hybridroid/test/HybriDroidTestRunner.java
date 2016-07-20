@@ -14,6 +14,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 
 import kr.ac.kaist.wala.hybridroid.test.annotation.AnnotationTest;
+import kr.ac.kaist.wala.hybridroid.test.callgraph.ReachableBridgeTest;
 
 public class HybriDroidTestRunner {
 
@@ -42,11 +43,22 @@ public class HybriDroidTestRunner {
 	public static String getLibPath(){
 		return testProperties.getProperty(LIB_JAR);
 	}
+	
+	private static void runTest(Class c, String test){
+		Result result = JUnitCore.runClasses(c);
+		
+		if(result.getFailures().isEmpty()){
+			System.out.println("Pass all " + test + " tests.");
+		}else{
+			System.out.println("Failed in " + test + " tests: ");
+		    for (Failure failure : result.getFailures()) {
+		      System.out.println(failure.toString());
+		    }
+		}
+	}
+	
 	public static void main(String[] args) throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
-
-		Result result = JUnitCore.runClasses(AnnotationTest.class);
-	    for (Failure failure : result.getFailures()) {
-	      System.out.println(failure.toString());
-	    }
+		runTest(AnnotationTest.class, "annotation");
+		runTest(ReachableBridgeTest.class, "reachable bridge");
 	}
 }

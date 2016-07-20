@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="libs/junit-4.11.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
