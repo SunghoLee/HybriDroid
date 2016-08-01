@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+
 import org.junit.Test;
 
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
@@ -26,10 +29,6 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Pair;
 
-import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
-import kr.ac.kaist.wala.hybridroid.test.FileCollector;
-import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
-
 public class ReachableBridgeTest {
 	public static String TEST_DIR = "callgraph" + File.separator + "reachability";
 	
@@ -37,16 +36,17 @@ public class ReachableBridgeTest {
 	public void haveEdgesToReachableJavaMethodFromJavaScript() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 //		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
 		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "ReachableMethodTest.apk")};
+		boolean ReachableMethodTest = false;
 		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
 			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
 			CallGraph cg = p.fst;
-			PointerAnalysis<InstanceKey> pa = p.snd;
 			
 			switch(testName){
 			case "ReachableMethodTest.apk":
+				ReachableMethodTest = true;
 			    IClass bridgeC = cg.getClassHierarchy().lookupClass(TypeReference.find(ClassLoaderReference.Application, "Lkr/ac/kaist/wala/hybridroid/test/reachability/JSBridge"));
 			    
 			    IMethod initM = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridgeC.getReference(), Selector.make("<init>()V")));
@@ -98,22 +98,25 @@ public class ReachableBridgeTest {
 				break;
 			}
 		}
+		
+		assertTrue(ReachableMethodTest);
 	}
 	
 	@Test
 	public void haveEdgeOnlyReachableMethod() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 //		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
 		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "UnreachableMethodTest.apk")};
+		boolean UnreachableMethodTest = false;
 		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
 			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
 			CallGraph cg = p.fst;
-			PointerAnalysis<InstanceKey> pa = p.snd;
-
+			
 			switch(testName){
 			case "UnreachableMethodTest.apk":
+				UnreachableMethodTest = true;
 			    IClass bridgeC = cg.getClassHierarchy().lookupClass(TypeReference.find(ClassLoaderReference.Application, "Lkr/ac/kaist/wala/hybridroid/test/unreachability/JSBridge"));
 			    
 			    IMethod initM = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridgeC.getReference(), Selector.make("<init>()V")));
@@ -165,22 +168,25 @@ public class ReachableBridgeTest {
 				break;
 			}
 		}
+		
+		assertTrue(UnreachableMethodTest);
 	}
 	
 	@Test
 	public void haveEdgeFromBoth() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 //		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
 		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "DualReachableMethodTest.apk")};
+		boolean DualReachableMethodTest = false;
 		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
 			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
 			CallGraph cg = p.fst;
-			PointerAnalysis<InstanceKey> pa = p.snd;
-			
+
 			switch(testName){
 			case "DualReachableMethodTest.apk":
+				DualReachableMethodTest = true;
 			    IClass bridgeC = cg.getClassHierarchy().lookupClass(TypeReference.find(ClassLoaderReference.Application, "Lkr/ac/kaist/wala/hybridroid/test/dualreachability/JSBridge"));
 			    
 			    IMethod initM = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridgeC.getReference(), Selector.make("<init>()V")));
@@ -246,5 +252,7 @@ public class ReachableBridgeTest {
 				break;
 			}
 		}
+		
+		assertTrue(DualReachableMethodTest);
 	}
 }
