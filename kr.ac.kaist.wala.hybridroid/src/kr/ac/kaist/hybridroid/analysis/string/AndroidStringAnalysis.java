@@ -350,7 +350,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		options.setSelector(new AndroidMethodTargetSelector(cha));
 //		CallGraphBuilder cgb = new nCFABuilder(0, cha, options, cache, null, null);
 //		CallGraphBuilder cgb = ZeroXCFABuilder.make(cha, options, cache, null, null, 0);
-		CallGraphBuilder cgb = ResourceCallGraphBuilder.make(cha, options, cache, null, null, 0, ara);
+		CallGraphBuilder<InstanceKey> cgb = ResourceCallGraphBuilder.make(cha, options, cache, null, null, 0, ara);
 		return Pair.make(cgb.makeCallGraph(options, null), cgb.getPointerAnalysis());
 	}
 	
