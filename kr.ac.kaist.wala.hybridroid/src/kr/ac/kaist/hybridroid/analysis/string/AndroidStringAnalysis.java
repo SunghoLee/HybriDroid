@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2002 - 2006 IBM Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
+* Copyright (c) 2016 IBM Corporation and KAIST.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*
+* Contributors:
+* KAIST - initial API and implementation
+*******************************************************************************/
 package kr.ac.kaist.hybridroid.analysis.string;
 
 import java.io.File;
@@ -350,7 +350,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		options.setSelector(new AndroidMethodTargetSelector(cha));
 //		CallGraphBuilder cgb = new nCFABuilder(0, cha, options, cache, null, null);
 //		CallGraphBuilder cgb = ZeroXCFABuilder.make(cha, options, cache, null, null, 0);
-		CallGraphBuilder cgb = ResourceCallGraphBuilder.make(cha, options, cache, null, null, 0, ara);
+		CallGraphBuilder<InstanceKey> cgb = ResourceCallGraphBuilder.make(cha, options, cache, null, null, 0, ara);
 		return Pair.make(cgb.makeCallGraph(options, null), cgb.getPointerAnalysis());
 	}
 	
