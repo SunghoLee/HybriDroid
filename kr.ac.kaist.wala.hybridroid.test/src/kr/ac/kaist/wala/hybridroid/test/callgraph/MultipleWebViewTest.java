@@ -31,7 +31,7 @@ import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
 public class MultipleWebViewTest {
 	public static String TEST_DIR = "callgraph" + File.separator + "webview";
 	
-	@Test
+//	@Test
 	public void shareOneBridgeByTwoWebView() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "MultipleWebViewTest.apk")};
 		
@@ -98,8 +98,152 @@ public class MultipleWebViewTest {
 	}
 	
 	@Test
-	public void loadMultiplePagesOnOneWebView(){
-		//TODO: implements test app
+	public void loadMultiplePagesOnOneWebView() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
+		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "MultipleWebViewAndDiffBridgeTest.apk")};
+		
+		for(File f : tests){
+			String testName = f.getName();
+			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
+			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
+			CallGraph cg = p.fst;
+			
+			switch(testName){
+			case "MultipleWebViewAndDiffBridgeTest.apk":
+				IClass bridge1C = cg.getClassHierarchy().lookupClass(TypeReference.find(ClassLoaderReference.Application, "Lkr/ac/kaist/wala/hybridroid/test/multiplewebviewanddiffbridgetest/JSBridge1"));
+				IClass bridge2C = cg.getClassHierarchy().lookupClass(TypeReference.find(ClassLoaderReference.Application, "Lkr/ac/kaist/wala/hybridroid/test/multiplewebviewanddiffbridgetest/JSBridge2"));
+				
+				IMethod getName1M = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridge1C.getReference(), Selector.make("getName()Ljava/lang/String;")));
+				IMethod getLastName1M = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridge1C.getReference(), Selector.make("getLastName()Ljava/lang/String;")));
+				IMethod getFirstName1M = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridge1C.getReference(), Selector.make("getFirstName()Ljava/lang/String;")));
+				
+				IMethod getName2M = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridge2C.getReference(), Selector.make("getName()Ljava/lang/String;")));
+				IMethod getLastName2M = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridge2C.getReference(), Selector.make("getLastName()Ljava/lang/String;")));
+				IMethod getFirstName2M = cg.getClassHierarchy().resolveMethod(MethodReference.findOrCreate(bridge2C.getReference(), Selector.make("getFirstName()Ljava/lang/String;")));
+				
+				CGNode getName1N = cg.getNode(getName1M, Everywhere.EVERYWHERE);
+				CGNode getLastName1N = cg.getNode(getLastName1M, Everywhere.EVERYWHERE);
+				CGNode getFirstName1N = cg.getNode(getFirstName1M, Everywhere.EVERYWHERE);
+				
+				CGNode getName2N = cg.getNode(getName2M, Everywhere.EVERYWHERE);
+				CGNode getLastName2N = cg.getNode(getLastName2M, Everywhere.EVERYWHERE);
+				CGNode getFirstName2N = cg.getNode(getFirstName2M, Everywhere.EVERYWHERE);
+				
+				Set<CGNode> name1Preds = new HashSet<CGNode>();
+				
+				for(Iterator<CGNode> iPred = cg.getPredNodes(getName1N); iPred.hasNext();)
+					name1Preds.add(iPred.next());
+				
+				assertTrue("getName(of first bridge) method must have two predecessors.", name1Preds.size() == 2);
+				
+				boolean index1 = false;
+				boolean index2 = false;
+				for(CGNode n : name1Preds){
+					if(!index1 && n.toString().contains("index1.html")){
+						index1 = true;
+					}else{
+						index2 = true;
+					}
+				}
+				
+				assertTrue("getName(of first bridge)'s predecessors must come from two different htmls.", index1 && index2);
+				
+				Set<CGNode> name2Preds = new HashSet<CGNode>();
+				
+				for(Iterator<CGNode> iPred = cg.getPredNodes(getName2N); iPred.hasNext();)
+					name2Preds.add(iPred.next());
+				
+				assertTrue("getName(of second bridge) method must one predecessor.", name2Preds.size() == 1);
+				
+				index1 = false;
+				index2 = false;
+				for(CGNode n : name2Preds){
+					if(!index1 && n.toString().contains("index1.html")){
+						index1 = true;
+					}else{
+						index2 = true;
+					}
+				}
+				
+				assertTrue("getName(of second bridge)'s predecessor must come from index2.html.", !index1 && index2);
+				
+				Set<CGNode> first1Preds = new HashSet<CGNode>();
+				
+				for(Iterator<CGNode> iPred = cg.getPredNodes(getFirstName1N); iPred.hasNext();)
+					first1Preds.add(iPred.next());
+				
+				assertTrue("getFirstName(of first bridge) method must have two predecessors.", first1Preds.size() == 2);
+				
+				index1 = false;
+				index2 = false;
+				for(CGNode n : first1Preds){
+					if(!index1 && n.toString().contains("index1.html")){
+						index1 = true;
+					}else{
+						index2 = true;
+					}
+				}
+				
+				assertTrue("getFirstName(of first bridge)'s predecessor must come from two different htmls.", index1 && index2);
+//				
+				Set<CGNode> first2Preds = new HashSet<CGNode>();
+				
+				for(Iterator<CGNode> iPred = cg.getPredNodes(getFirstName2N); iPred.hasNext();)
+					first2Preds.add(iPred.next());
+				
+				assertTrue("getFirstName(of second bridge) method must one predecessor.", first2Preds.size() == 1);
+				
+				index1 = false;
+				index2 = false;
+				for(CGNode n : first2Preds){
+					if(!index1 && n.toString().contains("index1.html")){
+						index1 = true;
+					}else{
+						index2 = true;
+					}
+				}
+				
+				assertTrue("getFirstName(of second bridge)'s predecessor must come from index2.html.", !index1 && index2);
+				
+				
+				Set<CGNode> last1Preds = new HashSet<CGNode>();
+				
+				for(Iterator<CGNode> iPred = cg.getPredNodes(getLastName1N); iPred.hasNext();)
+					last1Preds.add(iPred.next());
+				
+				assertTrue("getLastName(of first bridge) method must have two predecessors.", last1Preds.size() == 2);
+				
+				index1 = false;
+				index2 = false;
+				for(CGNode n : last1Preds){
+					if(!index1 && n.toString().contains("index1.html")){
+						index1 = true;
+					}else{
+						index2 = true;
+					}
+				}
+				
+				assertTrue("getLastName(of first bridge)'s predecessor must come from two different htmls.", index1 && index2);
+//				
+				Set<CGNode> last2Preds = new HashSet<CGNode>();
+				
+				for(Iterator<CGNode> iPred = cg.getPredNodes(getLastName2N); iPred.hasNext();)
+					last2Preds.add(iPred.next());
+				
+				assertTrue("getLastName(of second bridge) method must one predecessor.", last2Preds.size() == 1);
+				
+				index1 = false;
+				index2 = false;
+				for(CGNode n : last2Preds){
+					if(!index1 && n.toString().contains("index1.html")){
+						index1 = true;
+					}else{
+						index2 = true;
+					}
+				}
+				
+				assertTrue("getLastName(of second bridge)'s predecessor must come from index2.html.", !index1 && index2);
+			}
+		}
 	}
 	
 	@Test
