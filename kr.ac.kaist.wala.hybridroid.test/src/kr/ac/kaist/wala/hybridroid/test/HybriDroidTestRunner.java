@@ -14,6 +14,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 
 import kr.ac.kaist.wala.hybridroid.test.annotation.AnnotationTest;
+import kr.ac.kaist.wala.hybridroid.test.callgraph.DynamicJSExectionTest;
 import kr.ac.kaist.wala.hybridroid.test.callgraph.MultipleHTMLLoadTest;
 import kr.ac.kaist.wala.hybridroid.test.callgraph.ReachableBridgeTest;
 
@@ -62,5 +63,6 @@ public class HybriDroidTestRunner {
 		runTest(AnnotationTest.class, "annotation");
 		runTest(ReachableBridgeTest.class, "reachable bridge");
 		runTest(MultipleHTMLLoadTest.class, "multiple pages load");
+		runTest(DynamicJSExectionTest.class, "dynamic js execution");
 	}
 }
