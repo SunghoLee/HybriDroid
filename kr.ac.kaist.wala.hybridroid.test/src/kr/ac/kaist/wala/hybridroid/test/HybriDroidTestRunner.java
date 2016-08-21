@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Properties;
 
 import org.junit.runner.JUnitCore;
@@ -15,6 +14,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 
 import kr.ac.kaist.wala.hybridroid.test.annotation.AnnotationTest;
+import kr.ac.kaist.wala.hybridroid.test.callgraph.MultipleHTMLLoadTest;
 import kr.ac.kaist.wala.hybridroid.test.callgraph.ReachableBridgeTest;
 
 public class HybriDroidTestRunner {
@@ -61,5 +61,6 @@ public class HybriDroidTestRunner {
 	public static void main(String[] args) throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 		runTest(AnnotationTest.class, "annotation");
 		runTest(ReachableBridgeTest.class, "reachable bridge");
+		runTest(MultipleHTMLLoadTest.class, "multiple pages load");
 	}
 }
