@@ -33,6 +33,13 @@ import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
 public class ReachableBridgeTest {
 	public static String TEST_DIR = "callgraph" + File.separator + "reachability";
 	
+	/**
+	 * Test for checking the call graph denoting that JavaScript calls Java method via bridge communication.  
+	 * @throws ClassHierarchyException
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 * @throws CancelException
+	 */
 	@Test
 	public void haveEdgesToReachableJavaMethodFromJavaScript() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 //		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
@@ -100,6 +107,13 @@ public class ReachableBridgeTest {
 		}
 	}
 	
+	/**
+	 * Test for checking the call graph denoting that JavaScript calls Java method via bridge communication. One method is reachable, and another method is not reachable. 
+	 * @throws ClassHierarchyException
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 * @throws CancelException
+	 */
 	@Test
 	public void haveEdgeOnlyReachableMethod() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 //		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
@@ -167,6 +181,13 @@ public class ReachableBridgeTest {
 		}
 	}
 	
+	/**
+	 * Test for checking the call graph denoting that JavaScript calls Java method via bridge communication. One Java method is called by both of Java and JavaScript.  
+	 * @throws ClassHierarchyException
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 * @throws CancelException
+	 */
 	@Test
 	public void haveEdgeFromBoth() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 //		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
