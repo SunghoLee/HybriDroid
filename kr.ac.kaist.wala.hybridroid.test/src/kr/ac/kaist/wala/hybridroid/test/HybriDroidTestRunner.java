@@ -16,6 +16,7 @@ import com.ibm.wala.util.CancelException;
 import kr.ac.kaist.wala.hybridroid.test.annotation.AnnotationTest;
 import kr.ac.kaist.wala.hybridroid.test.callgraph.DynamicJSExectionTest;
 import kr.ac.kaist.wala.hybridroid.test.callgraph.MultipleHTMLLoadTest;
+import kr.ac.kaist.wala.hybridroid.test.callgraph.MultipleWebViewTest;
 import kr.ac.kaist.wala.hybridroid.test.callgraph.ReachableBridgeTest;
 
 public class HybriDroidTestRunner {
@@ -64,5 +65,6 @@ public class HybriDroidTestRunner {
 		runTest(ReachableBridgeTest.class, "reachable bridge");
 		runTest(MultipleHTMLLoadTest.class, "multiple pages load");
 		runTest(DynamicJSExectionTest.class, "dynamic js execution");
+		runTest(MultipleWebViewTest.class, "multiple webview execution");
 	}
 }
