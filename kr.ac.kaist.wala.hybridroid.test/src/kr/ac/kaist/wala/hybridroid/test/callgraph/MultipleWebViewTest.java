@@ -31,7 +31,7 @@ import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
 public class MultipleWebViewTest {
 	public static String TEST_DIR = "callgraph" + File.separator + "webview";
 	
-//	@Test
+	@Test
 	public void shareOneBridgeByTwoWebView() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "MultipleWebViewTest.apk")};
 		
@@ -184,7 +184,7 @@ public class MultipleWebViewTest {
 				}
 				
 				assertTrue("getFirstName(of first bridge)'s predecessor must come from two different htmls.", index1 && index2);
-//				
+				
 				Set<CGNode> first2Preds = new HashSet<CGNode>();
 				
 				for(Iterator<CGNode> iPred = cg.getPredNodes(getFirstName2N); iPred.hasNext();)
@@ -223,7 +223,7 @@ public class MultipleWebViewTest {
 				}
 				
 				assertTrue("getLastName(of first bridge)'s predecessor must come from two different htmls.", index1 && index2);
-//				
+				
 				Set<CGNode> last2Preds = new HashSet<CGNode>();
 				
 				for(Iterator<CGNode> iPred = cg.getPredNodes(getLastName2N); iPred.hasNext();)
