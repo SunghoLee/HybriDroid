@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-SymbolicName: kr.ac.kaist.wala.hybridroid.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: test.jar,
+ libs/junit-4.11.jar
+Export-Package: kr.ac.kaist.wala.hybridroid.test,
+ kr.ac.kaist.wala.hybridroid.test.annotation,
+ kr.ac.kaist.wala.hybridroid.test.callgraph
+Require-Bundle: org.junit;bundle-version="4.11.0"
