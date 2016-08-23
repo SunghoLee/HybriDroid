@@ -18,7 +18,7 @@ import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
 /**
  * Basic interface for an object that can build a call graph.
  */
-public interface CallGraphBuilder {
+public interface CallGraphBuilder<T> {
   /**
    * Build a call graph.
    * 
