@@ -26,6 +26,8 @@ import com.ibm.wala.util.debug.Assertions;
 
 public class AndroidResourceAnalysis {
 	
+	private static boolean DEBUG = false;
+	
 	// the order is important!! because it is compared using 'startWith'. so longest prefix first.
 	private static String[] cpPrefix = {
 			".class public final ",
@@ -86,9 +88,8 @@ public class AndroidResourceAnalysis {
 		}
 		
 		Set<File> rSet = getFiles(smaliDir, "R$string.smali", "R.java");
-		if(rSet.isEmpty())
+		if(rSet.isEmpty() && !DEBUG)
 			throw new InternalError("there is no R$string.smali file.");
-//		
 		
 		for(File f : rSet){
 			String classpath = getClassPath(f);

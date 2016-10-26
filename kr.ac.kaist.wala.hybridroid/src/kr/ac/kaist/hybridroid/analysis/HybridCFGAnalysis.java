@@ -175,10 +175,6 @@ public class HybridCFGAnalysis {
 				vs.add(chMap.get(s));
 			}
 		}
-//		if(Shell.args.has(CommandArguments.MODEL_ARG)){
-//			String modelingPath = Shell.args.get(CommandArguments.MODEL_ARG);
-//			jsFiles.add(new File(modelingPath).toURI().toURL());
-//		}
 		
 		if(jsFiles.isEmpty()){
 			System.out.println("It does not have local html files or js codes");
@@ -192,7 +188,7 @@ public class HybridCFGAnalysis {
 	}
 	
 	private void xmlAnalyze(String targetPath) {
-		// Using manifest analysis? Not give any improvement now.
+		// Need to use manifest analysis? No need to improve this now.
 		XMLManifestReader mr = new XMLManifestReader(targetPath);
 		System.out.println(mr.rootProperty());
 	}
@@ -226,6 +222,7 @@ public class HybridCFGAnalysis {
 			return is;
 		}
 	}
+	
 	/**
 	 * Build Control-flow graph for the AnalysisScope.
 	 * @param scope the scope that includes all target files.
