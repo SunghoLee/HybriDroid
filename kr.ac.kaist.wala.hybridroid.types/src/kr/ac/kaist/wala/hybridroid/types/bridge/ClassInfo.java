@@ -11,7 +11,10 @@
 package kr.ac.kaist.wala.hybridroid.types.bridge;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -35,6 +38,46 @@ public class ClassInfo{
 		TypeReference jsinterAnnTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/webkit/JavascriptInterface");
 		this.jsinterAnnClass = c.getClassHierarchy().lookupClass(jsinterAnnTR);
 		initClass();
+	}
+	
+	/**
+	 * Get the object representing this class.
+	 * @return a class object.
+	 */
+	public IClass getClassObject(){
+		return c;
+	}
+	
+	/**
+	 * Get the name of this class.
+	 * @return a string value for the name.
+	 */
+	public String getClassName(){
+		return c.getName().getClassName().toString();
+	}
+	
+	/**
+	 * Get all methods declared in this class.
+	 * @return a set of methods
+	 */
+	public Set<MethodInfo> getAllMethods(){
+		return new HashSet<MethodInfo>(methodList);
+	}
+	
+	/**
+	 * Get all methods accessible from a bridge object
+	 * @return a set of methods
+	 */
+	public Set<MethodInfo> getAllAccessibleMethods(){
+		Set<MethodInfo> s = getAllMethods();
+		s.removeIf(new Predicate<MethodInfo>(){
+			@Override
+			public boolean test(MethodInfo t) {
+				// TODO Auto-generated method stub
+				return !(t.isAccessible());
+			}
+		});
+		return s;
 	}
 	
 	/**

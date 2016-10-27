@@ -11,5 +11,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
+	<classpathentry kind="lib" path="libs/json_simple-1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -45,6 +45,7 @@ public class MethodInfo implements IMethod{
 		return this.isAccessible;
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see com.ibm.wala.classLoader.IMember#getDeclaringClass()
 	 */
