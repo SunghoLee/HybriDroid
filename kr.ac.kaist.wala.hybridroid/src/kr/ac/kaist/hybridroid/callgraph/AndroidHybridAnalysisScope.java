@@ -28,7 +28,6 @@ import com.ibm.wala.cast.js.html.WebUtil;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.test.JSCallGraphBuilderUtil;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
-import com.ibm.wala.cast.loader.CAstAbstractLoader;
 import com.ibm.wala.classLoader.JarFileModule;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.classLoader.SourceModule;
@@ -38,7 +37,6 @@ import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.config.FileOfClasses;
-import com.ibm.wala.util.debug.UnimplementedError;
 import com.ibm.wala.util.io.FileProvider;
 import com.ibm.wala.util.strings.Atom;
 
@@ -57,15 +55,11 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 	
 	private static final Set<Language> languages;
 
-	static private Set<Atom> jsFileNames;
-
 	static {
 		languages = HashSetFactory.make();
 
 		languages.add(Language.JAVA);
 		languages.add(JavaScriptLoader.JS);
-
-		jsFileNames = HashSetFactory.make();
 	}
 
 	public AndroidHybridAnalysisScope() {
@@ -118,7 +112,8 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 
 		scope.addToScope(ClassLoaderReference.Application, DexFileModule.make(new File(classpath)));
 
-		scope = setUpJsAnalysisScope(dir, scope, htmls);
+		if(!htmls.isEmpty())
+			scope = setUpJsAnalysisScope(dir, scope, htmls);
 
 		fs.close();
 

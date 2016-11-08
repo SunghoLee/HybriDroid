@@ -4,6 +4,7 @@
 package kr.ac.kaist.wala.hybridroid.types;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,27 +28,40 @@ public class JSONOut {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public String toJSONString(){
+	public String toJSONString() throws IOException{
 		JSONObject outer = new JSONObject();
-		JSONObject bridge = new JSONObject();
+		JSONObject js2bridge = new JSONObject();
 		JSONObject klass = new JSONObject();
 		
-		Map<String, String> bridgeMap = new HashMap<String, String>();
+		Map<String, Map<String, String>> jsBridgeMap = new HashMap<String, Map<String, String>>();
 		Map<String, ClassInfo> classMap = new HashMap<String, ClassInfo>();
 		
-		for(Set<BridgeInfo> bis : m.values()){
-			for(BridgeInfo bi : bis){
-				String cn = bi.getClassInfo().getClassName();
-				bridgeMap.put(bi.getName(), cn);
-				classMap.put(cn, bi.getClassInfo());
+		for(File f : m.keySet()){
+			Set<BridgeInfo> bis = m.get(f);
+			String jsPath = f.getCanonicalPath();
+			if(bis != null && !bis.isEmpty()){
+				for(BridgeInfo bi : bis){
+					String cn = bi.getClassInfo().getClassName();
+					if(!jsBridgeMap.containsKey(jsPath))
+						jsBridgeMap.put(jsPath, new HashMap<String, String>());
+					jsBridgeMap.get(jsPath).put(bi.getName(), cn);
+					classMap.put(cn, bi.getClassInfo());
+				}
 			}
 		}
 		
-		for(String n : bridgeMap.keySet()){
-			bridge.put(n, bridgeMap.get(n));
+		for(String n : jsBridgeMap.keySet()){
+			JSONObject bridge = new JSONObject();
+			Map<String, String> bridgeMap = jsBridgeMap.get(n);
+			
+			for(String b : bridgeMap.keySet()){
+				bridge.put(b, bridgeMap.get(b));
+			}
+			
+			js2bridge.put(n, bridge);
 		}
 		
-		outer.put("bridge", bridge);
+		outer.put("js2bridge", js2bridge);
 		
 		for(String n : classMap.keySet()){
 			ClassInfo c = classMap.get(n);

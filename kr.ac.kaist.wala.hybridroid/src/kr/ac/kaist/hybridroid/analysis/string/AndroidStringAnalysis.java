@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.jar.JarFile;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
-import com.ibm.wala.cast.java.loader.JavaSourceLoaderImpl.JavaClass;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -257,6 +256,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		return hotspots;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Map<IBox, Set<String>> getSpotString(){
 		Map<IBox, Set<String>> res = new HashMap<IBox, Set<String>>();
 		for(IBox b : spotBoxSet){
@@ -298,6 +298,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Pair<CallGraph, PointerAnalysis<InstanceKey>> buildCG() throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
 		IClassHierarchy cha = ClassHierarchy.make(scope);
 		//test
@@ -456,10 +457,6 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	}
 	
 	private ConstraintGraph buildConstraintGraph(CallGraph cg, FieldDefAnalysis fda, IBox... initials){
-//		for(IBox box : initials){
-//			System.err.println("TargetSpot: " + box);
-//		}
-		
 		StringModel.init(cg.getClassHierarchy());
 		ConstraintGraph graph = new ConstraintGraph();
 //		ConstraintVisitor v = new ConstraintVisitor(cg, fda, graph, new InteractionConstraintMonitor(cg, InteractionConstraintMonitor.CLASSTYPE_ALL, InteractionConstraintMonitor.NODETYPE_NONE));
@@ -468,10 +465,8 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		for(IBox initial : initials)
 			worklist.add(initial);
 		
-		int iter = 1;
 		while(!worklist.isEmpty()){
 			IBox box = worklist.pop();
-//			System.out.println("#Iter(" + (iter++) + ", size: " + worklist.size() + ") " + box);
 			Set<IBox> res = box.visit(v);
 			
 			for(IBox next : res)

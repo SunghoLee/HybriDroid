@@ -3,7 +3,10 @@
  */
 package kr.ac.kaist.wala.hybridroid.types;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +24,14 @@ public class Shell {
 		Map<File, Set<BridgeInfo>> m = d.analyzeBridgeMapping(args[0], args[1]);
 		JSONOut out = new JSONOut(m);
 		
-		System.out.println(out.toJSONString());
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(args[2]));
+			bw.write(out.toJSONString());
+			bw.flush();
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

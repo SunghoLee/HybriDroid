@@ -63,7 +63,7 @@ import com.ibm.wala.util.strings.ImmutableByteArray;
  */
 public class AnalysisScope {
 
-  private final static int DEBUG_LEVEL = 0;
+  private final static int DEBUG_LEVEL = -1;
 
   public static final Atom PRIMORDIAL = Atom.findOrCreateUnicodeAtom("Primordial");
 
@@ -229,8 +229,7 @@ public class AnalysisScope {
       throw new IllegalArgumentException("null m");
     }
     List<Module> s = MapUtil.findOrCreateList(moduleMap, loader);
-//    if (DEBUG_LEVEL > 0) {
-    if(true){
+    if (DEBUG_LEVEL > 0) {  
       System.err.println(("AnalysisScope: add module " + m));
     }
     s.add(m);

@@ -26,7 +26,6 @@ import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 
 public class AnalysisScopeBuilder {
 	private File target;
-	private boolean flag;
 	private Set<URL> htmls;
 	private String dir;
 	

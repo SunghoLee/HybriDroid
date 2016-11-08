@@ -18,9 +18,10 @@ import java.util.function.Predicate;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
+
+import kr.ac.kaist.hybridroid.types.HybriDroidTypes;
 
 /**
  * Data structure denotes a class containing all methods declared in the class. 
@@ -35,7 +36,7 @@ public class ClassInfo{
 	public ClassInfo(IClass c){
 		methodList = new ArrayList<MethodInfo>();
 		this.c = c;
-		TypeReference jsinterAnnTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/webkit/JavascriptInterface");
+		TypeReference jsinterAnnTR = HybriDroidTypes.JAVASCRIPT_INTERFACE_ANNOTATION;
 		this.jsinterAnnClass = c.getClassHierarchy().lookupClass(jsinterAnnTR);
 		initClass();
 	}

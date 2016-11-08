@@ -12,16 +12,15 @@ package kr.ac.kaist.hybridroid.callgraph;
 
 import java.util.Map;
 
-import kr.ac.kaist.hybridroid.pointer.MockupClass;
-
 import com.ibm.wala.cast.ipa.callgraph.CrossLanguageMethodTargetSelector;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
-import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.strings.Atom;
+
+import kr.ac.kaist.hybridroid.pointer.MockupClass;
 
 public class AndroidHybridMethodTargetSelector extends
 		CrossLanguageMethodTargetSelector {

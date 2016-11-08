@@ -46,14 +46,13 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
-import com.ibm.wala.types.Selector;
-import com.ibm.wala.types.TypeReference;
 
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
+import kr.ac.kaist.hybridroid.types.HybriDroidTypes;
 import kr.ac.kaist.hybridroid.util.file.FileCollector;
 import kr.ac.kaist.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.hybridroid.utils.LocalFileReader;
@@ -142,8 +141,10 @@ public class Driver {
 			PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, inst.getUse(0));
 			
 			for(InstanceKey ik : pa.getPointsToSet(wvPK)){
-				if(vs.isEmpty()){
-					
+				if(vs.isEmpty()){ // failed to analyze a String value used at 'loadUrl'
+					for(File js : htmlToJsMap.values()){
+						putWebViewMap(m, ik, js);
+					}
 				}else{
 					for(String v : vs){
 						if(v.startsWith("javascript:")){ // if it is javascript code, then
@@ -175,10 +176,7 @@ public class Driver {
 	 */
 	private Map<InstanceKey, Set<BridgeInfo>> getWebViewBridgeMapping(PointerAnalysis<InstanceKey> pa, CallGraph cg){
 		Map<InstanceKey, Set<BridgeInfo>> m = new HashMap<InstanceKey, Set<BridgeInfo>>();
-		TypeReference wvTR = TypeReference.find(ClassLoaderReference.Application, "Landroid/webkit/WebView");
-		Selector addjsSelector = Selector.make("addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V");
-		
-		MethodReference addJsM = MethodReference.findOrCreate(wvTR, addjsSelector);
+		MethodReference addJsM = HybriDroidTypes.ADDJAVASCRIPTINTERFACE_OF_WEBVIEW;
 		IMethod mm = cg.getClassHierarchy().resolveMethod(addJsM);
 		CGNode addJsIM = cg.getNode(mm, Everywhere.EVERYWHERE);
 		Iterator<CGNode> in = cg.getPredNodes(addJsIM);
@@ -189,16 +187,18 @@ public class Driver {
 				CallSiteReference csr = icsr.next();
 				if (!csr.getDeclaredTarget().equals(addJsM))
 					continue;
-
+				
 				IR ir = n.getIR();
 				if (ir != null) {
 					SymbolTable symTab = ir.getSymbolTable();
 					for (SSAAbstractInvokeInstruction invokeInst : ir.getCalls(csr)) {
 						PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, invokeInst.getUse(0));
 						String bridgeName = "unknown";
+						
 						if (symTab.isStringConstant(invokeInst.getUse(2))) {
 							bridgeName = symTab.getStringValue(invokeInst.getUse(2));
 						}
+						
 						PointerKey bridgePK = pa.getHeapModel().getPointerKeyForLocal(n, invokeInst.getUse(1));
 
 						Set<IClass> bridgeClassSet = new HashSet<IClass>();
