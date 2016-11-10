@@ -10,6 +10,9 @@
  *******************************************************************************/
 package kr.ac.kaist.hybridroid.util.file;
 
+import com.sun.tools.javac.main.CommandLine;
+import kr.ac.kaist.hybridroid.util.print.AsyncPrinter;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,32 +33,57 @@ public class FilePrinter {
 				e.printStackTrace();
 			}
 		}
-		
+
 		BufferedReader br = null;
 		BufferedWriter bw = null;
-		try{
+		try {
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
 			bw = new BufferedWriter(new OutputStreamWriter(os));
-			
+
 			String s = null;
-			
-			while((s = br.readLine()) != null){
+
+			while ((s = br.readLine()) != null) {
 				bw.write(s + "\n");
 			}
 			bw.flush();
-		}catch(IOException e){
-			
-		}finally{
+		} catch (IOException e) {
+
+		} finally {
 			try {
-				if(br != null)
+				if (br != null)
 					br.close();
-				if(bw != null)
+				if (bw != null)
 					bw.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
+	}
+
+	public static void printUsingShell(File f, String path){
+		if(!f.exists()){
+			try {
+				throw new InternalError("the file does not exsit: " + f.getCanonicalPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		Runtime r = Runtime.getRuntime();
+		try {
+			System.out.println("cp " + f.getCanonicalPath() + " " + path);
+			Process p = r.exec("cp " + f.getCanonicalPath() + " " + path);
+			AsyncPrinter errPinter = new AsyncPrinter(p.getErrorStream(), AsyncPrinter.PRINT_ERR);
+			AsyncPrinter outPinter = new AsyncPrinter(p.getInputStream(), AsyncPrinter.PRINT_OUT);
+			errPinter.run();
+			outPinter.run();
+			p.waitFor();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }

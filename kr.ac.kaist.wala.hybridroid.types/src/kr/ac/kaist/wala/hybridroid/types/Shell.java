@@ -17,8 +17,9 @@ import kr.ac.kaist.wala.hybridroid.types.bridge.BridgeInfo;
  *
  */
 public class Shell {
-	
 	static public void main(String[] args){
+		long start = System.currentTimeMillis();
+
 		Driver d = new Driver();
 		
 		Map<File, Set<BridgeInfo>> m = d.analyzeBridgeMapping(args[0], args[1]);
@@ -33,5 +34,8 @@ public class Shell {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		long end = System.currentTimeMillis();
+		System.out.println("#time: " + (end - start));
 	}
 }

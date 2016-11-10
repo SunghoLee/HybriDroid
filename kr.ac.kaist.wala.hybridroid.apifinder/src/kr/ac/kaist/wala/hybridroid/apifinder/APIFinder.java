@@ -17,6 +17,7 @@ import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
 import com.ibm.wala.dalvik.classLoader.DexFileModule;
 import com.ibm.wala.dalvik.classLoader.DexIRFactory;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
+import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
@@ -113,11 +114,11 @@ public class APIFinder {
                                     if (symTab.isStringConstant(strvar))
                                         bridgeName = symTab.getStringValue(strvar);
 
-                                    TypeReference type = findLocalType(new DefUse(ir), ir.getBasicBlockForInstruction(invokeInst), objvar);
-
-                                    IClass klass = cha.lookupClass(type);
-                                    bridgeSet.add(new BridgeInfo(bridgeName, new ClassInfo(klass)));
-
+                                    TypeReference type = findLocalType(m, new DefUse(ir), objvar);
+                                    if(type != null) {
+                                        IClass klass = cha.lookupClass(type);
+                                        bridgeSet.add(new BridgeInfo(bridgeName, new ClassInfo(klass)));
+                                    }
                                 }
                             }
                         }
@@ -134,22 +135,21 @@ public class APIFinder {
 //		
 //	}
 
-    private TypeReference findLocalType(DefUse du, ISSABasicBlock seed, int usevar) {
-        IMethod m = seed.getMethod();
-        if (m.isStatic()) {
-            if (m.getNumberOfParameters() >= usevar)
+    private TypeReference findLocalType(IMethod m, DefUse du, int usevar){
+        if(m.getNumberOfParameters() >= usevar){
+            if(m.isStatic()){
                 return m.getParameterType(usevar);
-        } else {
-            if ((m.getNumberOfParameters() + 1) >= usevar)
-                return m.getParameterType(usevar);
+            }else{
+                return m.getParameterType(usevar-1);
+            }
         }
 
         SSAInstruction inst = du.getDef(usevar);
 
-        if (inst instanceof SSANewInstruction) {
+        if(inst instanceof SSANewInstruction){
             SSANewInstruction newInst = (SSANewInstruction) inst;
             return newInst.getConcreteType();
-        } else if (inst instanceof SSAGetInstruction) {
+        }else if(inst instanceof SSAGetInstruction){
             SSAGetInstruction getInst = (SSAGetInstruction) inst;
             return getInst.getDeclaredFieldType();
         }

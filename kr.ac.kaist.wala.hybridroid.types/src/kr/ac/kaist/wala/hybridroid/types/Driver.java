@@ -10,10 +10,7 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.types;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +51,7 @@ import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
 import kr.ac.kaist.hybridroid.types.HybriDroidTypes;
 import kr.ac.kaist.hybridroid.util.file.FileCollector;
+import kr.ac.kaist.hybridroid.util.file.FilePrinter;
 import kr.ac.kaist.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 import kr.ac.kaist.wala.hybridroid.types.bridge.BridgeInfo;
@@ -129,7 +127,9 @@ public class Driver {
 		
 		for(File html : htmls){
 			File f = WebUtil.extractScriptFromHTML(html.toURI().toURL(), DefaultSourceExtractor.factory).snd;
-			htmlToJsMap.put(html, f);
+			FilePrinter.print(f, new FileOutputStream(dirPath + File.separator + f.getName()));
+			File nFile = new File(dirPath + File.separator + f.getName());
+			htmlToJsMap.put(html, nFile);
 		}
 		
 		//make javascript code as seperate js file
@@ -153,7 +153,10 @@ public class Driver {
 							putWebViewMap(m, ik, js);
 						}else if(v.startsWith("http")){ // if it is online html file, then
 							URL url = new URL(v);
-							putWebViewMap(m, ik, WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd);
+							File jsFile = WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd;
+							FilePrinter.print(jsFile, new FileOutputStream(dirPath + File.separator + jsFile.getName()));
+							File nFile = new File(dirPath + File.separator + jsFile.getName());
+							putWebViewMap(m, ik, nFile);
 						}else if(v.startsWith("file:///")){
 							String nPath = dirPath + File.separator + v.replace("file:///", "").replace("android_asset", "assets");
 							if(htmlToJsMap.containsKey(new File(nPath))){

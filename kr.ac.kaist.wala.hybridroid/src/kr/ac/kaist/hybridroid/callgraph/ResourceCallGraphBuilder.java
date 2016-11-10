@@ -174,7 +174,33 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 //			if(mainClass == null)	
 //				Assertions.UNREACHABLE(target.getDeclaringClass() + " does not exist.");
 			//TODO: need to detach this part to a seperate logic
-			if (fvbiSelector.equals(target.getSelector()) && mainClass != null
+			if(target.getSelector().equals(HybriDroidTypes.SETWEBVIEWCLIENT_SELECTOR) && (mainClass.getReference().equals(HybriDroidTypes.WEBVIEW_PRI_CLASS) || mainClass.getReference().equals(HybriDroidTypes.WEBVIEW_APP_CLASS))){
+				int objvar = instruction.getUse(1);
+				int webviewvar = instruction.getUse(0);
+
+				TypeReference objType = findLocalType(node, objvar);
+				if(objType != null) {
+					IClass objClass = cha.lookupClass(objType);
+
+					PointerKey webviewPK = builder.getPointerKeyForLocal(node, webviewvar);
+					if (!system.isImplicit(webviewPK)) {
+						for (IMethod m : objClass.getAllMethods()) {
+							if (m.getDeclaringClass().equals(objClass) && m.getName().toString().startsWith("on")) {
+								try {
+									CGNode callbackNode = builder.getCallGraph().findOrCreateNode(m, Everywhere.EVERYWHERE);
+
+									boolean n = system.newConstraint(builder.getPointerKeyForLocal(callbackNode, 2), assignOperator, webviewPK);
+//							System.out.println("inst : " + instruction);
+//							System.out.println("\tPK : " + webviewPK);
+//							System.out.println("\t" + n + " : " + callbackNode);
+								} catch (CancelException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+			}else if (fvbiSelector.equals(target.getSelector()) && mainClass != null
 					&& (cha.isSubclassOf(mainClass, activityClass) || 
 						mainClass.equals(viewClass)	|| cha.isSubclassOf(mainClass, viewClass) || 
 						mainClass.equals(dialogClass) || cha.isSubclassOf(mainClass, dialogClass) || 
@@ -401,7 +427,8 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 							ResourceInstanceKey rik = new ResourceInstanceKey(node, klass, instruction.iindex, v);
 							
 							try{
-								system.newConstraint(pk, rik);
+								if(!system.isImplicit(pk))
+									system.newConstraint(pk, rik);
 							}catch(UnimplementedError e){ // if the pointer key is implicit, then just return; work normally.
 								return;
 							}
@@ -427,8 +454,7 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 		
 		/**
 		 * Additional integer calculation for statically predefined integer variable.
-		 * @param insts
-		 * @param startIndex
+		 * @param n
 		 * @param var
 		 * @return
 		 */
@@ -456,9 +482,6 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 				return -1;
 			
 			int v = info.getResourceValue(fieldName);
-			System.out.println("FN: " + fieldName);
-			System.out.println("RES: " + v);
-			System.out.println("");
 			
 			return v;
 		}
