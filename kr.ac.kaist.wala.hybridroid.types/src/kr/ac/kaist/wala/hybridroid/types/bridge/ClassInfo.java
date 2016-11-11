@@ -33,12 +33,12 @@ public class ClassInfo{
 	private List<MethodInfo> methodList;
 	private final IClass jsinterAnnClass;
 	
-	public ClassInfo(IClass c){
+	public ClassInfo(IClass c, boolean isAboveJELLYBEAN){
 		methodList = new ArrayList<MethodInfo>();
 		this.c = c;
 		TypeReference jsinterAnnTR = HybriDroidTypes.JAVASCRIPT_INTERFACE_ANNOTATION;
 		this.jsinterAnnClass = c.getClassHierarchy().lookupClass(jsinterAnnTR);
-		initClass();
+		initClass(isAboveJELLYBEAN);
 	}
 	
 	/**
@@ -84,11 +84,13 @@ public class ClassInfo{
 	/**
 	 * Initialize a method list containing all methods delcared in the class.
 	 */
-	private void initClass(){
+	private void initClass(boolean isAboveJELLYBEAN){
 		for(IMethod m : c.getAllMethods()){
-			if(hasJavascriptInterfaceAnnotation(m))
+			if(m.isInit() || m.isClinit())
+				continue;
+			if(isAboveJELLYBEAN && hasJavascriptInterfaceAnnotation(m) || !isAboveJELLYBEAN) {
 				methodList.add(new MethodInfo(m, true));
-			else
+			}else
 				methodList.add(new MethodInfo(m, false));
 		}
 	}

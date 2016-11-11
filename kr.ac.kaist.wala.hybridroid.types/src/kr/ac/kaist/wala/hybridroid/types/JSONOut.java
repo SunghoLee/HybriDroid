@@ -6,9 +6,11 @@ package kr.ac.kaist.wala.hybridroid.types;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import kr.ac.kaist.hybridroid.util.data.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -33,7 +35,7 @@ public class JSONOut {
 		JSONObject js2bridge = new JSONObject();
 		JSONObject klass = new JSONObject();
 		
-		Map<String, Map<String, String>> jsBridgeMap = new HashMap<String, Map<String, String>>();
+		Map<String, Set<Pair<String, String>>> jsBridgeMap = new HashMap<String, Set<Pair<String, String>>>();
 		Map<String, ClassInfo> classMap = new HashMap<String, ClassInfo>();
 		
 		for(File f : m.keySet()){
@@ -43,8 +45,8 @@ public class JSONOut {
 				for(BridgeInfo bi : bis){
 					String cn = bi.getClassInfo().getClassName();
 					if(!jsBridgeMap.containsKey(jsPath))
-						jsBridgeMap.put(jsPath, new HashMap<String, String>());
-					jsBridgeMap.get(jsPath).put(bi.getName(), cn);
+						jsBridgeMap.put(jsPath, new HashSet<Pair<String, String>>());
+					jsBridgeMap.get(jsPath).add(Pair.make(bi.getName(), cn));
 					classMap.put(cn, bi.getClassInfo());
 				}
 			}
@@ -52,12 +54,16 @@ public class JSONOut {
 		
 		for(String n : jsBridgeMap.keySet()){
 			JSONObject bridge = new JSONObject();
-			Map<String, String> bridgeMap = jsBridgeMap.get(n);
-			
-			for(String b : bridgeMap.keySet()){
-				bridge.put(b, bridgeMap.get(b));
+
+			Set<Pair<String, String>> bridgeMap = jsBridgeMap.get(n);
+
+			for(Pair<String, String> p : bridgeMap){
+				String b = p.fst();
+				String o = p.snd();
+				if(!bridge.containsKey(b))
+					bridge.put(b, new JSONArray());
+				((JSONArray)(bridge.get(b))).add(o);
 			}
-			
 			js2bridge.put(n, bridge);
 		}
 		

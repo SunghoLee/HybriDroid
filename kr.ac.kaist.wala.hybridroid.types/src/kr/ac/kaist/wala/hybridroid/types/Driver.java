@@ -53,6 +53,7 @@ import kr.ac.kaist.hybridroid.types.HybriDroidTypes;
 import kr.ac.kaist.hybridroid.util.file.FileCollector;
 import kr.ac.kaist.hybridroid.util.file.FilePrinter;
 import kr.ac.kaist.hybridroid.util.file.FileWriter;
+import kr.ac.kaist.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 import kr.ac.kaist.wala.hybridroid.types.bridge.BridgeInfo;
 import kr.ac.kaist.wala.hybridroid.types.bridge.ClassInfo;
@@ -177,11 +178,15 @@ public class Driver {
 	 * @param cg a call graph.
 	 * @return A map from an object representing a WebView to a set of bridge informations.
 	 */
-	private Map<InstanceKey, Set<BridgeInfo>> getWebViewBridgeMapping(PointerAnalysis<InstanceKey> pa, CallGraph cg){
+	private Map<InstanceKey, Set<BridgeInfo>> getWebViewBridgeMapping(PointerAnalysis<InstanceKey> pa, CallGraph cg, String dir){
 		Map<InstanceKey, Set<BridgeInfo>> m = new HashMap<InstanceKey, Set<BridgeInfo>>();
 		MethodReference addJsM = HybriDroidTypes.ADDJAVASCRIPTINTERFACE_OF_WEBVIEW;
 		IMethod mm = cg.getClassHierarchy().resolveMethod(addJsM);
 		CGNode addJsIM = cg.getNode(mm, Everywhere.EVERYWHERE);
+
+		YMLParser.YMLData data = getAppData(dir);
+		boolean isAboveJELLYBEAN = isEqualOrAboveJELLY_BEAN_MR1(data);
+
 		Iterator<CGNode> in = cg.getPredNodes(addJsIM);
 		while (in.hasNext()) {
 			CGNode n = in.next();
@@ -211,7 +216,7 @@ public class Driver {
 
 						for (InstanceKey ik : pa.getPointsToSet(wvPK)) {
 							for (IClass c : bridgeClassSet)
-								putWebViewMap(m, ik, new BridgeInfo(bridgeName, new ClassInfo(c)));
+								putWebViewMap(m, ik, new BridgeInfo(bridgeName, new ClassInfo(c, isAboveJELLYBEAN)));
 						}
 					}
 				}
@@ -220,7 +225,36 @@ public class Driver {
 		
 		return m;
 	}
-	
+
+	private YMLParser.YMLData getAppData(String dir){
+		YMLParser parser = new YMLParser(new File(dir + File.separator + "apktool.yml"));
+		YMLParser.YMLData data = null;
+		try {
+			data = parser.parse();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return data;
+	}
+	private boolean isEqualOrAboveJELLY_BEAN_MR1(YMLParser.YMLData data){
+		String name = data.getName();
+
+		if(name.equals("targetSdkVersion")){
+			int version = Integer.parseInt(data.getValue().replace("'", ""));
+			if(version > 16)
+				return true;
+			else
+				return false;
+		}else{
+			boolean is = true;
+			for(YMLParser.YMLData child : data.getChildren())
+				is &= isEqualOrAboveJELLY_BEAN_MR1(child);
+			return is;
+		}
+	}
+
 	/**
 	 * Analyze what bridges are attached to which JavaScript files.
 	 * @param apkPath a apk file path for analysis.
@@ -255,7 +289,7 @@ public class Driver {
 			e.printStackTrace();
 		}
 		
-		Map<InstanceKey, Set<BridgeInfo>> wvToBridge = getWebViewBridgeMapping(pa, cg);
+		Map<InstanceKey, Set<BridgeInfo>> wvToBridge = getWebViewBridgeMapping(pa, cg, ara.getDir());
 		
 		Map<File, Set<BridgeInfo>> m = new HashMap<File, Set<BridgeInfo>>();
 		
