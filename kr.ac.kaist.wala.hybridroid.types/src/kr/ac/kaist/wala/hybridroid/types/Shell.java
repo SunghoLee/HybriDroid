@@ -17,8 +17,11 @@ import kr.ac.kaist.wala.hybridroid.types.bridge.BridgeInfo;
  *
  */
 public class Shell {
+	public static long START;
+
 	static public void main(String[] args){
 		long start = System.currentTimeMillis();
+		START = start;
 
 		Driver d = new Driver();
 		

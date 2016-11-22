@@ -115,7 +115,8 @@ public class ClassInfo{
 	public String toString(){
 		String res = "";
 		res += c;
-		res += " : " + methodList;
+//		res += " : " + methodList;
+		res += " : " + getAllAccessibleMethods();
 		return res;
 	}
 }

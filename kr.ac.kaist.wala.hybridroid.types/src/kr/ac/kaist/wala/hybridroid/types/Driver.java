@@ -10,18 +10,6 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.types;
 
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
 import com.ibm.wala.cast.js.html.DefaultSourceExtractor;
 import com.ibm.wala.cast.js.html.WebUtil;
@@ -43,7 +31,6 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
-
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
@@ -57,6 +44,10 @@ import kr.ac.kaist.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 import kr.ac.kaist.wala.hybridroid.types.bridge.BridgeInfo;
 import kr.ac.kaist.wala.hybridroid.types.bridge.ClassInfo;
+
+import java.io.*;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Driver is a basic step for type checking. This class finds all JavaScript
@@ -125,14 +116,16 @@ public class Driver {
 		
 		Set<File> htmls = FileCollector.collectFiles(new File(dirPath), "html", "htm");
 		Map<File, File> htmlToJsMap = new HashMap<File, File>();
-		
+		Set<File> allFiles = new HashSet<File>();
+
 		for(File html : htmls){
 			File f = WebUtil.extractScriptFromHTML(html.toURI().toURL(), DefaultSourceExtractor.factory).snd;
 			FilePrinter.print(f, new FileOutputStream(dirPath + File.separator + f.getName()));
 			File nFile = new File(dirPath + File.separator + f.getName());
+			allFiles.add(nFile);
 			htmlToJsMap.put(html, nFile);
 		}
-		
+
 		//make javascript code as seperate js file
 		int i = 1;
 		for(HotspotDescriptor hd : asa.getAllDescriptors()){
@@ -142,22 +135,24 @@ public class Driver {
 			PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, inst.getUse(0));
 			
 			for(InstanceKey ik : pa.getPointsToSet(wvPK)){
-				if(vs.isEmpty()){ // failed to analyze a String value used at 'loadUrl'
-					for(File js : htmlToJsMap.values()){
-						putWebViewMap(m, ik, js);
-					}
-				}else{
+//				if(vs.isEmpty()){ // failed to analyze a String value used at 'loadUrl'
+//					for(File js : htmlToJsMap.values()){
+//						putWebViewMap(m, ik, js);
+//					}
+//				}else{
 					for(String v : vs){
 						if(v.startsWith("javascript:")){ // if it is javascript code, then
 							String outJSName = "js_" + (i++) + ".html";
 							File js = FileWriter.makeHtmlFile(dirPath, outJSName, v.substring(v.indexOf(":")+1));
 							putWebViewMap(m, ik, js);
+							allFiles.add(js);
 						}else if(v.startsWith("http")){ // if it is online html file, then
 							URL url = new URL(v);
 							File jsFile = WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd;
 							FilePrinter.print(jsFile, new FileOutputStream(dirPath + File.separator + jsFile.getName()));
 							File nFile = new File(dirPath + File.separator + jsFile.getName());
 							putWebViewMap(m, ik, nFile);
+							allFiles.add(nFile);
 						}else if(v.startsWith("file:///")){
 							String nPath = dirPath + File.separator + v.replace("file:///", "").replace("android_asset", "assets");
 							if(htmlToJsMap.containsKey(new File(nPath))){
@@ -165,10 +160,24 @@ public class Driver {
 							}
 						}
 					}
+//				}
+			}
+		}
+
+		for(HotspotDescriptor hd : asa.getAllDescriptors()){
+			Set<String> vs = hd.getValues();
+			CGNode n = hd.getNode();
+			SSAInstruction inst = hd.getInstruction();
+			PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, inst.getUse(0));
+			for(InstanceKey ik : pa.getPointsToSet(wvPK)){
+				if(vs.isEmpty()){
+					for(File js : allFiles){
+						putWebViewMap(m, ik, js);
+					}
 				}
 			}
 		}
-		
+
 		return m;
 	}
 	
@@ -276,6 +285,7 @@ public class Driver {
 		
 		AndroidResourceAnalysis ara = analyzeResource(apkPath);
 		AndroidStringAnalysis asa = analyzeString(LocalFileReader.androidJar(p).getPath(), apkPath, ara);
+		System.out.println("#StringAnalysisEndTime: " + (System.currentTimeMillis() - Shell.START));
 		CallGraph cg = asa.getCGusedInSA();
 		PointerAnalysis<InstanceKey> pa = asa.getPAusedInSA();
 		Map<InstanceKey, Set<File>> wvToJs = Collections.emptyMap();
@@ -296,9 +306,12 @@ public class Driver {
 		for(InstanceKey wv : wvToJs.keySet()){
 			Set<File> fs = wvToJs.get(wv);
 			Set<BridgeInfo> bs =  wvToBridge.get(wv);
-			
 			for(File f : fs){
-				m.put(f, bs);
+				if(bs != null && !bs.isEmpty()) {
+					if (!m.containsKey(f))
+						m.put(f, new HashSet<BridgeInfo>());
+					m.get(f).addAll(bs);
+				}
 			}
 		}	
 		return m;

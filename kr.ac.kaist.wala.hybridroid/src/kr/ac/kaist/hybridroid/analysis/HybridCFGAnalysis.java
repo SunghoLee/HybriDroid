@@ -61,6 +61,7 @@ import kr.ac.kaist.hybridroid.callgraph.HybridClassLoaderFactory;
 import kr.ac.kaist.hybridroid.callgraph.HybridIRFactory;
 import kr.ac.kaist.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
+import kr.ac.kaist.hybridroid.shell.Shell;
 import kr.ac.kaist.hybridroid.util.file.FileCollector;
 import kr.ac.kaist.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.hybridroid.util.file.YMLParser;
@@ -245,6 +246,8 @@ public class HybridCFGAnalysis {
 		if(!annVersion)
 			System.out.println("[Warning] the target of this app is less than Android JELLY_BEAN_MR1; all public bridge methods is allowed by JS access");
 		AndroidStringAnalysis asa = analyzeString(libPath, targetPath, ara);
+		System.out.println("#StringAnalysisEndTime: " + (System.currentTimeMillis() - Shell.START));
+
 		AndroidHybridAnalysisScope scope = makeScope(libPath, targetPath, ara, asa);
 		
 		JSCallGraphUtil.setTranslatorFactory(new CAstRhinoTranslatorFactory());

@@ -27,6 +27,7 @@ public class JSONOut {
 	
 	public JSONOut(Map<File, Set<BridgeInfo>> m){
 		this.m = m;
+//		System.out.println(m);
 	}
 	
 	@SuppressWarnings("unchecked")

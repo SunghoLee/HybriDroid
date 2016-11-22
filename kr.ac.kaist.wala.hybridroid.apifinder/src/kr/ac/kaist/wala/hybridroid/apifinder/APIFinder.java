@@ -117,7 +117,7 @@ public class APIFinder {
                                     TypeReference type = findLocalType(m, new DefUse(ir), objvar);
                                     if(type != null) {
                                         IClass klass = cha.lookupClass(type);
-                                        bridgeSet.add(new BridgeInfo(bridgeName, new ClassInfo(klass)));
+                                        bridgeSet.add(new BridgeInfo(bridgeName, new ClassInfo(klass, true)));
                                     }
                                 }
                             }

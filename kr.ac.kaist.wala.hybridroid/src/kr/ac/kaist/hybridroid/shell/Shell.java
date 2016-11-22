@@ -90,6 +90,7 @@ public class Shell {
 		// Load target file for analysis.
 		String targetPath = Shell.args.get(CommandArguments.TARGET_ARG);
 		long startTime = System.currentTimeMillis();
+		START = startTime;
 		/**
 		 * Below is the switch case for HybriDroid functions. One function of
 		 * the CommandLineOptionGroup must be one case in below.
