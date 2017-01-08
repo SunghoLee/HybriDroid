@@ -32,27 +32,27 @@ public class CommandArguments {
 	
 	static{
 		options = new Options();
-		
-		Option targetOp = new Option(TARGET_ARG, true, "target apk file of analysis");
-		targetOp.setRequired(true);
-		options.addOption(targetOp);
-		
-		Option propOp = new Option(PROP_ARG, true, "set the wala property file");
-		propOp.setRequired(true);
-		options.addOption(propOp);
-		
-		Option modelOp = new Option(MODEL_ARG, true, "set the wala property file");
-		options.addOption(modelOp);
-		
-		Option jsOp = new Option(ONLY_JS_ARG, false, "set the wala property file");
-		options.addOption(jsOp);
-		
-		OptionGroup functions = new OptionGroup();
-		functions.addOption(new Option(CFG_ARG, false, "construct cfg for the android application"));
-		options.addOptionGroup(functions);
-//		options.addOption(new Option(PRE_STRING_ARG, false, "pre-analysis for "), hasArg, description)
-		options.addOption(new Option(DROIDEL_ARG, false, "enable pre transforming using DROIDEL"));
-		options.addOption(new Option(MANIFEST_ARG, false, "enable the manifest analysis"));
+//
+//		Option targetOp = new Option(TARGET_ARG, true, "target apk file of analysis");
+//		targetOp.setRequired(true);
+//		options.addOption(targetOp);
+//
+//		Option propOp = new Option(PROP_ARG, true, "set the wala property file");
+//		propOp.setRequired(true);
+//		options.addOption(propOp);
+//
+//		Option modelOp = new Option(MODEL_ARG, true, "set the wala property file");
+//		options.addOption(modelOp);
+//
+//		Option jsOp = new Option(ONLY_JS_ARG, false, "set the wala property file");
+//		options.addOption(jsOp);
+//
+//		OptionGroup functions = new OptionGroup();
+//		functions.addOption(new Option(CFG_ARG, false, "construct cfg for the android application"));
+//		options.addOptionGroup(functions);
+////		options.addOption(new Option(PRE_STRING_ARG, false, "pre-analysis for "), hasArg, description)
+//		options.addOption(new Option(DROIDEL_ARG, false, "enable pre transforming using DROIDEL"));
+//		options.addOption(new Option(MANIFEST_ARG, false, "enable the manifest analysis"));
 	}
 	
 	private CommandLine cmd;
@@ -65,7 +65,7 @@ public class CommandArguments {
 	public CommandArguments(String[] args){
 		CommandLineParser parser = new BasicParser();
 		try {
-			cmd = parser.parse(options, args);
+			cmd = parser.parse(options, args, false);
 			
 			if(!computeDependency()){
 				usage();

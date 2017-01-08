@@ -92,10 +92,10 @@ public class Driver {
 			asa.analyze(hotspots);
 		} catch (ClassHierarchyException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		} catch (CallGraphBuilderCancelException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		
 		return asa;
@@ -140,10 +140,9 @@ public class Driver {
 			CGNode n = hd.getNode();
 			SSAInstruction inst = hd.getInstruction();
 			PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, inst.getUse(0));
-			
 			for(InstanceKey ik : pa.getPointsToSet(wvPK)){
 				if(vs.isEmpty()){
-					
+
 				}else{
 					for(String v : vs){
 						if(v.startsWith("javascript:")){ // if it is javascript code, then
@@ -246,7 +245,7 @@ public class Driver {
 			wvToJs = getWebViewJavaScriptMapping(pa, asa, ara.getDir());
 		} catch (Error e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

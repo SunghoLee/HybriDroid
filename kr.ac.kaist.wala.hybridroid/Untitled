@@ -1,0 +1,64 @@
+
+bash-3.2$ find ./ -name 'Java60RegressionExclusions.txt' 
+.//com.ibm.wala.cast.java.test.data/Java60RegressionExclusions.txt
+.//com.ibm.wala.core.tests/bin/Java60RegressionExclusions.txt
+.//com.ibm.wala.core.tests/dat/Java60RegressionExclusions.txt
+bash-3.2$ cp com.ibm.wala.cast.java.test.data/Java60RegressionExclusions.txt ~/Documents/OneDrive/OneDrive\ -\ kaist.ac.kr/plrg/adPlatforms/unityAds/ARDetector/
+bash-3.2$ cd kr.ac.kaist.wala.hybridroid
+bash-3.2$ grep -r 'entry' ./
+.//.classpath:	<classpathentry kind="src" path="src"/>
+.//.classpath:	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+.//.classpath:	<classpathentry kind="lib" path="libs/commons-cli-1.2.jar"/>
+.//.classpath:	<classpathentry kind="lib" path="libs/apktool_2.0.2.jar"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java.test"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java.test.data"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.rhino"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js.test"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.test"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.testdata"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.dalvik"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
+.//.classpath:	<classpathentry combineaccessrules="false" kind="src" path="/kr.ac.kaist.wala.hybridroid.util"/>
+.//.classpath:	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+.//.classpath:	<classpathentry kind="output" path="bin"/>
+.//src/kr/ac/kaist/hybridroid/analysis/FieldDefAnalysis.java:	//entry basic block number in CFG.
+.//src/kr/ac/kaist/hybridroid/analysis/FieldDefAnalysis.java:		int entry = cfg.getNumber(cfg.entry());
+.//src/kr/ac/kaist/hybridroid/analysis/FieldDefAnalysis.java:				if(predNum == entry)
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:		Iterable<Entrypoint> entrypoints = null;
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:			entrypoints = new Iterable<Entrypoint>() {
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:			final List<Entrypoint> entry = new ArrayList<Entrypoint>();
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:			entry.add(droidelEntryPoint);
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:			entrypoints = new Iterable<Entrypoint>(){
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:					return entry.iterator();
+.//src/kr/ac/kaist/hybridroid/analysis/string/AndroidStringAnalysis.java:		return entrypoints;
+.//src/kr/ac/kaist/hybridroid/callgraph/graphutils/WalaCFGVisualizer.java:			label += "entry\\l";
+.//src/kr/ac/kaist/hybridroid/callgraph/graphutils/WalaCGVisualizer.java:			for(Entry<CGNode, String> e : labelMap.entrySet()){
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:		Iterable<Entrypoint> entrypoints = null;
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:			entrypoints = new Iterable<Entrypoint>() {
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:			final List<Entrypoint> entry = new ArrayList<Entrypoint>();
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:			entry.add(droidelEntryPoint);
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:			entrypoints = new Iterable<Entrypoint>(){
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:					return entry.iterator();
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:		//is the order of entrypoints important?
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java:		return new ComposedEntrypoints(jsRoots, entrypoints);
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java://		return new ComposedEntrypoints(jsRoots, entrypoints);
+.//src/kr/ac/kaist/hybridroid/models/AndroidHybridAppModel.java://		return new ComposedEntrypoints(entrypoints, jsRoots);
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java:								for(BasicBlockInContext<IExplodedBasicBlock> entry : supergraph.getEntriesForProcedure(n)){
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java:									for(Iterator<BasicBlockInContext<IExplodedBasicBlock>> isucc = supergraph.getSuccNodes(entry); isucc.hasNext(); ){
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java:											seeds.add(PathEdge.createPathEdge(entry, d, succ, d));
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java://								for(BasicBlockInContext<IExplodedBasicBlock> entry : supergraph.getEntriesForProcedure(n)){
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java://									bQueue.add(entry);
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java://									visited.add(entry);
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java://											for(BasicBlockInContext<IExplodedBasicBlock> entrybb : supergraph.getEntriesForProcedure(cg.getFakeRootNode())){
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java:						for(BasicBlockInContext<IExplodedBasicBlock> entry : entries){
+.//src/kr/ac/kaist/hybridroid/test/PrivateLeakageDetector.java:							for(Iterator<BasicBlockInContext<IExplodedBasicBlock>> iCall = supergraph.getPredNodes(entry); iCall.hasNext();){
+.//src/kr/ac/kaist/hybridroid/test/TaintAnalysisForHybrid.java:	   * analysis with the path edge (main_entry, 0) -> (main_entry, 0). We choose the partially-balanced approach to avoid pollution of
+.//src/kr/ac/kaist/hybridroid/test/TaintAnalysisForHybrid.java:	     * we use the entry block of the CGNode as the fake entry when propagating from callee to caller with unbalanced parens
+.//src/kr/ac/kaist/hybridroid/test/TaintAnalysisForHybrid.java:	     * we use the entry block of the CGNode as the "fake" entry when propagating from callee to caller with unbalanced parens
+bash-3.2$ 

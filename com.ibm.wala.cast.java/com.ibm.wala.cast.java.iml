@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="libs" level="project" />
+    <orderEntry type="library" name="libs3" level="project" />
+    <orderEntry type="library" name="libs7" level="project" />
+    <orderEntry type="library" name="libs1" level="project" />
+    <orderEntry type="library" name="data" level="project" />
+    <orderEntry type="library" name="libs6" level="project" />
+    <orderEntry type="library" name="libs8" level="project" />
+    <orderEntry type="module" module-name="com.ibm.wala.core" />
+    <orderEntry type="module" module-name="com.ibm.wala.shrike" />
+    <orderEntry type="module" module-name="com.ibm.wala.util" />
+    <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast" />
+  </component>
+</module>
