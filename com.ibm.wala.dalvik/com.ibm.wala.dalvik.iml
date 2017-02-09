@@ -7,12 +7,12 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="libs4" level="project" />
     <orderEntry type="library" name="data" level="project" />
-    <orderEntry type="module" module-name="com.ibm.wala.core" />
-    <orderEntry type="module" module-name="com.ibm.wala.shrike" />
+    <orderEntry type="library" name="libs7" level="project" />
     <orderEntry type="module" module-name="com.ibm.wala.util" />
-    <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
     <orderEntry type="module" module-name="com.ibm.wala.cast" />
+    <orderEntry type="module" module-name="com.ibm.wala.core" />
+    <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
+    <orderEntry type="module" module-name="com.ibm.wala.shrike" />
   </component>
 </module>

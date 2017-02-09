@@ -8,22 +8,22 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="apktool_2.0.2" level="project" />
-    <orderEntry type="library" name="libs" level="project" />
-    <orderEntry type="library" name="libs4" level="project" />
-    <orderEntry type="library" name="libs2" level="project" />
     <orderEntry type="library" name="data" level="project" />
-    <orderEntry type="module" module-name="com.ibm.wala.dalvik" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast.js.test" />
-    <orderEntry type="module" module-name="com.ibm.wala.core" />
-    <orderEntry type="module" module-name="com.ibm.wala.shrike" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast.js.rhino" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast.js.rhino.test" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast.js.html.nu_validator" />
-    <orderEntry type="module" module-name="com.ibm.wala.util" />
-    <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast.js" />
+    <orderEntry type="library" name="libs7" level="project" />
+    <orderEntry type="library" name="libs" level="project" />
+    <orderEntry type="library" name="libs8" level="project" />
     <orderEntry type="module" module-name="kr.ac.kaist.wala.hybridroid.util" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast.js.rhino" />
+    <orderEntry type="module" module-name="com.ibm.wala.util" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast.js.html.nu_validator" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast" />
+    <orderEntry type="module" module-name="com.ibm.wala.dalvik" />
+    <orderEntry type="module" module-name="com.ibm.wala.core" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast.js.rhino.test" />
+    <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
+    <orderEntry type="module" module-name="com.ibm.wala.shrike" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast.js" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast.js.test" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.java" />
   </component>
 </module>

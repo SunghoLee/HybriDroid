@@ -22,33 +22,39 @@ import org.apache.commons.cli.ParseException;
 public class CommandArguments {
 	static private Options options;
 	static final public String PROP_ARG = "p";
+	static final public String PROP_LONG_ARG = "property";
 	static final public String MODEL_ARG = "m";
+	static final public String MODEL_LONG_ARG = "model";
 	static final public String TARGET_ARG = "t";
+	static final public String TARGET_LONG_ARG = "target";
 	static final public String DROIDEL_ARG = "droidel";
 	static final public String MANIFEST_ARG = "manifest";
 	static final public String CFG_ARG = "cfg";
+	static final public String CFG_LONG_ARG = "cfg";
 	static final public String PRE_STRING_ARG = "prestr";
-	static final public String ONLY_JS_ARG = "jsonly";
+	static final public String ONLY_JS_ARG = "j";
+	static final public String ONLY_JS_LONG_ARG = "jsonly";
 	
 	static{
 		options = new Options();
-//
-//		Option targetOp = new Option(TARGET_ARG, true, "target apk file of analysis");
-//		targetOp.setRequired(true);
-//		options.addOption(targetOp);
-//
-//		Option propOp = new Option(PROP_ARG, true, "set the wala property file");
-//		propOp.setRequired(true);
-//		options.addOption(propOp);
-//
-//		Option modelOp = new Option(MODEL_ARG, true, "set the wala property file");
-//		options.addOption(modelOp);
-//
-//		Option jsOp = new Option(ONLY_JS_ARG, false, "set the wala property file");
-//		options.addOption(jsOp);
-//
+
+		Option targetOp = new Option(TARGET_ARG, TARGET_LONG_ARG,true, "target apk file of analysis");
+		targetOp.setRequired(true);
+		options.addOption(targetOp);
+
+		Option propOp = new Option(PROP_ARG, PROP_LONG_ARG, true, "set the wala property file");
+		propOp.setRequired(true);
+		options.addOption(propOp);
+
+		Option modelOp = new Option(MODEL_ARG, MODEL_LONG_ARG, true, "set the wala property file");
+		options.addOption(modelOp);
+
+		Option jsOp = new Option(ONLY_JS_ARG, ONLY_JS_LONG_ARG, false, "set the wala property file");
+		options.addOption(jsOp);
+
 //		OptionGroup functions = new OptionGroup();
-//		functions.addOption(new Option(CFG_ARG, false, "construct cfg for the android application"));
+		Option cfgOp = new Option(CFG_ARG, CFG_LONG_ARG, false, "construct cfg for the android application");
+		options.addOption(cfgOp);
 //		options.addOptionGroup(functions);
 ////		options.addOption(new Option(PRE_STRING_ARG, false, "pre-analysis for "), hasArg, description)
 //		options.addOption(new Option(DROIDEL_ARG, false, "enable pre transforming using DROIDEL"));
@@ -68,24 +74,23 @@ public class CommandArguments {
 			cmd = parser.parse(options, args, false);
 			
 			if(!computeDependency()){
+				System.out.println("124555");
 				usage();
 				System.exit(-1);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
+			System.out.println("124");
 			usage();
 			System.exit(-1);
 		}
 	}
 	
 	private boolean computeDependency(){
-		if(cmd.hasOption(DROIDEL_ARG) || cmd.hasOption(MANIFEST_ARG)){
-			if(!cmd.hasOption(CFG_ARG)){
-				return false;
-			}else
-				return true;
-		}
-		return true;
+		if(!cmd.hasOption(CFG_ARG) || !cmd.hasOption(PROP_ARG) || !cmd.hasOption(TARGET_ARG)){
+			return false;
+		}else
+			return true;
 	}
 	
 	public boolean has(String op){

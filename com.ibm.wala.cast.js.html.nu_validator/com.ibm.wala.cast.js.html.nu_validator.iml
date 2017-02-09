@@ -14,9 +14,8 @@
     <orderEntry type="module" module-name="com.ibm.wala.cast" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.js" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.js.rhino.test" scope="TEST" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast.js.rhino" />
-    <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast.js.test" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.test" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast.js.test" />
+    <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
   </component>
 </module>

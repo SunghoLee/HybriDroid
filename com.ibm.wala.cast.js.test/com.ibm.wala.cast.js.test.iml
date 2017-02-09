@@ -7,19 +7,19 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="junit-4.11" level="project" />
     <orderEntry type="library" name="junit-4.111" level="project" />
+    <orderEntry type="library" name="junit-4.11" level="project" />
     <orderEntry type="library" name="libs3" level="project" />
+    <orderEntry type="library" name="data" level="project" />
     <orderEntry type="library" name="junit-4.113" level="project" />
     <orderEntry type="library" name="junit-4.112" level="project" />
-    <orderEntry type="library" name="data" level="project" />
-    <orderEntry type="library" name="libs8" level="project" />
-    <orderEntry type="module" module-name="com.ibm.wala.core" />
+    <orderEntry type="library" name="libs2" level="project" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.js.rhino" />
     <orderEntry type="module" module-name="com.ibm.wala.util" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast" />
+    <orderEntry type="module" module-name="com.ibm.wala.core" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.test" />
     <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
-    <orderEntry type="module" module-name="com.ibm.wala.cast" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.js" />
     <orderEntry type="module" module-name="com.ibm.wala.shrike" />
   </component>
