@@ -10,6 +10,8 @@
 *******************************************************************************/
 package kr.ac.kaist.hybridroid.analysis.resource;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +56,8 @@ public class AndroidDecompiler {
 //				throw new InternalError("failed to decompile: " + path);
 //			}
 			brut.apktool.Main.main(cmds);
-			permission(toPath);
+			if(!SystemUtils.IS_OS_WINDOWS)
+				permission(toPath);
 			return toPath;
 		}catch(Exception e){
 			e.printStackTrace();
