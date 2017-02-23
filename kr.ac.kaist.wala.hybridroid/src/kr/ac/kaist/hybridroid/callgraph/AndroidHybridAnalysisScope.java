@@ -25,6 +25,7 @@ import java.util.jar.JarFile;
 import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
 import com.ibm.wala.cast.js.html.DefaultSourceExtractor;
 import com.ibm.wala.cast.js.html.WebUtil;
+import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.test.JSCallGraphBuilderUtil;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
@@ -42,7 +43,9 @@ import com.ibm.wala.util.debug.UnimplementedError;
 import com.ibm.wala.util.io.FileProvider;
 import com.ibm.wala.util.strings.Atom;
 
+import kr.ac.kaist.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.hybridroid.util.file.FileWriter;
+import org.apache.commons.lang3.SystemUtils;
 
 /**
  * AnalysisScope for Android Hybrid application. This class supports DROIDEL Dex
@@ -131,9 +134,23 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 			throws IllegalArgumentException, IOException {
 
 		JavaScriptLoader.addBootstrapFile(WebUtil.preamble);
-		scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
-		scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("preamble.js"));
-		
+		if(SystemUtils.IS_OS_WINDOWS) {
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getResource("prologue.js")) {
+				@Override
+				public String getName() {
+					return "prologue.js";
+				}
+			});
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getResource("preamble.js")) {
+				@Override
+				public String getName() {
+					return "preamble.js";
+				}
+			});
+		}else{
+			scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
+			scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("preamble.js"));
+		}
 		for (URL url : htmls) {
 			try {
 				File f = WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd;

@@ -556,8 +556,6 @@ public class AndroidHybridCallGraphBuilder extends
 		 * 
 		 * @param method
 		 *            the target method used for making the mock-up instance.
-		 * @param obj
-		 *            the object instance key in which the method is declared.
 		 * @return
 		 * @throws CancelException
 		 */
@@ -669,7 +667,6 @@ public class AndroidHybridCallGraphBuilder extends
 	
 	public GlobalObjectKey getGlobalObject(Atom language, Atom file){
 		assert language.equals(JavaScriptTypes.jsName);
-		
 		if(!jsGlobalMap.containsKey(file))
 			Assertions.UNREACHABLE("the file is not in the scope: " + file);
 				
@@ -909,7 +906,9 @@ public class AndroidHybridCallGraphBuilder extends
 						}
 					}
 				} else {
-					Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf(File.separator) + 1));
+					//for Windows, all back slashes are already converted to slash in the path.
+					// so, simply separate path using slash!
+					Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf("/") + 1));
 					InstanceKey globalObj = builder.getGlobalObject(JavaScriptTypes.jsName, afn);
 					if (directGlobalObjectRef(field)) {
 						// points-to set is just the global object
@@ -955,7 +954,9 @@ public class AndroidHybridCallGraphBuilder extends
 					}
 				}
 			} else {
-				Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf(File.separator) + 1));
+				//for Windows, all back slashes are already converted to slash in the path.
+				// so, simply separate path using slash!
+				Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf("/") + 1));
 				InstanceKey globalObj = builder.getGlobalObject(JavaScriptTypes.jsName, afn);
 				system.findOrCreateIndexForInstanceKey(globalObj);
 				PointerKey p = getPointerKeyForInstanceField(globalObj, f);
@@ -1016,7 +1017,9 @@ public class AndroidHybridCallGraphBuilder extends
 					pointsToSet = new OrdinalSet<InstanceKey>(S, analysis.getInstanceKeyMapping());
 				}
 			}else{
-				Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf(File.separator) + 1));
+				//for Windows, all back slashes are already converted to slash in the path.
+				// so, simply separate path using slash!
+				Atom afn = Atom.findOrCreateAsciiAtom(fn.substring(fn.lastIndexOf("/") + 1));
 		          InstanceKey globalObj = getGlobalObject(JavaScriptTypes.jsName, afn);
 		          PointerKey fkey = analysis.getHeapModel().getPointerKeyForInstanceField(globalObj, f);
 					if (fkey != null) {
