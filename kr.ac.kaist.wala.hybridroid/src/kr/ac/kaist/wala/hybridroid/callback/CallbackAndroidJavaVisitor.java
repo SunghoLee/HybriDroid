@@ -13,8 +13,8 @@ package kr.ac.kaist.wala.hybridroid.callback;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 
-import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
-import kr.ac.kaist.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
+import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis;
+import kr.ac.kaist.wala.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
 
 /**
  * @author Sungho Lee
