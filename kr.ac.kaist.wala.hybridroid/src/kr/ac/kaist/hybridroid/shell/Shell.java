@@ -89,7 +89,8 @@ public class Shell {
 
 		// Load target file for analysis.
 		String targetPath = Shell.args.get(CommandArguments.TARGET_ARG);
-		
+		long startTime = System.currentTimeMillis();
+		START = startTime;
 		/**
 		 * Below is the switch case for HybriDroid functions. One function of
 		 * the CommandLineOptionGroup must be one case in below.
@@ -111,30 +112,32 @@ public class Shell {
 					    vis.printLabel("jslabel.txt");
 			}else{
 				
-				Shell.START = System.currentTimeMillis();
+//				Shell.START = System.currentTimeMillis();
 				HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
 				Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(targetPath, LocalFileReader.androidJar(Shell.walaProperties).getPath());
-				PointerAnalysis<InstanceKey> pa = p.snd;
-				Shell.END = System.currentTimeMillis();
-				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
+//				PointerAnalysis<InstanceKey> pa = p.snd;
+//				Shell.END = System.currentTimeMillis();
+//				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
 
-				System.err.println("Graph Modeling for taint...");
-				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
+//				System.err.println("Graph Modeling for taint...");
+//				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
 				
-				PrivateLeakageDetector pld = new PrivateLeakageDetector(mcg, p.snd);
-				pld.analyze();
-				Shell.END = System.currentTimeMillis();
-				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
-				for(LeakWarning w : pld.getWarnings()){
-					System.out.println("=========");
-					System.out.println(w);
-					System.out.println("=========");
-					w.printPathFlow("leak.dot");
-				}
+//				PrivateLeakageDetector pld = new PrivateLeakageDetector(mcg, p.snd);
+//				pld.analyze();
+//				Shell.END = System.currentTimeMillis();
+//				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
+//				for(LeakWarning w : pld.getWarnings()){
+//					System.out.println("=========");
+//					System.out.println(w);
+//					System.out.println("=========");
+//					w.printPathFlow("leak.dot");
+//				}
 			}
 		} else {
 			// TODO: support several functions
 		}
+		long endTime = System.currentTimeMillis();
+		System.out.println("#Time: " + (endTime - startTime));
 	}
 
 	/**

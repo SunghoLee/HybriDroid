@@ -10,12 +10,7 @@
  *******************************************************************************/
 package kr.ac.kaist.hybridroid.util.file;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 
 public class FileWriter {
 	public static boolean DEBUG = false;
@@ -118,5 +113,26 @@ public class FileWriter {
 			}
 		}
 		return output; 
+	}
+
+	public static File copyFile(File src, String dstPath){
+		File n = new File(dstPath);
+
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(src));
+			BufferedWriter bw = new BufferedWriter(new java.io.FileWriter(n));
+			String buff;
+			while((buff = br.readLine()) != null){
+				bw.write(buff + "\n");
+			}
+			bw.flush();
+			bw.close();
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return n;
 	}
 }

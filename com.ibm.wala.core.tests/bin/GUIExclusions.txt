@@ -1,4 +1,0 @@
-java\/awt\/.*
-javax\/swing\/.*
-sun\/awt\/.*
-sun\/swing\/.*

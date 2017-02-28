@@ -909,6 +909,10 @@ public class PropagationSystem extends DefaultFixedPointSolver<PointsToSetVariab
     return pointsToMap.isUnified(result);
   }
 
+  public boolean isImplicit(PointerKey result) {
+    return pointsToMap.isImplicit(result);
+  }
+
   public int getNumber(PointerKey p) {
     return pointsToMap.getIndex(p);
   }

@@ -10,13 +10,7 @@
  *****************************************************************************/
 package com.ibm.wala.cast.js.html;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.Reader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -253,14 +247,14 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
       URL scriptSrc = new URL(entrypointUrl, urlAsString);
       Reader scriptInputStream;
       try {
-        BOMInputStream bs = new BOMInputStream(scriptSrc.openConnection().getInputStream(), false, 
-            ByteOrderMark.UTF_8, 
+        BOMInputStream bs = new BOMInputStream(scriptSrc.openConnection().getInputStream(), false,
             ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
             ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE);
         if (bs.hasBOM()) {
           System.err.println("removing BOM " + bs.getBOM());
         }
-        scriptInputStream = new InputStreamReader(bs);
+        scriptInputStream = new InputStreamReader(bs, bs.getBOMCharsetName());
+//        scriptInputStream = new InputStreamReader(scriptSrc.openConnection().getInputStream());
       } catch (Exception e) {
         //it looks like this happens when we can't resolve the url?
         if (DEBUG) {
@@ -279,9 +273,7 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
         while ((line = scriptReader.readLine()) != null) {
           x.append(line).append("\n");
         }
-
         scriptRegion.println(x.toString(), scriptTag.getElementPosition(), scriptSrc, false);
-
       } finally {
         if (scriptReader != null) {
           scriptReader.close();
@@ -383,7 +375,7 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
     MappedSourceModule entry = res.iterator().next();
     System.out.println(entry);
     System.out.println(entry.getMapping());
-    
+
   }
 
   @Override

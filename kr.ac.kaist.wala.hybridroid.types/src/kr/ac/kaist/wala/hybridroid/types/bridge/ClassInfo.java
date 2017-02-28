@@ -18,9 +18,10 @@ import java.util.function.Predicate;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
+
+import kr.ac.kaist.hybridroid.types.HybriDroidTypes;
 
 /**
  * Data structure denotes a class containing all methods declared in the class. 
@@ -32,12 +33,12 @@ public class ClassInfo{
 	private List<MethodInfo> methodList;
 	private final IClass jsinterAnnClass;
 	
-	public ClassInfo(IClass c){
+	public ClassInfo(IClass c, boolean isAboveJELLYBEAN){
 		methodList = new ArrayList<MethodInfo>();
 		this.c = c;
-		TypeReference jsinterAnnTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/webkit/JavascriptInterface");
+		TypeReference jsinterAnnTR = HybriDroidTypes.JAVASCRIPT_INTERFACE_ANNOTATION;
 		this.jsinterAnnClass = c.getClassHierarchy().lookupClass(jsinterAnnTR);
-		initClass();
+		initClass(isAboveJELLYBEAN);
 	}
 	
 	/**
@@ -83,11 +84,13 @@ public class ClassInfo{
 	/**
 	 * Initialize a method list containing all methods delcared in the class.
 	 */
-	private void initClass(){
+	private void initClass(boolean isAboveJELLYBEAN){
 		for(IMethod m : c.getAllMethods()){
-			if(hasJavascriptInterfaceAnnotation(m))
+			if(m.isInit() || m.isClinit())
+				continue;
+			if(isAboveJELLYBEAN && hasJavascriptInterfaceAnnotation(m) || !isAboveJELLYBEAN) {
 				methodList.add(new MethodInfo(m, true));
-			else
+			}else
 				methodList.add(new MethodInfo(m, false));
 		}
 	}
@@ -112,7 +115,8 @@ public class ClassInfo{
 	public String toString(){
 		String res = "";
 		res += c;
-		res += " : " + methodList;
+//		res += " : " + methodList;
+		res += " : " + getAllAccessibleMethods();
 		return res;
 	}
 }

@@ -147,14 +147,14 @@ public final class AndroidEntryPointLocator {
         }
 
         Set<AndroidEntryPoint> entryPoints = new HashSet<AndroidEntryPoint>();
-
+        
         mon.beginTask("Locating Entrypoints", IProgressMonitor.UNKNOWN);
         int dummy = 0;  // for the progress monitor
         for (IClass cls : cha) {
             mon.worked(dummy++);
-            if (cls.getName().toString().contains("MainActivity")) {
-            	System.err.println("got here");
-            }
+//            if (cls.getName().toString().contains("MainActivity")) {
+//            	System.err.println("got here");
+//            }
             if (isExcluded(cls)) continue;
             if (!cls.isInterface() && 
             	!cls.isAbstract() && 
@@ -163,9 +163,9 @@ public final class AndroidEntryPointLocator {
             	 )) {
 nextMethod:
                 for (final IMethod m : cls.getDeclaredMethods()) {
-                    if (cls.getName().toString().contains("MainActivity")) {
-                    	System.err.println("got here: " + m);
-                    }
+//                    if (cls.getName().toString().contains("MainActivity")) {
+//                    	System.err.println("got here: " + m);
+//                    }
                 	// If there is a Method signature in the possible entry points use thatone
                     for (AndroidPossibleEntryPoint e: possibleEntryPoints) {
                         if (e.name.equals(m.getName().toString()) ) {

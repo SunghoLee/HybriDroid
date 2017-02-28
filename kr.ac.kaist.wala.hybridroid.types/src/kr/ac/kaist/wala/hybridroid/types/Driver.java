@@ -10,21 +10,6 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.types;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
 import com.ibm.wala.cast.js.html.DefaultSourceExtractor;
 import com.ibm.wala.cast.js.html.WebUtil;
@@ -46,19 +31,23 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
-import com.ibm.wala.types.Selector;
-import com.ibm.wala.types.TypeReference;
-
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.hybridroid.analysis.string.Hotspot;
+import kr.ac.kaist.hybridroid.types.HybriDroidTypes;
 import kr.ac.kaist.hybridroid.util.file.FileCollector;
+import kr.ac.kaist.hybridroid.util.file.FilePrinter;
 import kr.ac.kaist.hybridroid.util.file.FileWriter;
+import kr.ac.kaist.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.hybridroid.utils.LocalFileReader;
 import kr.ac.kaist.wala.hybridroid.types.bridge.BridgeInfo;
 import kr.ac.kaist.wala.hybridroid.types.bridge.ClassInfo;
+
+import java.io.*;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Driver is a basic step for type checking. This class finds all JavaScript
@@ -127,12 +116,16 @@ public class Driver {
 		
 		Set<File> htmls = FileCollector.collectFiles(new File(dirPath), "html", "htm");
 		Map<File, File> htmlToJsMap = new HashMap<File, File>();
-		
+		Set<File> allFiles = new HashSet<File>();
+
 		for(File html : htmls){
 			File f = WebUtil.extractScriptFromHTML(html.toURI().toURL(), DefaultSourceExtractor.factory).snd;
-			htmlToJsMap.put(html, f);
+			FilePrinter.print(f, new FileOutputStream(dirPath + File.separator + f.getName()));
+			File nFile = new File(dirPath + File.separator + f.getName());
+			allFiles.add(nFile);
+			htmlToJsMap.put(html, nFile);
 		}
-		
+
 		//make javascript code as seperate js file
 		int i = 1;
 		for(HotspotDescriptor hd : asa.getAllDescriptors()){
@@ -141,17 +134,19 @@ public class Driver {
 			SSAInstruction inst = hd.getInstruction();
 			PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, inst.getUse(0));
 			for(InstanceKey ik : pa.getPointsToSet(wvPK)){
-				if(vs.isEmpty()){
-
-				}else{
 					for(String v : vs){
 						if(v.startsWith("javascript:")){ // if it is javascript code, then
 							String outJSName = "js_" + (i++) + ".html";
 							File js = FileWriter.makeHtmlFile(dirPath, outJSName, v.substring(v.indexOf(":")+1));
 							putWebViewMap(m, ik, js);
+							allFiles.add(js);
 						}else if(v.startsWith("http")){ // if it is online html file, then
 							URL url = new URL(v);
-							putWebViewMap(m, ik, WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd);
+							File jsFile = WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd;
+							FilePrinter.print(jsFile, new FileOutputStream(dirPath + File.separator + jsFile.getName()));
+							File nFile = new File(dirPath + File.separator + jsFile.getName());
+							putWebViewMap(m, ik, nFile);
+							allFiles.add(nFile);
 						}else if(v.startsWith("file:///")){
 							String nPath = dirPath + File.separator + v.replace("file:///", "").replace("android_asset", "assets");
 							if(htmlToJsMap.containsKey(new File(nPath))){
@@ -159,10 +154,24 @@ public class Driver {
 							}
 						}
 					}
+//				}
+			}
+		}
+
+		for(HotspotDescriptor hd : asa.getAllDescriptors()){
+			Set<String> vs = hd.getValues();
+			CGNode n = hd.getNode();
+			SSAInstruction inst = hd.getInstruction();
+			PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, inst.getUse(0));
+			for(InstanceKey ik : pa.getPointsToSet(wvPK)){
+				if(vs.isEmpty()){
+					for(File js : allFiles){
+						putWebViewMap(m, ik, js);
+					}
 				}
 			}
 		}
-		
+
 		return m;
 	}
 	
@@ -172,14 +181,15 @@ public class Driver {
 	 * @param cg a call graph.
 	 * @return A map from an object representing a WebView to a set of bridge informations.
 	 */
-	private Map<InstanceKey, Set<BridgeInfo>> getWebViewBridgeMapping(PointerAnalysis<InstanceKey> pa, CallGraph cg){
+	private Map<InstanceKey, Set<BridgeInfo>> getWebViewBridgeMapping(PointerAnalysis<InstanceKey> pa, CallGraph cg, String dir){
 		Map<InstanceKey, Set<BridgeInfo>> m = new HashMap<InstanceKey, Set<BridgeInfo>>();
-		TypeReference wvTR = TypeReference.find(ClassLoaderReference.Application, "Landroid/webkit/WebView");
-		Selector addjsSelector = Selector.make("addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V");
-		
-		MethodReference addJsM = MethodReference.findOrCreate(wvTR, addjsSelector);
+		MethodReference addJsM = HybriDroidTypes.ADDJAVASCRIPTINTERFACE_APP_METHODREFERENCE;
 		IMethod mm = cg.getClassHierarchy().resolveMethod(addJsM);
 		CGNode addJsIM = cg.getNode(mm, Everywhere.EVERYWHERE);
+
+		YMLParser.YMLData data = getAppData(dir);
+		boolean isAboveJELLYBEAN = isEqualOrAboveJELLY_BEAN_MR1(data);
+
 		Iterator<CGNode> in = cg.getPredNodes(addJsIM);
 		while (in.hasNext()) {
 			CGNode n = in.next();
@@ -188,16 +198,18 @@ public class Driver {
 				CallSiteReference csr = icsr.next();
 				if (!csr.getDeclaredTarget().equals(addJsM))
 					continue;
-
+				
 				IR ir = n.getIR();
 				if (ir != null) {
 					SymbolTable symTab = ir.getSymbolTable();
 					for (SSAAbstractInvokeInstruction invokeInst : ir.getCalls(csr)) {
 						PointerKey wvPK = pa.getHeapModel().getPointerKeyForLocal(n, invokeInst.getUse(0));
 						String bridgeName = "unknown";
+						
 						if (symTab.isStringConstant(invokeInst.getUse(2))) {
 							bridgeName = symTab.getStringValue(invokeInst.getUse(2));
 						}
+						
 						PointerKey bridgePK = pa.getHeapModel().getPointerKeyForLocal(n, invokeInst.getUse(1));
 
 						Set<IClass> bridgeClassSet = new HashSet<IClass>();
@@ -207,7 +219,7 @@ public class Driver {
 
 						for (InstanceKey ik : pa.getPointsToSet(wvPK)) {
 							for (IClass c : bridgeClassSet)
-								putWebViewMap(m, ik, new BridgeInfo(bridgeName, new ClassInfo(c)));
+								putWebViewMap(m, ik, new BridgeInfo(bridgeName, new ClassInfo(c, isAboveJELLYBEAN)));
 						}
 					}
 				}
@@ -216,7 +228,36 @@ public class Driver {
 		
 		return m;
 	}
-	
+
+	private YMLParser.YMLData getAppData(String dir){
+		YMLParser parser = new YMLParser(new File(dir + File.separator + "apktool.yml"));
+		YMLParser.YMLData data = null;
+		try {
+			data = parser.parse();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return data;
+	}
+	private boolean isEqualOrAboveJELLY_BEAN_MR1(YMLParser.YMLData data){
+		String name = data.getName();
+
+		if(name.equals("targetSdkVersion")){
+			int version = Integer.parseInt(data.getValue().replace("'", ""));
+			if(version > 16)
+				return true;
+			else
+				return false;
+		}else{
+			boolean is = true;
+			for(YMLParser.YMLData child : data.getChildren())
+				is &= isEqualOrAboveJELLY_BEAN_MR1(child);
+			return is;
+		}
+	}
+
 	/**
 	 * Analyze what bridges are attached to which JavaScript files.
 	 * @param apkPath a apk file path for analysis.
@@ -238,6 +279,7 @@ public class Driver {
 		
 		AndroidResourceAnalysis ara = analyzeResource(apkPath);
 		AndroidStringAnalysis asa = analyzeString(LocalFileReader.androidJar(p).getPath(), apkPath, ara);
+		System.out.println("#StringAnalysisEndTime: " + (System.currentTimeMillis() - Shell.START));
 		CallGraph cg = asa.getCGusedInSA();
 		PointerAnalysis<InstanceKey> pa = asa.getPAusedInSA();
 		Map<InstanceKey, Set<File>> wvToJs = Collections.emptyMap();
@@ -251,16 +293,19 @@ public class Driver {
 			e.printStackTrace();
 		}
 		
-		Map<InstanceKey, Set<BridgeInfo>> wvToBridge = getWebViewBridgeMapping(pa, cg);
+		Map<InstanceKey, Set<BridgeInfo>> wvToBridge = getWebViewBridgeMapping(pa, cg, ara.getDir());
 		
 		Map<File, Set<BridgeInfo>> m = new HashMap<File, Set<BridgeInfo>>();
 		
 		for(InstanceKey wv : wvToJs.keySet()){
 			Set<File> fs = wvToJs.get(wv);
 			Set<BridgeInfo> bs =  wvToBridge.get(wv);
-			
 			for(File f : fs){
-				m.put(f, bs);
+				if(bs != null && !bs.isEmpty()) {
+					if (!m.containsKey(f))
+						m.put(f, new HashSet<BridgeInfo>());
+					m.get(f).addAll(bs);
+				}
 			}
 		}	
 		return m;

@@ -15,5 +15,7 @@
     <orderEntry type="module" module-name="com.ibm.wala.core.tests" />
     <orderEntry type="module" module-name="com.ibm.wala.shrike" />
     <orderEntry type="module" module-name="com.ibm.wala.cast.js" />
+    <orderEntry type="module" module-name="com.ibm.wala.cast" />
+    <orderEntry type="module" module-name="com.ibm.wala.util" />
   </component>
 </module>

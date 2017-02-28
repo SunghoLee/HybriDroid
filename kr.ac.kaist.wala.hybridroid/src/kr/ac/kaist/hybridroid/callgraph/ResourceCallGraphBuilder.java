@@ -14,15 +14,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
+import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.ssa.DefUse;
+import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAArrayLengthInstruction;
 import com.ibm.wala.ssa.SSAArrayLoadInstruction;
 import com.ibm.wala.ssa.SSAArrayStoreInstruction;
@@ -54,12 +58,14 @@ import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.debug.UnimplementedError;
 
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.hybridroid.analysis.resource.AndroidResourceAnalysis.ResourceInfo;
 import kr.ac.kaist.hybridroid.pointer.ResourceInstanceKey;
+import kr.ac.kaist.hybridroid.types.HybriDroidTypes;
 import kr.ac.kaist.hybridroid.utils.Wrapper;
 
 public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
@@ -123,6 +129,35 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 			setidSelector = Selector.make("setId(I)V");
 		}
 
+		private TypeReference findLocalType(CGNode n, int usevar){
+			IR ir = n.getIR();
+			if(ir == null)
+				return null;
+			
+			IMethod m = n.getMethod();
+			DefUse du = new DefUse(n.getIR());
+			
+			if(m.getNumberOfParameters() >= usevar){
+				if(m.isStatic()){
+					return m.getParameterType(usevar);
+				}else{
+					return m.getParameterType(usevar-1);
+				}
+			}
+			
+			SSAInstruction inst = du.getDef(usevar);
+			
+			if(inst instanceof SSANewInstruction){
+				SSANewInstruction newInst = (SSANewInstruction) inst;
+				return newInst.getConcreteType();
+			}else if(inst instanceof SSAGetInstruction){
+				SSAGetInstruction getInst = (SSAGetInstruction) inst;
+				return getInst.getDeclaredFieldType();
+			}
+			
+			return null;
+		}
+		
 		@Override
 		public void visitInvoke(SSAInvokeInstruction instruction) {
 			// TODO Auto-generated method stub
@@ -138,8 +173,34 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 			
 //			if(mainClass == null)	
 //				Assertions.UNREACHABLE(target.getDeclaringClass() + " does not exist.");
-			
-			if (fvbiSelector.equals(target.getSelector()) && mainClass != null
+			//TODO: need to detach this part to a seperate logic
+			if(target.getSelector().equals(HybriDroidTypes.SETWEBVIEWCLIENT_SELECTOR) && (mainClass.getReference().equals(HybriDroidTypes.WEBVIEW_PRI_CLASS) || mainClass.getReference().equals(HybriDroidTypes.WEBVIEW_APP_CLASS))){
+				int objvar = instruction.getUse(1);
+				int webviewvar = instruction.getUse(0);
+
+				TypeReference objType = findLocalType(node, objvar);
+				if(objType != null) {
+					IClass objClass = cha.lookupClass(objType);
+
+					PointerKey webviewPK = builder.getPointerKeyForLocal(node, webviewvar);
+					if (!system.isImplicit(webviewPK)) {
+						for (IMethod m : objClass.getAllMethods()) {
+							if (m.getDeclaringClass().equals(objClass) && m.getName().toString().startsWith("on")) {
+								try {
+									CGNode callbackNode = builder.getCallGraph().findOrCreateNode(m, Everywhere.EVERYWHERE);
+
+									boolean n = system.newConstraint(builder.getPointerKeyForLocal(callbackNode, 2), assignOperator, webviewPK);
+//							System.out.println("inst : " + instruction);
+//							System.out.println("\tPK : " + webviewPK);
+//							System.out.println("\t" + n + " : " + callbackNode);
+								} catch (CancelException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+			}else if (fvbiSelector.equals(target.getSelector()) && mainClass != null
 					&& (cha.isSubclassOf(mainClass, activityClass) || 
 						mainClass.equals(viewClass)	|| cha.isSubclassOf(mainClass, viewClass) || 
 						mainClass.equals(dialogClass) || cha.isSubclassOf(mainClass, dialogClass) || 
@@ -163,7 +224,6 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 						}
 						return;
 					}else{
-//						Assertions.UNREACHABLE("the return value of Activity.findViewById must be converted to any concrete type: " + nextInst);
 						//currently, if the return of findViewById is not casted, just deal with it as View.
 						ResourceInstanceKey rik = new ResourceInstanceKey(node, cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/view/View")), instruction.iindex, v);
 						system.newConstraint(builder.getPointerKeyForLocal(node, defVar), rik);
@@ -174,11 +234,6 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 					if(resId < 0){
 						if(DEBUG)
 							System.err.println("Warning: resource descriptor is not int constant." + instruction + "(" + symTab.isConstant(paramVar) + ") in " + node);
-//						if(instruction.toString().contains("invokevirtual < Application, Landroid/webkit/WebView, addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V > 10,15,16 @26 exception:17")){
-//							NodePrinter.printInsts(node);
-//							System.out.println("I: " + instruction);
-//						}
-//						NodePrinter.printInsts(node);
 					}else{
 						int v = resId;
 						if(ccInst != null){
@@ -372,7 +427,8 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 							ResourceInstanceKey rik = new ResourceInstanceKey(node, klass, instruction.iindex, v);
 							
 							try{
-								system.newConstraint(pk, rik);
+								if(!system.isImplicit(pk))
+									system.newConstraint(pk, rik);
 							}catch(UnimplementedError e){ // if the pointer key is implicit, then just return; work normally.
 								return;
 							}
@@ -398,8 +454,7 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 		
 		/**
 		 * Additional integer calculation for statically predefined integer variable.
-		 * @param insts
-		 * @param startIndex
+		 * @param n
 		 * @param var
 		 * @return
 		 */
@@ -426,7 +481,9 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 			if(info == null || !info.isDeclaredResorce(fieldName))
 				return -1;
 			
-			return info.getResourceValue(fieldName);
+			int v = info.getResourceValue(fieldName);
+			
+			return v;
 		}
 	}
 }

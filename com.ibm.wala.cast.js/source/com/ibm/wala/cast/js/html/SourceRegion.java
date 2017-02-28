@@ -10,10 +10,7 @@
  *****************************************************************************/
 package com.ibm.wala.cast.js.html;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 
 import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
