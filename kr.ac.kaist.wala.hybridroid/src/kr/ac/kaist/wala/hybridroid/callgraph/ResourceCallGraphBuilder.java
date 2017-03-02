@@ -157,8 +157,9 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 							if (m.getDeclaringClass().equals(objClass) && m.getName().toString().startsWith("on")) {
 								try {
 									CGNode callbackNode = builder.getCallGraph().findOrCreateNode(m, Everywhere.EVERYWHERE);
-
-									boolean n = system.newConstraint(builder.getPointerKeyForLocal(callbackNode, 2), assignOperator, webviewPK);
+									if(!system.isImplicit(builder.getPointerKeyForLocal(callbackNode, 2))) {
+										boolean n = system.newConstraint(builder.getPointerKeyForLocal(callbackNode, 2), assignOperator, webviewPK);
+									}
 //							System.out.println("inst : " + instruction);
 //							System.out.println("\tPK : " + webviewPK);
 //							System.out.println("\t" + n + " : " + callbackNode);
