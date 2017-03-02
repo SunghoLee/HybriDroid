@@ -380,7 +380,8 @@ public class AndroidHybridCallGraphBuilder extends
 										int params = method.getNumberOfParameters();
 										Pair<String, Integer> p = Pair.make(mname, params);
 										if(overloadChecker.contains(p)){
-											mismatchW.add("[Error] the method is overloaded by type: " + wClass.getName() + ": " + mname + "(" + params + ")");
+											//TODO: check method overloading
+//											mismatchW.add("[Error] the method is overloaded by type: " + wClass.getName() + ": " + mname + "(" + params + ")");
 										}
 										overloadChecker.add(p);
 										
