@@ -36,7 +36,7 @@ import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Pair;
 
 /**
- * Abstract superclass for types performing a rewrite operation on a CAst. The
+ * Abstract superclass for frontend performing a rewrite operation on a CAst. The
  * CAst is not mutated; instead, a new CAst is created which delegates to the
  * original CAst where no transformation was performed.
  * 

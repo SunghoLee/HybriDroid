@@ -422,7 +422,7 @@ public abstract class BytecodeClass<T extends IClassLoader> implements IClass {
   }
 
   /*
-   * @see com.ibm.wala.classLoader.IClass#getMethod(com.ibm.wala.types.Selector)
+   * @see com.ibm.wala.classLoader.IClass#getMethod(com.ibm.wala.frontend.Selector)
    */
   @Override
   public IMethod getMethod(Selector selector) {

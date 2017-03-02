@@ -188,7 +188,7 @@ public class PDFCallGraph {
   /**
    * A filter that accepts WALA objects that "belong" to the application loader.
    * 
-   * Currently supported WALA types include
+   * Currently supported WALA frontend include
    * <ul>
    * <li> {@link CGNode}
    * <li> {@link LocalPointerKey}

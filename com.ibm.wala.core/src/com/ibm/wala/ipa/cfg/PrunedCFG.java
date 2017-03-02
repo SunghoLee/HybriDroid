@@ -38,7 +38,7 @@ import com.ibm.wala.util.intset.MutableIntSet;
 /**
  * A pruned view of a {@link ControlFlowGraph}. Use this class along with an {@link EdgeFilter} to produce a custom view of a CFG.
  * 
- * For example, you can use this class to produce a CFG view that ignores certain types of exceptional edges.
+ * For example, you can use this class to produce a CFG view that ignores certain frontend of exceptional edges.
  */
 public class PrunedCFG<I, T extends IBasicBlock<I>> extends AbstractNumberedGraph<T> implements ControlFlowGraph<I, T> {
 

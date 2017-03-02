@@ -69,11 +69,11 @@ final public class ArrayLoadInstruction extends Instruction implements IArrayLoa
       return getType();
     } else {
       if (types.length <= 1) {
-        throw new IllegalArgumentException("types.length <= 1");
+        throw new IllegalArgumentException("frontend.length <= 1");
       }
       String t = types[1];
       if (t == null) {
-        throw new IllegalArgumentException("types[1] cannot be null");
+        throw new IllegalArgumentException("frontend[1] cannot be null");
       }
       if (t.startsWith("[")) {
         return t.substring(1);

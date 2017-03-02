@@ -276,9 +276,9 @@ public class DexCFG extends AbstractCFG<Instruction, DexCFG.BasicBlock> implemen
                     // to determine what the athrow throws. So, add an
                     // edge to all reachable handlers. Better information can
                     // be obtained later with SSA type propagation.
-                    // TODO: consider pruning to only the exception types that
+                    // TODO: consider pruning to only the exception frontend that
                     // this method either catches or allocates, since these are
-                    // the only types that can flow to an athrow.
+                    // the only frontend that can flow to an athrow.
                     goToAllHandlers = true;
                 } else {
                     if (hs != null && hs.length > 0) {
@@ -345,7 +345,7 @@ public class DexCFG extends AbstractCFG<Instruction, DexCFG.BasicBlock> implemen
                                 }
                                 // hs[j].getCatchClass() == null.
                                 // this means that the handler catches all exceptions.
-                                // add the edge and null out all types
+                                // add the edge and null out all frontend
                                 if (!exceptionTypes.isEmpty()) {
                                     addExceptionalEdgeTo(b);
                                     exceptionTypes.clear();
@@ -396,12 +396,12 @@ public class DexCFG extends AbstractCFG<Instruction, DexCFG.BasicBlock> implemen
 
         /**
          * @param pei a potentially-excepting instruction
-         * @return the exception types that pei may throw, independent of the class hierarchy. null if none.
+         * @return the exception frontend that pei may throw, independent of the class hierarchy. null if none.
          *
          *         Notes
          *         <ul>
          *         <li>this method will <em>NOT</em> return the exception type explicitly thrown by an athrow
-         *         <li>this method will <em>NOT</em> return the exception types that a called method may throw
+         *         <li>this method will <em>NOT</em> return the exception frontend that a called method may throw
          *         <li>this method ignores OutOfMemoryError
          *         <li>this method ignores linkage errors
          *         <li>this method ignores IllegalMonitorState exceptions

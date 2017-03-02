@@ -592,7 +592,7 @@ public class ClassLoaderImpl implements IClassLoader {
   }
 
   /*
-   * @see com.ibm.wala.classLoader.IClassLoader#lookupClass(com.ibm.wala.types.TypeName)
+   * @see com.ibm.wala.classLoader.IClassLoader#lookupClass(com.ibm.wala.frontend.TypeName)
    */
   @Override
   public IClass lookupClass(TypeName className) {

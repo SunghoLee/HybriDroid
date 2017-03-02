@@ -169,7 +169,7 @@ public abstract class AbstractReflectionInterpreter implements SSAContextInterpr
   protected class SpecializedMethod extends SyntheticMethod {
 
     /**
-     * Set of types that we have already inserted an allocation for.
+     * Set of frontend that we have already inserted an allocation for.
      */
     protected final HashSet<TypeReference> typesAllocated = HashSetFactory.make(5);
 

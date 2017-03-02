@@ -353,7 +353,7 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
    * @param node governing node
    * @param peis list of PEI instructions
    * @param exceptionVar PointerKey representing a pointer to an exception value
-   * @param catchClasses the types "caught" by the exceptionVar
+   * @param catchClasses the frontend "caught" by the exceptionVar
    */
   private void addExceptionDefConstraints(IR ir, DefUse du, CGNode node, List<ProgramCounter> peis, PointerKey exceptionVar,
       Set<IClass> catchClasses) {
@@ -1551,8 +1551,8 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
     // we're a little sloppy for now ... we don't filter calls to
     // java.lang.Object.
     // TODO: we need much more precise filters than cones in order to handle
-    // the various types of dispatch logic. We need a filter that expresses
-    // "the set of types s.t. x.foo resolves to y.foo."
+    // the various frontend of dispatch logic. We need a filter that expresses
+    // "the set of frontend s.t. x.foo resolves to y.foo."
     for (int i = 0; i < instruction.getNumberOfParameters(); i++) {
       if (target.getMethod().getParameterType(i).isReferenceType()) {
         PointerKey formal = getTargetPointerKey(target, i);
@@ -2092,7 +2092,7 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
   }
 
   /**
-   * TODO: enhance this logic using type inference TODO!!!: enhance filtering to consider concrete types, not just cones.
+   * TODO: enhance this logic using type inference TODO!!!: enhance filtering to consider concrete frontend, not just cones.
    * precondition: needs Filter
    * 
    * @param target

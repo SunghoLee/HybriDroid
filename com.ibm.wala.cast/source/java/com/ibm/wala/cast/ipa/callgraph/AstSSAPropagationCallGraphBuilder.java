@@ -325,7 +325,7 @@ public abstract class AstSSAPropagationCallGraphBuilder extends SSAPropagationCa
 
   // /////////////////////////////////////////////////////////////////////////
   //
-  // IR visitor specialization for Ast-specific IR types
+  // IR visitor specialization for Ast-specific IR frontend
   //
   // /////////////////////////////////////////////////////////////////////////
 

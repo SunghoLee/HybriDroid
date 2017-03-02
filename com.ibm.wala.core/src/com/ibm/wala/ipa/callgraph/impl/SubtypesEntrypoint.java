@@ -21,7 +21,7 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 
 /**
- * An entrypoint whose parameter types are cones based on declared types.
+ * An entrypoint whose parameter frontend are cones based on declared frontend.
  */
 public class SubtypesEntrypoint extends DefaultEntrypoint {
 

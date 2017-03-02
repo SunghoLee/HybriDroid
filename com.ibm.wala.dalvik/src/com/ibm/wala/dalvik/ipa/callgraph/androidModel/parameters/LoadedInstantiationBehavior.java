@@ -296,7 +296,7 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
     private static final long serialVersionUID = 810020131212L;
 
     /**
-     *  Including the cache may be useful to get all seen types.
+     *  Including the cache may be useful to get all seen frontend.
      */
     public transient boolean serializationIncludesCache = true;
 

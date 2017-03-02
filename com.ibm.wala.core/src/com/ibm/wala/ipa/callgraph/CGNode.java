@@ -61,7 +61,7 @@ public interface CGNode extends INodeWithNumber, ContextItem, IClassHierarchyDwe
   public DefUse getDU();
   
   /**
-   * @return an Iterator of the types that may be allocated by a given
+   * @return an Iterator of the frontend that may be allocated by a given
    * method in a given context.
    */
   public Iterator<NewSiteReference> iterateNewSites();

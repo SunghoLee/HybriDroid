@@ -110,7 +110,7 @@ public class PrivateLeakageDetector {
 	
 	private static MethodReference[] mSourceRefs = {
 			//for wifi information
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Application, "Landroid/telephony/TelephonyManager"), Selector.make("getLine1Number()Ljava/lang/String;")),
+			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Application, "Landroid/telephony/TelephonyManager"), Selector.make("getLine1Number()Ljava/lang/String;")),
 //			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/net/wifi/WifiManager"), Selector.make("getWifiApState()I")),
 //			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/net/wifi/WifiManager"), Selector.make("getConnectionInfo()Landroid/net/wifi/WifiInfo;")),
 	};

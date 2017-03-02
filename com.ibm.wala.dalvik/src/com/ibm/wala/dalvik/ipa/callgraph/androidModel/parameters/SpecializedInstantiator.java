@@ -68,7 +68,7 @@ import com.ibm.wala.util.ssa.SSAValueManager;
 import com.ibm.wala.util.ssa.TypeSafeInstructionFactory;
 
 /**
- *  Instantiates certain android-types differently.
+ *  Instantiates certain android-frontend differently.
  *
  *  For example instantiating an android.content.Context would pull in all Android-components in
  *  scope resulting in a massivly overapproximated model.
@@ -92,7 +92,7 @@ public class SpecializedInstantiator extends FlatInstantiator {
      *  If T is a class-type all its constructors are searched for the one found best suited (takes the least arguments, ...).
      *  New instances are created for all parameters, then the constructor is called.
      *
-     *  If T represents multiple types (is an interface, abstract class, ...) _all_ implementors of that type are instantiated
+     *  If T represents multiple frontend (is an interface, abstract class, ...) _all_ implementors of that type are instantiated
      *  After that they get Phi-ed together.
      *
      *  If T is an array-type a new array of length 1 is generated.
@@ -154,7 +154,7 @@ public class SpecializedInstantiator extends FlatInstantiator {
         return understandTypes.contains(T);
     }
 
-    // Now for the specialized types...
+    // Now for the specialized frontend...
 
     /**
      *  Creates a new instance of android/content/Context.

@@ -10,13 +10,6 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.callgraph;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder.AstPointerAnalysisImpl.AstImplicitPointsToSetVisitor;
 import com.ibm.wala.cast.ipa.callgraph.CrossLanguageSSAPropagationCallGraphBuilder;
@@ -34,41 +27,12 @@ import com.ibm.wala.cast.js.types.JavaScriptMethods;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.util.TargetLanguageSelector;
-import com.ibm.wala.classLoader.CallSiteReference;
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IField;
-import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.classLoader.NewSiteReference;
+import com.ibm.wala.classLoader.*;
 import com.ibm.wala.fixpoint.UnaryOperator;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
-import com.ibm.wala.ipa.callgraph.AnalysisOptions;
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.ContextKey;
-import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
-import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKeyFactory;
-import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory;
-import com.ibm.wala.ipa.callgraph.propagation.PointsToMap;
-import com.ibm.wala.ipa.callgraph.propagation.PointsToSetVariable;
-import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
-import com.ibm.wala.ipa.callgraph.propagation.PropagationSystem;
-import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
+import com.ibm.wala.ipa.callgraph.*;
+import com.ibm.wala.ipa.callgraph.propagation.*;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.ssa.DefUse;
-import com.ibm.wala.ssa.IR;
-import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
-import com.ibm.wala.ssa.SSAGetInstruction;
-import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.ssa.SSAInvokeInstruction;
-import com.ibm.wala.ssa.SSANewInstruction;
-import com.ibm.wala.ssa.SSAPutInstruction;
-import com.ibm.wala.ssa.SymbolTable;
+import com.ibm.wala.ssa.*;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.Selector;
@@ -79,13 +43,8 @@ import com.ibm.wala.util.CancelRuntimeException;
 import com.ibm.wala.util.MonitorUtil;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
-import com.ibm.wala.util.intset.IntSet;
-import com.ibm.wala.util.intset.IntSetAction;
-import com.ibm.wala.util.intset.MutableMapping;
-import com.ibm.wala.util.intset.MutableSparseIntSet;
-import com.ibm.wala.util.intset.OrdinalSet;
+import com.ibm.wala.util.intset.*;
 import com.ibm.wala.util.strings.Atom;
-
 import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo;
@@ -95,12 +54,15 @@ import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.Pointin
 import kr.ac.kaist.wala.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker.Warning;
+import kr.ac.kaist.wala.hybridroid.frontend.AndroidJavaJavaScriptTypeMap;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.pointer.InterfaceClass;
 import kr.ac.kaist.wala.hybridroid.pointer.JSCompatibleClassFilter;
 import kr.ac.kaist.wala.hybridroid.pointer.JavaCompatibleClassFilter;
 import kr.ac.kaist.wala.hybridroid.pointer.MockupInstanceKey;
-import kr.ac.kaist.wala.hybridroid.types.AndroidJavaJavaScriptTypeMap;
+
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * Specialized pointer analysis constraint generation for Hybrid Android
@@ -367,7 +329,10 @@ public class AndroidHybridCallGraphBuilder extends
 								String err = "Cannot find the bridge object instance: \n";
 								err += "# caller: " + node;
 								err += "# instruction: " + invoke;
-								Assertions.UNREACHABLE(err);
+								System.err.println(err);
+								super.visitInvoke(instruction);
+								return;
+//								Assertions.UNREACHABLE(err);
 							}
 							
 							ConcreteTypeKey[] objKeys = new ConcreteTypeKey[bdSet.size()];
@@ -375,7 +340,7 @@ public class AndroidHybridCallGraphBuilder extends
 							int objIndex = 0;
 							for(BridgeDescription bd : bdSet){
 								if(DEBUG)
-									System.out.println("\tbridge: " + bd.getTypeReference());
+									System.out.println("\tbridge: " + bd.getTypeReference() + " => " + name);
 								TypeReference tr = bd.getTypeReference();
 								IClass objClass = cha.lookupClass(tr);
 								InterfaceClass wClass = wrappingClass(objClass);
@@ -420,12 +385,11 @@ public class AndroidHybridCallGraphBuilder extends
 										overloadChecker.add(p);
 										
 										IField f = wClass.getField(Atom.findOrCreateAsciiAtom(mname));
-										
 										PointerKey constantPK = builder.getPointerKeyForInstanceField(objKeys[i], f);
 										InstanceKey ik = makeMockupInstanceKey(method);
 										
 										if(DEBUG)
-											System.out.println("\t\tBridgeMethod: " + constantPK + " -> " + ik);
+											System.out.println("\t\tBridgeMethod: " + ((InstanceFieldKey)constantPK).getField().getFieldTypeReference() + " -> " + mname);
 										system.findOrCreateIndexForInstanceKey(ik);
 										
 										system.newConstraint(constantPK, ik);
@@ -809,7 +773,7 @@ public class AndroidHybridCallGraphBuilder extends
 		              public byte evaluate(PointsToSetVariable lhs, PointsToSetVariable ptrs) {
 		                if(receiverType.getConcreteType() instanceof InterfaceClass){
 		                	if(DEBUG)
-		                		System.out.println(fieldKey + " (" + ptrs.getValue() + ")");
+		                		System.out.println("==> " + fieldKey + " (" + ptrs.getValue() + ")");
 		                	if(ptrs.getValue() == null)
 		                		mismatchW.add("[Error] the " + fieldKey + " is not matched.");
 		                }

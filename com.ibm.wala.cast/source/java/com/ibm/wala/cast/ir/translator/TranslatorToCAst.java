@@ -70,7 +70,7 @@ public interface TranslatorToCAst {
     CAstSourcePositionRecorder pos();
 
     /**
-     * for recording types of nodes
+     * for recording frontend of nodes
      */
     CAstNodeTypeMapRecorder getNodeTypeMap();
 

@@ -271,9 +271,9 @@ public class ShrikeCFG extends AbstractCFG<IInstruction, ShrikeCFG.BasicBlock> i
           // to determine what the athrow throws. So, add an
           // edge to all reachable handlers. Better information can
           // be obtained later with SSA type propagation.
-          // TODO: consider pruning to only the exception types that
+          // TODO: consider pruning to only the exception frontend that
           // this method either catches or allocates, since these are
-          // the only types that can flow to an athrow.
+          // the only frontend that can flow to an athrow.
           goToAllHandlers = true;
         } else {
           if (hs != null && hs.length > 0) {
@@ -347,7 +347,7 @@ public class ShrikeCFG extends AbstractCFG<IInstruction, ShrikeCFG.BasicBlock> i
                 }
                 // hs[j].getCatchClass() == null.
                 // this means that the handler catches all exceptions.
-                // add the edge and null out all types
+                // add the edge and null out all frontend
                 if (!exceptionTypes.isEmpty()) {
                   addExceptionalEdgeTo(b);
                   exceptionTypes.clear();

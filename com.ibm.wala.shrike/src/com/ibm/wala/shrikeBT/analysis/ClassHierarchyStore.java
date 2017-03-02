@@ -54,7 +54,7 @@ public final class ClassHierarchyStore implements ClassHierarchyProvider {
    * @param isInterface true iff it's an interface
    * @param isFinal true iff it's final
    * @param superClass the JVM type of the superclass, or null if this is Object
-   * @param superInterfaces the JVM types of its implemented interfaces
+   * @param superInterfaces the JVM frontend of its implemented interfaces
    */
   public void setClassInfo(String cl, boolean isInterface, boolean isFinal, String superClass, String[] superInterfaces)
       throws IllegalArgumentException {

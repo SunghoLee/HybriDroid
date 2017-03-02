@@ -747,7 +747,7 @@ public class ParameterAccessor {
      *  Number 1 is the first parameter in the methods Selector. No matter if the function has an
      *  implicit this pointer.
      *
-     *  Use all() if you want to get all parameter-types.
+     *  Use all() if you want to get all parameter-frontend.
      *
      *  @param  no  the number in the Selector
      *  @return the type of the parameter
@@ -1089,7 +1089,7 @@ public class ParameterAccessor {
      *
      *  @param  args    list to build the arguments from - without implicit this
      *  @param  target  the method to be called - for type checking only
-     *  @param  cha     if types don't match exactly needed for the assignability check (may be null if that check is not wanted)
+     *  @param  cha     if frontend don't match exactly needed for the assignability check (may be null if that check is not wanted)
      *  @throws IllegalArgumentException if you call this method on a target that needs an implicit this
      *  @throws IllegalArgumentException if args length does not match the targets param-length
      *  @throws IllegalArgumentException if a parameter is unassignable
@@ -1189,7 +1189,7 @@ public class ParameterAccessor {
      *  @param  self    the this-pointer to use
      *  @param  args    list to build the arguments from - without implicit this
      *  @param  target  the method to be called - for type checking only
-     *  @param  cha     if types don't match exactly needed for the assignability check (may be null if that check is not wanted)
+     *  @param  cha     if frontend don't match exactly needed for the assignability check (may be null if that check is not wanted)
      *  @throws IllegalArgumentException if you call this method on a target that needs an implicit this
      *  @throws IllegalArgumentException if args length does not match the targets param-length
      *  @throws IllegalArgumentException if a parameter is unassignable

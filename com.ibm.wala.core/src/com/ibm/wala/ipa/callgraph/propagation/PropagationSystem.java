@@ -83,7 +83,7 @@ public class PropagationSystem extends DefaultFixedPointSolver<PointsToSetVariab
 
   /**
    * A mapping from IClass -> MutableSharedBitVectorIntSet The range represents the instance keys that correspond to a given class.
-   * This mapping is used to filter sets based on declared types; e.g., in cast constraints
+   * This mapping is used to filter sets based on declared frontend; e.g., in cast constraints
    */
   final private Map<IClass, MutableIntSet> class2InstanceKey = HashMapFactory.make();
 

@@ -180,7 +180,7 @@ public abstract class Entrypoint implements BytecodeConstants {
   }
 
   /**
-   * @return types to allocate for parameter i; for non-static methods, parameter 0 is "this"
+   * @return frontend to allocate for parameter i; for non-static methods, parameter 0 is "this"
    */
   public abstract TypeReference[] getParameterTypes(int i);
 

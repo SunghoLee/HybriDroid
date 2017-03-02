@@ -274,7 +274,7 @@ public class ZeroXInstanceKeys implements InstanceKeyFactory {
 
   /*
    * @see com.ibm.wala.ipa.callgraph.propagation.InstanceKeyFactory#getInstanceKeyForPEI(com.ibm.wala.ipa.callgraph.CGNode,
-   * com.ibm.wala.classLoader.ProgramCounter, com.ibm.wala.types.TypeReference)
+   * com.ibm.wala.classLoader.ProgramCounter, com.ibm.wala.frontend.TypeReference)
    */
   @Override
   public InstanceKey getInstanceKeyForPEI(CGNode node, ProgramCounter pei, TypeReference type) {

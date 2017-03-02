@@ -72,7 +72,7 @@ public class RecursionCheckContextSelector implements ContextSelector {
       Context curContext = p.fst;
       Collection<IMethod> curEncountered = p.snd;
       // we just do a case analysis here. we might have to add cases later to
-      // account for new types of context / recursion.
+      // account for new frontend of context / recursion.
       CGNode callerNode = (CGNode) curContext.get(ContextKey.CALLER);
       if (callerNode != null) {
         if (!updateForNode(baseContext, curEncountered, worklist, callerNode)) {

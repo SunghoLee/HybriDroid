@@ -345,7 +345,7 @@ public class AnnotationsReader extends AttributeReader {
   }
 
   // //////////////
-  // utility methods for reading well-known annotation types
+  // utility methods for reading well-known annotation frontend
   // //////////////
 
   public static enum AnnotationType {

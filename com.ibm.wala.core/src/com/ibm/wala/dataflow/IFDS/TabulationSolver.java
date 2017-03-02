@@ -621,7 +621,7 @@ public class TabulationSolver<T, P, F> {
     final Collection<T> returnSitesForCallee = Iterator2Collection.toSet(supergraph.getReturnSites(edge.target, supergraph
         .getProcOf(calleeEntry)));
     allReturnSites.addAll(returnSitesForCallee);
-    // we modify this to handle each return site individually. Some types of problems
+    // we modify this to handle each return site individually. Some frontend of problems
     // compute different flow functions for each return site.
     for (final T returnSite : returnSitesForCallee) {
       IUnaryFlowFunction f = flowFunctionMap.getCallFlowFunction(edge.target, calleeEntry, returnSite);

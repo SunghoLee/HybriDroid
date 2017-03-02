@@ -278,7 +278,7 @@ public class JavaCAst2IRTranslator extends AstTranslator {
       return (parent.getName().length() == 0) ? f.getName() : parent.getName() + "/" + f.getName();
     }
     case CAstEntity.FUNCTION_ENTITY: {
-      // TODO properly handle types with clashing names/signatures within a
+      // TODO properly handle frontend with clashing names/signatures within a
       // given method
       return parent.getName() + "/" + f.getSignature();
     }

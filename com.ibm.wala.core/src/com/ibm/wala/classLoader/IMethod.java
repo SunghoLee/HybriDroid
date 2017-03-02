@@ -103,7 +103,7 @@ public interface IMethod extends IMember, ContextItem {
   int getNumberOfParameters();
 
   /**
-   * @return an array of the exception types declared by the throws clause for this method, or null if there are none
+   * @return an array of the exception frontend declared by the throws clause for this method, or null if there are none
    * @throws InvalidClassFileException
    */
   TypeReference[] getDeclaredExceptions() throws InvalidClassFileException, UnsupportedOperationException;

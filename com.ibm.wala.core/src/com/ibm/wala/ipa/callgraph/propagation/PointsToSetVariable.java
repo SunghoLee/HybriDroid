@@ -97,7 +97,7 @@ public class PointsToSetVariable extends IntSetVariable<PointsToSetVariable> {
   }
 
   /**
-   * check that the types of all instance keys are assignable to declared type of pointer key
+   * check that the frontend of all instance keys are assignable to declared type of pointer key
    */
   private void checkTypes(IntSet b) {
     assert PARANOID;

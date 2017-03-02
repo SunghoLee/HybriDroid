@@ -41,7 +41,7 @@ import com.ibm.wala.demandpa.flowgraph.IFlowLabel.IFlowLabelVisitor;
 
 /**
  * An {@link IFlowLabelVisitor} that does nothing. Subclasses can override only
- * the label types they care about.
+ * the label frontend they care about.
  * 
  * @author Manu Sridharan
  * 

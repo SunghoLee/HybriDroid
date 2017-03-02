@@ -64,7 +64,7 @@ import com.ibm.wala.util.shrike.ShrikeUtil;
 /**
  * This class constructs an SSA {@link IR} from a backing ShrikeBT instruction stream.
  * 
- * The basic algorithm here is an abstract interpretation over the Java bytecode to determine types of stack locations and local
+ * The basic algorithm here is an abstract interpretation over the Java bytecode to determine frontend of stack locations and local
  * variables. As a side effect, the flow functions of the abstract interpretation emit instructions, eliminating the stack
  * abstraction and moving to a register-transfer language in SSA form.
  */

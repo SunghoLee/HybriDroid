@@ -68,8 +68,8 @@ import com.ibm.wala.util.intset.OrdinalSet;
  * <LI> The points-to sets of these values represent the base set of escapees.
  * <LI> All object reachable from fields of these objects are added
  * <LI> This process continues until a fixpoint is reached
- * <LI> The abstract objects in the points-to sets are converted to types
- * <LI> This set of types is returned
+ * <LI> The abstract objects in the points-to sets are converted to frontend
+ * <LI> This set of frontend is returned
  * </OL>
  * </P>
  * 
@@ -228,7 +228,7 @@ public class SimpleThreadEscapeAnalysis extends AbstractAnalysisEngine {
     // 2) instance fields of Threads
     // (we hack this by getting the 'this' parameter of all ctor calls;
     // this works because the next phase will add all objects transitively
-    // reachable from fields of types in these pointer keys, and all
+    // reachable from fields of frontend in these pointer keys, and all
     // Thread objects must be constructed somewhere)
     Collection<IClass> threads = cha.computeSubClasses(TypeReference.JavaLangThread);
     for (Iterator<IClass> clss = threads.iterator(); clss.hasNext();) {
@@ -246,8 +246,8 @@ public class SimpleThreadEscapeAnalysis extends AbstractAnalysisEngine {
     }
 
     // 
-    // compute escaping types: all types flowing to escaping roots and
-    // all types transitively reachable through their fields.
+    // compute escaping frontend: all frontend flowing to escaping roots and
+    // all frontend transitively reachable through their fields.
     //
     Set<InstanceKey> escapingInstanceKeys = HashSetFactory.make();
 
@@ -306,7 +306,7 @@ public class SimpleThreadEscapeAnalysis extends AbstractAnalysisEngine {
     } while (!newKeys.isEmpty());
 
     //
-    // get set of types from set of instance keys
+    // get set of frontend from set of instance keys
     //
     Set<IClass> escapingTypes = HashSetFactory.make();
     for (Iterator<InstanceKey> keys = escapingInstanceKeys.iterator(); keys.hasNext();) {

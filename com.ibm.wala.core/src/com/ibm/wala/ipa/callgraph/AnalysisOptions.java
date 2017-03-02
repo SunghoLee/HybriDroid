@@ -35,7 +35,7 @@ public class AnalysisOptions {
 
 
   /**
-   * Policy that determines types allocated at new statements.
+   * Policy that determines frontend allocated at new statements.
    */
   private ClassTargetSelector classTargetSelector;
 
@@ -238,7 +238,7 @@ public class AnalysisOptions {
   }
 
   /**
-   * @return Policy that determines types allocated at new statements.
+   * @return Policy that determines frontend allocated at new statements.
    */
   public ClassTargetSelector getClassTargetSelector() {
     return classTargetSelector;

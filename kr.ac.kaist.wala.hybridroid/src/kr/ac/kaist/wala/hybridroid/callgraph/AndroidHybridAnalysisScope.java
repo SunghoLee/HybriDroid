@@ -10,6 +10,25 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.callgraph;
 
+import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
+import com.ibm.wala.cast.js.html.DefaultSourceExtractor;
+import com.ibm.wala.cast.js.html.WebUtil;
+import com.ibm.wala.cast.js.loader.JavaScriptLoader;
+import com.ibm.wala.cast.js.types.JavaScriptTypes;
+import com.ibm.wala.classLoader.JarFileModule;
+import com.ibm.wala.classLoader.Language;
+import com.ibm.wala.classLoader.SourceModule;
+import com.ibm.wala.classLoader.SourceURLModule;
+import com.ibm.wala.dalvik.classLoader.DexFileModule;
+import com.ibm.wala.ipa.callgraph.AnalysisScope;
+import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.util.collections.HashSetFactory;
+import com.ibm.wala.util.config.FileOfClasses;
+import com.ibm.wala.util.strings.Atom;
+import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
+import kr.ac.kaist.wala.hybridroid.util.file.FileWriter;
+import org.apache.commons.lang3.SystemUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,28 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
-
-import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
-import com.ibm.wala.cast.js.html.DefaultSourceExtractor;
-import com.ibm.wala.cast.js.html.WebUtil;
-import com.ibm.wala.cast.js.loader.JavaScriptLoader;
-import com.ibm.wala.cast.js.test.JSCallGraphBuilderUtil;
-import com.ibm.wala.cast.js.types.JavaScriptTypes;
-import com.ibm.wala.classLoader.JarFileModule;
-import com.ibm.wala.classLoader.Language;
-import com.ibm.wala.classLoader.SourceModule;
-import com.ibm.wala.classLoader.SourceURLModule;
-import com.ibm.wala.dalvik.classLoader.DexFileModule;
-import com.ibm.wala.ipa.callgraph.AnalysisScope;
-import com.ibm.wala.types.ClassLoaderReference;
-import com.ibm.wala.util.collections.HashSetFactory;
-import com.ibm.wala.util.config.FileOfClasses;
-import com.ibm.wala.util.io.FileProvider;
-import com.ibm.wala.util.strings.Atom;
-
-import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
-import kr.ac.kaist.wala.hybridroid.util.file.FileWriter;
-import org.apache.commons.lang3.SystemUtils;
 
 /**
  * AnalysisScope for Android Hybrid application. This class supports DROIDEL Dex
@@ -79,7 +76,7 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 	 * 
 	 * @param classpath
 	 *            the target apk file uri.
-	 * @param jsFiles
+	 * @param htmls
 	 *            JavaScript files contained in the scope.
 	 * @param exclusions
 	 *            the exclusion file.
@@ -141,8 +138,20 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 				}
 			});
 		}else{
-			scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
-			scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("preamble.js"));
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getResource("prologue.js")) {
+				@Override
+				public String getName() {
+					return "prologue.js";
+				}
+			});
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getResource("preamble.js")) {
+				@Override
+				public String getName() {
+					return "preamble.js";
+				}
+			});
+			//scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("prologue.js"));
+			//scope.addToScope(scope.getJavaScriptLoader(), JSCallGraphBuilderUtil.getPrologueFile("preamble.js"));
 		}
 		for (URL url : htmls) {
 			try {

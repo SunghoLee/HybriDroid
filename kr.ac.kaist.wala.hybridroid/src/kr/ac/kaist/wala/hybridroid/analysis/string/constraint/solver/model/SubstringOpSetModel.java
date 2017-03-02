@@ -70,7 +70,7 @@ public class SubstringOpSetModel implements IOperationModel {
 				}
 				return StringSetDomain.op().alpha(res);
 			}else
-				Assertions.UNREACHABLE("Incorrect args types(arg1: " + str.getClass().getName() + ", arg2: " + begin.getClass().getName());
+				Assertions.UNREACHABLE("Incorrect args frontend(arg1: " + str.getClass().getName() + ", arg2: " + begin.getClass().getName());
 		}else if(args.length == 3){
 			IValue end = args[2];
 			if(str instanceof TopValue || begin instanceof TopValue || end instanceof TopValue)
@@ -93,7 +93,7 @@ public class SubstringOpSetModel implements IOperationModel {
 				return StringSetDomain.op().alpha(res);
 			}else
 				if(CRASH)
-					Assertions.UNREACHABLE("Incorrect args types(arg1: " + str.getClass().getName() + ", arg2: " + begin.getClass().getName() + ", arg3: " + end.getClass().getName());
+					Assertions.UNREACHABLE("Incorrect args frontend(arg1: " + str.getClass().getName() + ", arg2: " + begin.getClass().getName() + ", arg3: " + end.getClass().getName());
 				else
 					return BotValue.getInstance();
 		}

@@ -43,7 +43,7 @@ import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.debug.UnimplementedError;
 
 /**
- * A trivial field-based heap model, which only uses the information of which types (classes) are live.
+ * A trivial field-based heap model, which only uses the information of which frontend (classes) are live.
  * 
  * Note that this heap model is based on ssa value numbers for locals, since we will build a pointer flow graph based on this heap
  * model when resolving reflection.

@@ -61,7 +61,7 @@ import com.ibm.wala.shrikeBT.Util;
  * </pre>
  * 
  * For full verification you need to provide class hierarchy information using setClassHierarchy. Without this information, we can't
- * compute the exact types of variables at control flow merge points. If you don't provide a hierarchy, or the hierarchy you provide
+ * compute the exact frontend of variables at control flow merge points. If you don't provide a hierarchy, or the hierarchy you provide
  * is partial, then the Verifier will be optimistic.
  * 
  * This method can also be used to gather type information for every stack and local variable at every program point. Just call

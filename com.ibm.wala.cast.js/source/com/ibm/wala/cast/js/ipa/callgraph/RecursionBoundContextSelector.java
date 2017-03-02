@@ -81,7 +81,7 @@ public class RecursionBoundContextSelector implements ContextSelector {
       return true;
     }
     // we just do a case analysis here. we might have to add cases later to
-    // account for new types of context / recursion.
+    // account for new frontend of context / recursion.
     CGNode callerNode = (CGNode) baseContext.get(ContextKey.CALLER);
     if (callerNode != null && exceedsRecursionBound(callerNode.getContext(), curLevel + 1)) {
       return true;

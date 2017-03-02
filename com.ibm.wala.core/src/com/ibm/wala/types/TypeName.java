@@ -196,7 +196,7 @@ public final class TypeName implements Serializable {
   }
   
   /**
-   * @return the dimensionality of the type. By convention, class types have dimensionality 0, primitives -1, and arrays the number
+   * @return the dimensionality of the type. By convention, class frontend have dimensionality 0, primitives -1, and arrays the number
    *         of [ in their descriptor.
    */
   public final int getDerivedMask() {
@@ -252,7 +252,7 @@ public final class TypeName implements Serializable {
      *                  >0 => mask of levels of array, reference, pointer
      *                  
      *  When the mask is > 0, it represents levels of type qualifiers (in C 
-     *  terminology) for array, reference and pointer types.  There is also a
+     *  terminology) for array, reference and pointer frontend.  There is also a
      *  special mask for when the innermost type is a primitive.  The mask is
      *  a bitfield laid out in inverse dimension order. 
      *  

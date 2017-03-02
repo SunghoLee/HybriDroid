@@ -21,7 +21,7 @@ import com.ibm.wala.util.debug.Assertions;
  * ast nodes that are control flow instructions. The label is fairly
  * arbitrary---it will depend on the language, producers and consumers of the
  * tree---but is generally expected to be things like case labels, exception
- * types, conditional outcomes and so on.
+ * frontend, conditional outcomes and so on.
  * 
  * @author Julian Dolby (dolby@us.ibm.com)
  * 

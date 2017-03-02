@@ -46,7 +46,7 @@ public abstract class PrimitiveType extends TypeAbstraction {
     } else if (rhs == this) {
       return this;
     } else if (rhs instanceof PrimitiveType) {
-      // the meet of two primitives is the smaller of the two types.
+      // the meet of two primitives is the smaller of the two frontend.
       // in particular integer meet boolean == boolean
       if (size() < ((PrimitiveType) rhs).size()) {
         return this;

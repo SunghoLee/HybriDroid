@@ -79,7 +79,7 @@ public final class MethodReference extends MemberReference {
           Descriptor.findOrCreateUTF8("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"));
   
   /**
-   * types of parameters to this method.
+   * frontend of parameters to this method.
    */
   final private TypeReference[] parameterTypes;
 

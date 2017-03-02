@@ -19,7 +19,7 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.strings.Atom;
-import kr.ac.kaist.wala.hybridroid.types.AndroidJavaJavaScriptTypeMap;
+import kr.ac.kaist.wala.hybridroid.frontend.AndroidJavaJavaScriptTypeMap;
 
 import java.util.*;
 

@@ -418,7 +418,7 @@ public class SimpleDemandPointerFlowGraph extends SlowSparseNumberedGraph<Object
    * @param node governing node
    * @param peis list of PEI instructions
    * @param exceptionVar PointerKey representing a pointer to an exception value
-   * @param catchClasses the types "caught" by the exceptionVar
+   * @param catchClasses the frontend "caught" by the exceptionVar
    */
   private void addExceptionDefConstraints(IR ir, CGNode node, List<ProgramCounter> peis, PointerKey exceptionVar,
       Set<IClass> catchClasses) {

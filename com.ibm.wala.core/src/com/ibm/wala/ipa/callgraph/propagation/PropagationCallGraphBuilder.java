@@ -445,7 +445,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
 
   /**
    * Generate a set of constraints to represent assignment to an exception variable in a catch clause. Note that we use
-   * FilterOperator to filter out types that the exception handler doesn't catch.
+   * FilterOperator to filter out frontend that the exception handler doesn't catch.
    * 
    * @param exceptionVar points-to set for a variable representing a caught exception
    * @param catchClasses set of TypeReferences that the exceptionVar may catch

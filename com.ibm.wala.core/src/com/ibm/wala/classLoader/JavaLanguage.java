@@ -541,7 +541,7 @@ public class JavaLanguage extends LanguageImpl implements BytecodeLanguage, Cons
   }
 
   /**
-   * @return Collection<TypeReference>, set of exception types a call to a declared target might throw.
+   * @return Collection<TypeReference>, set of exception frontend a call to a declared target might throw.
    * @throws InvalidClassFileException
    * @throws IllegalArgumentException if target is null
    * @throws IllegalArgumentException if cha is null
@@ -579,12 +579,12 @@ public class JavaLanguage extends LanguageImpl implements BytecodeLanguage, Cons
 
   /**
    * @param pei a potentially-excepting instruction
-   * @return the exception types that pei may throw, independent of the class hierarchy. null if none.
+   * @return the exception frontend that pei may throw, independent of the class hierarchy. null if none.
    * 
    *         Notes
    *         <ul>
    *         <li>this method will <em>NOT</em> return the exception type explicitly thrown by an athrow
-   *         <li>this method will <em>NOT</em> return the exception types that a called method may throw
+   *         <li>this method will <em>NOT</em> return the exception frontend that a called method may throw
    *         <li>this method ignores OutOfMemoryError
    *         <li>this method ignores linkage errors
    *         <li>this method ignores IllegalMonitorState exceptions
