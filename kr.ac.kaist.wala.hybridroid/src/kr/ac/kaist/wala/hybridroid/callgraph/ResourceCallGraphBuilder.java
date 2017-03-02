@@ -238,10 +238,16 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 						System.err.println("Warning: resource descriptor is not int constant." + instruction + "(" + symTab.isConstant(paramVar) + ") in " + node);
 				}else{
 					if(symTab.isParameter(receiverVar)){
-						TypeReference tr = node.getMethod().getParameterType(receiverVar);
+						TypeReference tr = null;
+
+						if(receiverVar == 1)
+							tr = node.getMethod().getDeclaringClass().getReference();
+						else
+							tr = node.getMethod().getParameterType(receiverVar);
+
 						IClass klass = cha.lookupClass(tr);
 						if(klass == null)
-							Assertions.UNREACHABLE(tr +" does not exist.");
+							Assertions.UNREACHABLE(tr +" does not exist in this application.");
 						
 						ResourceInstanceKey rik = new ResourceInstanceKey(node, klass, instruction.iindex, v);
 						system.newConstraint(builder.getPointerKeyForLocal(node, receiverVar), rik);

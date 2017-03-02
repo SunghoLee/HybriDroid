@@ -165,16 +165,20 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 					System.err.println("#Loaded html: " + url.getFile());
 			} catch (Error | RuntimeException e) {// | UnimplementedError |
 													// Error e) {
-				String path = url.getPath();
-				SourceModule dummy = new SourceURLModule(FileWriter
-						.makeHtmlFile(dir,
-								path.substring(path.lastIndexOf(File.separator) + 1, path.length() - 1), "")
-						.toURI().toURL());
-				String dummypath = dummy.getName();
-				if(DEBUG)
-					System.err.println("make dummy: " + dummypath);
-				addScopeMap(Atom.findOrCreateAsciiAtom(url.toString()), Atom.findOrCreateAsciiAtom(dummypath.substring(dummypath.lastIndexOf(File.separator) + 1)));
-				scope.addToScope(scope.getJavaScriptLoader(), dummy);
+				if(url.toString().startsWith("http")) {
+					System.err.println("Cannot receive the response from the url: " + url);
+				}else{
+					String path = url.getPath();
+					SourceModule dummy = new SourceURLModule(FileWriter
+							.makeHtmlFile(dir,
+									path.substring(path.lastIndexOf(File.separator) + 1, path.length() - 1), "")
+							.toURI().toURL());
+					String dummypath = dummy.getName();
+					if (DEBUG)
+						System.err.println("make dummy: " + dummypath);
+					addScopeMap(Atom.findOrCreateAsciiAtom(url.toString()), Atom.findOrCreateAsciiAtom(dummypath.substring(dummypath.lastIndexOf(File.separator) + 1)));
+					scope.addToScope(scope.getJavaScriptLoader(), dummy);
+				}
 			}
 		}
 
