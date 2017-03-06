@@ -173,22 +173,21 @@ public class FieldDefAnalysis {
 				if(inst instanceof SSAPutInstruction){
 					SSAPutInstruction putInst = (SSAPutInstruction) inst;
 					FieldReference fr = putInst.getDeclaredField();
-					
-					if(putInst.isStatic()){
-						PointerKey pk = pa.getHeapModel().getPointerKeyForStaticField(cha.resolveField(fr));
-						if(!localFieldToNodesTest.containsKey(pk))
-							localFieldToNodesTest.put(pk, new HashSet<Pair<CGNode, SSAPutInstruction>>());
-						localFieldToNodesTest.get(pk).add(Pair.make(node, putInst));
-						fields.add(pa.getHeapModel().getPointerKeyForStaticField(cha.resolveField(fr)));
-					}else{
-						int owner = putInst.getUse(0);
-						
-						PointerKey ownerPK = pa.getHeapModel().getPointerKeyForLocal(node, owner);
-						for(InstanceKey ownerIK : (OrdinalSet<InstanceKey>)pa.getPointsToSet(ownerPK)){
-							IField f = cha.resolveField(fr);
-							if(f != null){
-								PointerKey pk = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, cha.resolveField(fr));
-								if(!localFieldToNodesTest.containsKey(pk))
+					IField f = cha.resolveField(fr);
+					if(f != null) {
+						if (putInst.isStatic()) {
+							PointerKey pk = pa.getHeapModel().getPointerKeyForStaticField(f);
+							if (!localFieldToNodesTest.containsKey(pk))
+								localFieldToNodesTest.put(pk, new HashSet<Pair<CGNode, SSAPutInstruction>>());
+							localFieldToNodesTest.get(pk).add(Pair.make(node, putInst));
+							fields.add(pa.getHeapModel().getPointerKeyForStaticField(f));
+						} else {
+							int owner = putInst.getUse(0);
+
+							PointerKey ownerPK = pa.getHeapModel().getPointerKeyForLocal(node, owner);
+							for (InstanceKey ownerIK : (OrdinalSet<InstanceKey>) pa.getPointsToSet(ownerPK)) {
+								PointerKey pk = pa.getHeapModel().getPointerKeyForInstanceField(ownerIK, f);
+								if (!localFieldToNodesTest.containsKey(pk))
 									localFieldToNodesTest.put(pk, new HashSet<Pair<CGNode, SSAPutInstruction>>());
 								localFieldToNodesTest.get(pk).add(Pair.make(node, putInst));
 								fields.add(pk);

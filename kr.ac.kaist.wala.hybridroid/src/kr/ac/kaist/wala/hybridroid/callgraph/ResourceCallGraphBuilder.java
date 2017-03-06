@@ -107,11 +107,11 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 			DefUse du = new DefUse(n.getIR());
 			
 			if(m.getNumberOfParameters() >= usevar){
-				if(m.isStatic()){
-					return m.getParameterType(usevar);
-				}else{
+//				if(m.isStatic()){
+//					return m.getParameterType(usevar);
+//				}else{
 					return m.getParameterType(usevar-1);
-				}
+//				}
 			}
 			
 			SSAInstruction inst = du.getDef(usevar);
@@ -187,8 +187,12 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 						// at this point, instancekey may be exploit when the result is not converted to concrete type.
 						for(TypeReference tr : ccInst.getDeclaredResultTypes()){
 							IClass klass = cha.lookupClass(tr);
-							if(klass == null)
-								Assertions.UNREACHABLE(tr +" does not exist.");
+							if(klass == null) {
+//								Assertions.UNREACHABLE(tr + " does not exist.");
+								System.err.println("[Resource Error] " + tr + " does not exist.");
+								return;
+							}
+
 							ResourceInstanceKey rik = new ResourceInstanceKey(node, klass, instruction.iindex, v);
 							system.newConstraint(builder.getPointerKeyForLocal(node, defVar), rik);
 						}
@@ -222,7 +226,7 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 						}
 					}
 				}
-			}else if(setidSelector.equals(target.getSelector()) && (mainClass.equals(viewClass) || cha.isSubclassOf(mainClass, viewClass))){
+			}else if(setidSelector.equals(target.getSelector()) && mainClass != null && (viewClass.equals(mainClass) || cha.isSubclassOf(mainClass, viewClass))){
 				SymbolTable symTab = node.getIR().getSymbolTable();
 				int receiverVar = instruction.getUse(0);
 				int paramVar = instruction.getUse(1);
@@ -235,7 +239,7 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 				
 				if(v < 0){
 					if(DEBUG)
-						System.err.println("Warning: resource descriptor is not int constant." + instruction + "(" + symTab.isConstant(paramVar) + ") in " + node);
+						System.err.println("Warning: resource descriptor is not inlst constant." + instruction + "(" + symTab.isConstant(paramVar) + ") in " + node);
 				}else{
 					if(symTab.isParameter(receiverVar)){
 						TypeReference tr = null;

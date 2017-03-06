@@ -141,11 +141,15 @@ public class Driver {
 							allFiles.add(js);
 						}else if(v.startsWith("http")){ // if it is online html file, then
 							URL url = new URL(v);
-							File jsFile = WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd;
-							FilePrinter.print(jsFile, new FileOutputStream(dirPath + File.separator + jsFile.getName()));
-							File nFile = new File(dirPath + File.separator + jsFile.getName());
-							putWebViewMap(m, ik, nFile);
-							allFiles.add(nFile);
+							try {
+								File jsFile = WebUtil.extractScriptFromHTML(url, DefaultSourceExtractor.factory).snd;
+								FilePrinter.print(jsFile, new FileOutputStream(dirPath + File.separator + jsFile.getName()));
+								File nFile = new File(dirPath + File.separator + jsFile.getName());
+								putWebViewMap(m, ik, nFile);
+								allFiles.add(nFile);
+							}catch(RuntimeException e){
+								System.err.println("Cannot get response from this url: " + url);
+							}
 						}else if(v.startsWith("file:///")){
 							String nPath = dirPath + File.separator + v.replace("file:///", "").replace("android_asset", "assets");
 							if(htmlToJsMap.containsKey(new File(nPath))){
@@ -185,7 +189,10 @@ public class Driver {
 		MethodReference addJsM = HybriDroidTypes.ADDJAVASCRIPTINTERFACE_APP_METHODREFERENCE;
 		IMethod mm = cg.getClassHierarchy().resolveMethod(addJsM);
 		CGNode addJsIM = cg.getNode(mm, Everywhere.EVERYWHERE);
-
+		if(addJsIM == null){
+			System.err.println("Cannot find call-sites to addJavascriptInterface.");
+			return m;
+		}
 		YMLParser.YMLData data = getAppData(dir);
 		boolean isAboveJELLYBEAN = isEqualOrAboveJELLY_BEAN_MR1(data);
 

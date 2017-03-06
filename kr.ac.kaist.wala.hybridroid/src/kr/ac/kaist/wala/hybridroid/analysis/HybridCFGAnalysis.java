@@ -10,16 +10,6 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.analysis;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
 import com.ibm.wala.cast.ipa.cha.CrossLanguageClassHierarchy;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
@@ -29,13 +19,8 @@ import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
-import com.ibm.wala.ipa.callgraph.AnalysisOptions;
+import com.ibm.wala.ipa.callgraph.*;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions.ReflectionOptions;
-import com.ibm.wala.ipa.callgraph.AnalysisScope;
-import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
-import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ComposedEntrypoints;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -47,18 +32,13 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.strings.Atom;
-
 import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.wala.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.wala.hybridroid.analysis.string.Hotspot;
 import kr.ac.kaist.wala.hybridroid.appinfo.XMLManifestReader;
-import kr.ac.kaist.wala.hybridroid.callgraph.AndroidHybridAnalysisScope;
-import kr.ac.kaist.wala.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
-import kr.ac.kaist.wala.hybridroid.callgraph.AndroidHybridMethodTargetSelector;
-import kr.ac.kaist.wala.hybridroid.callgraph.HybridClassLoaderFactory;
-import kr.ac.kaist.wala.hybridroid.callgraph.HybridIRFactory;
+import kr.ac.kaist.wala.hybridroid.callgraph.*;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.shell.Shell;
@@ -66,6 +46,11 @@ import kr.ac.kaist.wala.hybridroid.util.file.FileCollector;
 import kr.ac.kaist.wala.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser.YMLData;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Build Control-flow graph for the target Android hybrid application. Now, it
@@ -179,6 +164,8 @@ public class HybridCFGAnalysis {
 		
 		if(jsFiles.isEmpty()){
 			System.out.println("It does not have local html files or js codes");
+			Shell.END = System.currentTimeMillis();
+			System.out.println("#Time: " + (Shell.END - Shell.START));
 			System.exit(-1);
 		}
 		
@@ -226,7 +213,7 @@ public class HybridCFGAnalysis {
 	
 	/**
 	 * Build Control-flow graph for the AnalysisScope.
-	 * @param scope the scope that includes all target files.
+	 * @param targetPath the scope that includes all target files.
 	 * @throws IOException
 	 * @throws ClassHierarchyException
 	 * @throws IllegalArgumentException

@@ -167,4 +167,31 @@ public class JavaCompatibleClassFilter implements TypeFilter {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	/*
+	final private CGNode caller;
+	final private SSAAbstractInvokeInstruction inst;
+	final private CGNode target;
+	final private HybridAPIMisusesChecker typeChecker;
+	 */
+
+	@Override
+	public int hashCode(){
+		return caller.hashCode() + inst.hashCode() + target.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof JavaCompatibleClassFilter){
+			JavaCompatibleClassFilter f = (JavaCompatibleClassFilter) o;
+			if(f.caller.equals(caller) && f.inst.iindex == inst.iindex)// && f.target.equals(target))
+				return true;
+		}
+		return false;
+	}
+
+	@Override
+	public String toString(){
+		return "[FILTER] FROM: " + caller + ", INST: " + inst + ", TARGET: " + target;
+	}
 }
