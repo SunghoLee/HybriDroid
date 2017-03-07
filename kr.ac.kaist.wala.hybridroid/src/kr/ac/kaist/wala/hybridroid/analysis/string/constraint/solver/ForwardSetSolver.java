@@ -10,42 +10,18 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver;
 
+import com.ibm.wala.util.debug.Assertions;
+import com.ibm.wala.util.debug.UnimplementedError;
+import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.*;
+import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.*;
+import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.*;
+import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.model.ISolverMonitor;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import com.ibm.wala.util.debug.Assertions;
-import com.ibm.wala.util.debug.UnimplementedError;
-
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.ConstBox;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.ConstraintGraph;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.IBox;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.IConstraintEdge;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.IConstraintNode;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.IOperatorNode;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.OrderedEdge;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.ParamBox;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.VarBox;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.BooleanDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.DoubleSetDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.IBooleanDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.IDoubleDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.IIntegerDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.ILongDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.IStringDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.IntegerSetDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.LongSetDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.StringSetDomain;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.BooleanTopValue;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.BotValue;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.DoubleTopValue;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.IValue;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.IntegerTopValue;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.StringBotValue;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.domain.value.StringTopValue;
-import kr.ac.kaist.wala.hybridroid.analysis.string.constraint.solver.model.ISolverMonitor;
 
 public class ForwardSetSolver implements IStringConstraintSolver<IConstraintNode, IValue> {
 	public static boolean DO_NOT_STOP = true;
@@ -135,12 +111,15 @@ public class ForwardSetSolver implements IStringConstraintSolver<IConstraintNode
 				default:
 					throw new InternalError("Unknown Const Type: " + cb.getType());
 				}
-			}else if(n instanceof ParamBox){
+			}else if(n instanceof ParamBox) {
 				Set<IConstraintNode> preds = graph.getPredecessors(n);
-				if(preds.size() != 1)
-					throw new InternalError("Incorrected Graph: Besides OperatorNode, all nodes must have only one predecessor: [" + nindex + "] " + n + ", PREDS: " + preds.size());
-				IConstraintNode pred = preds.iterator().next();
-				nVal = strMap.get(pred);
+				if (preds.size() != 1){
+					nVal = StringBotValue.getInstance();
+					//throw new InternalError("Incorrected Graph: Besides OperatorNode, all nodes must have only one predecessor: [" + nindex + "] " + n + ", PREDS: " + preds.size());
+				}else {
+					IConstraintNode pred = preds.iterator().next();
+					nVal = strMap.get(pred);
+				}
 			}else if(n instanceof VarBox){
 				Set<IConstraintNode> preds = graph.getPredecessors(n);
 				if(preds.size() != 1){
