@@ -67,7 +67,7 @@ public interface Language {
 
   /**
    * Given a Java constant o, return the appropriate language type to associate
-   * with the constant. Possible frontend for o can be language dependent, but
+   * with the constant. Possible types for o can be language dependent, but
    * typically include Boolean, String, Integer, Float, etc.
    */
   TypeReference getConstantType(Object o);
@@ -125,7 +125,7 @@ public interface Language {
   SSAInstructionFactory instructionFactory();
 
   /**
-   * determine the set of possible exception frontend a call to target may throw
+   * determine the set of possible exception types a call to target may throw
    */
   Collection<TypeReference> inferInvokeExceptions(MethodReference target, IClassHierarchy cha) throws InvalidClassFileException;
 

@@ -31,7 +31,7 @@ import com.ibm.wala.util.debug.UnimplementedError;
 import com.ibm.wala.util.strings.Atom;
 
 /**
- * Implementation of {@link IClass} for array classes. Such classes would be best called 'broken covariant array frontend', since that
+ * Implementation of {@link IClass} for array classes. Such classes would be best called 'broken covariant array types', since that
  * is the semantics that they implement.
  */
 public class ArrayClass implements IClass, Constants {

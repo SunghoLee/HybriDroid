@@ -65,7 +65,7 @@ import com.ibm.wala.util.warnings.Warnings;
 public class FactoryBypassInterpreter extends AbstractReflectionInterpreter {
 
   /**
-   * A Map from CallerSiteContext -> Set <TypeReference>represents the frontend a factory method might create in a particular context
+   * A Map from CallerSiteContext -> Set <TypeReference>represents the types a factory method might create in a particular context
    */
   private final Map<Context, Set<TypeReference>> map = HashMapFactory.make();
 
@@ -102,9 +102,9 @@ public class FactoryBypassInterpreter extends AbstractReflectionInterpreter {
     // MemberReference m = site.getCaller().getMethod().getReference();
     // ReflectionSummary summary = spec.getSummary(m);
     // if (summary != null) {
-    // Set<TypeReference> frontend = summary.getTypesForProgramLocation(site.getCallSite().getProgramCounter());
-    // if (frontend != null) {
-    // return frontend;
+    // Set<TypeReference> types = summary.getTypesForProgramLocation(site.getCallSite().getProgramCounter());
+    // if (types != null) {
+    // return types;
     // }
     // }
     // }
@@ -526,7 +526,7 @@ public class FactoryBypassInterpreter extends AbstractReflectionInterpreter {
     }
 
     private void addStatementsForSetOfTypes(Iterator<IClass> it) {
-      if (!it.hasNext()) { // Uh. No frontend. Hope the caller reported a warning.
+      if (!it.hasNext()) { // Uh. No types. Hope the caller reported a warning.
         SSAReturnInstruction r = insts.ReturnInstruction(allInstructions.size(), nextLocal, false);
         allInstructions.add(r);
       }

@@ -45,7 +45,7 @@ import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
 
 /**
- *  Constants for frontend used by the AndroidModel
+ *  Constants for types used by the AndroidModel
  *
  *  @author     Tobias Blaschke <code@tobiasblaschke.de>
  */

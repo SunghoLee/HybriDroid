@@ -225,10 +225,10 @@ public final class Util {
   }
 
   /**
-   * Extract the frontend of the parameters given by method signature "type".
+   * Extract the types of the parameters given by method signature "type".
    * 
    * @param thisClassType null if the method is static, otherwise the type of "this"
-   * @return an array of the parameter frontend in order, including "this" as the first parameter if thisClassType was non-null
+   * @return an array of the parameter types in order, including "this" as the first parameter if thisClassType was non-null
    * @throws IllegalArgumentException if type == null
    */
   public static String[] getParamsTypes(String thisClassType, String type) throws IllegalArgumentException {
@@ -254,7 +254,7 @@ public final class Util {
   }
 
   /**
-   * Compute the frontend of the local variables on entry to a method. Similar to "getParamsTypes" except null array entries are
+   * Compute the types of the local variables on entry to a method. Similar to "getParamsTypes" except null array entries are
    * inserted to account for unused local variables because of 2-word parameter values.
    * 
    * @throws IllegalArgumentException if type == null

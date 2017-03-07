@@ -167,7 +167,7 @@ public class ReflectiveInvocationInterpreter extends AbstractReflectionInterpret
         // do nothing
       } else {
         // set up args[0] == the receiver for method.invoke, held in v2.
-        // insert a cast for v2 to filter out bogus frontend
+        // insert a cast for v2 to filter out bogus types
         args[0] = nextLocal++;
         TypeReference type = target.getParameterType(0);
         SSACheckCastInstruction cast = insts.CheckCastInstruction(m.allInstructions.size(), args[0], 2, type, true);
@@ -189,7 +189,7 @@ public class ReflectiveInvocationInterpreter extends AbstractReflectionInterpret
       // cast v_temp to the appropriate type and store it in args[j]
       args[j] = nextLocal++;
       TypeReference type = target.getParameterType(j);
-      // we insert a cast to filter out bogus frontend
+      // we insert a cast to filter out bogus types
       SSACheckCastInstruction cast = insts.CheckCastInstruction(m.allInstructions.size(), args[j], temp, type, true);
       m.addInstruction(null, cast, false);
       pc++;

@@ -17,8 +17,8 @@ import com.ibm.wala.types.TypeReference;
  * succeeds.
  * 
  * Note that this instruction generalizes the meaning of checkcast in Java since it supports
- * multiple frontend for which to check.  The meaning is that the case succeeds if the object
- * is of any of the desired frontend.
+ * multiple types for which to check.  The meaning is that the case succeeds if the object
+ * is of any of the desired types.
  *  
  */
 public abstract class SSACheckCastInstruction extends SSAInstruction {
@@ -34,7 +34,7 @@ public abstract class SSACheckCastInstruction extends SSAInstruction {
   private final int val;
 
   /**
-   * The frontend for which this instruction checks; the assignment succeeds if the val is a subtype of one of these frontend
+   * The types for which this instruction checks; the assignment succeeds if the val is a subtype of one of these types
    */
   private final TypeReference[] declaredResultTypes;
 
@@ -137,7 +137,7 @@ public abstract class SSACheckCastInstruction extends SSAInstruction {
   }
 
   /**
-   * @deprecated the system now supports multiple frontend, so this
+   * @deprecated the system now supports multiple types, so this
    * accessor will not work for all languages.
    */
   @Deprecated

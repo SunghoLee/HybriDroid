@@ -46,7 +46,7 @@ public class AnonymousGenerics {
 
 	static class StrTripler implements Ops<String> {
 		// if has type parameters, find overriding method and 
-		// get erasures for all of those frontend and make a new method
+		// get erasures for all of those types and make a new method
 		// that calls this one (with casts). no worries about return values.
 		
     public String unary(String x) {

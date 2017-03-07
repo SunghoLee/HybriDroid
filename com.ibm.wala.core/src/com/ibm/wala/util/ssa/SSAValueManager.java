@@ -151,7 +151,7 @@ public class SSAValueManager {
             for (Managed<? extends SSAValue> param : seenTypes.get(value.key)) {
                 if (param.status == ValueStatus.UNALLOCATED) {
                     // XXX: Allow more?
-                    assert (param.value.getType().equals(value.getType())) : "Inequal frontend";
+                    assert (param.value.getType().equals(value.getType())) : "Inequal types";
 
                     if ((param.value.getNumber() + 1) > nextLocal) {
                         nextLocal = param.value.getNumber() + 1;
@@ -195,7 +195,7 @@ public class SSAValueManager {
      *  @param  ssaValue the number the SSA-Instruction assigns to
      *  @param  setBy   the Phi-Instruction itself - may be null
      *  @throws IllegalArgumentException if you assign to a number requested using
-     *      {@link #getFree(TypeReference)} but frontend mismatch.
+     *      {@link #getFree(TypeReference)} but types mismatch.
      *  @throws IllegalStateException if you forgot to close some Phis
      */
     public void setPhi(final SSAValue value, SSAInstruction setBy) {
@@ -211,7 +211,7 @@ public class SSAValueManager {
                     (param.status == ValueStatus.FREE_INVALIDATED) ||
                     (param.status == ValueStatus.FREE_CLOSED)) {
                     // XXX: Allow more?
-                    assert (param.value.getType().equals(value.getType())) : "Unequal frontend";
+                    assert (param.value.getType().equals(value.getType())) : "Unequal types";
                     if (param.value.getNumber() != value.getNumber()) {
                         if ((param.status == ValueStatus.FREE) &&
                             (param.setInScope == currentScope)) {
@@ -375,7 +375,7 @@ public class SSAValueManager {
             for (Managed<? extends SSAValue> param : seenTypes.get(key)) {
                 if ((param.status == ValueStatus.FREE) ||
                     (param.status == ValueStatus.ALLOCATED)) {
-                    //assert (param.value.getType().equals(type)) : "Unequal frontend";
+                    //assert (param.value.getType().equals(type)) : "Unequal types";
                     if (param.setInScope > currentScope) {
                         debug("SSA Value {} is out of scope {}", param, currentScope);
                         continue;
@@ -443,7 +443,7 @@ public class SSAValueManager {
             for (Managed<? extends SSAValue> param : seenTypes.get(key)) {
                 if ((param.status == ValueStatus.FREE) ||
                     (param.status == ValueStatus.ALLOCATED)) {
-                    //assert (param.type.equals(type)) : "Unequal frontend";
+                    //assert (param.type.equals(type)) : "Unequal types";
 
                     ret.add(param.value);
                 } else if ((param.status == ValueStatus.INVALIDATED) &&
@@ -488,7 +488,7 @@ public class SSAValueManager {
     /**
      *  Return if the type is managed by this class.
      *
-     *  This variant respects super-frontend. Use isSeen(VariableKey, boolean) with a setting
+     *  This variant respects super-types. Use isSeen(VariableKey, boolean) with a setting
      *  for withSuper of false to enforce exact matches.
      *
      *  @return if the type is managed by this class.

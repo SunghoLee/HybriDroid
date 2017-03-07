@@ -81,7 +81,7 @@ public class CFGSanitizer {
         // occur in synthetic methods without a return statement? --MS); add edge to exit
         g.addEdge(b, exit);
       } else {
-        // compute frontend of exceptions the pei may throw
+        // compute types of exceptions the pei may throw
         TypeReference[] exceptions = null;
         try {
           exceptions = computeExceptions(cha, ir, s);
@@ -155,7 +155,7 @@ public class CFGSanitizer {
   }
 
   /**
-   * What are the exception frontend which s may throw?
+   * What are the exception types which s may throw?
    */
   private static TypeReference[] computeExceptions(IClassHierarchy cha, IR ir, SSAInstruction s) throws InvalidClassFileException {
     Collection c = null;

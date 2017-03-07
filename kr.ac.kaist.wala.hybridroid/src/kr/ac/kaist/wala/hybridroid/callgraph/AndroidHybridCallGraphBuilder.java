@@ -54,7 +54,7 @@ import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.Pointin
 import kr.ac.kaist.wala.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker.Warning;
-import kr.ac.kaist.wala.hybridroid.frontend.AndroidJavaJavaScriptTypeMap;
+import kr.ac.kaist.wala.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.pointer.InterfaceClass;
 import kr.ac.kaist.wala.hybridroid.pointer.JSCompatibleClassFilter;

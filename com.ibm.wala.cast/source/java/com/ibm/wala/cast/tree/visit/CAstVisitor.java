@@ -110,7 +110,7 @@ public abstract class CAstVisitor<C extends CAstVisitor.Context> {
 
   /**
    * Entity processing hook; sub-classes are expected to override if they introduce new
-   * entity frontend.
+   * entity types.
    * Should invoke super.doVisitEntity() for unprocessed entities.
    * @return true if entity was handled
    */
@@ -366,7 +366,7 @@ public abstract class CAstVisitor<C extends CAstVisitor.Context> {
 
   /**
    *  Node processing hook; sub-classes are expected to override if they 
-   * introduce new node frontend.
+   * introduce new node types.
    *
    * (Should invoke super.doVisit() for unprocessed nodes.)
    *
@@ -378,7 +378,7 @@ public abstract class CAstVisitor<C extends CAstVisitor.Context> {
 
   /**
    *  Node processing hook; sub-classes are expected to override if they
-   * introduce new node frontend that appear on the left hand side of assignment
+   * introduce new node types that appear on the left hand side of assignment
    * operations.
    *
    * (Should invoke super.doVisit() for unprocessed nodes.)
@@ -900,8 +900,8 @@ public abstract class CAstVisitor<C extends CAstVisitor.Context> {
 
   /**
    * Process the given array reference node. Factored out so that derived languages can reuse this
-   * code for specially-marked frontend of array references (as in X10, for which different instruction
-   * frontend get generated, but whose structure is essentially the same as an ordinary array reference).
+   * code for specially-marked types of array references (as in X10, for which different instruction
+   * types get generated, but whose structure is essentially the same as an ordinary array reference).
    */
   protected boolean doVisitArrayRefNode(CAstNode n, CAstNode v, CAstNode a, boolean assign, boolean preOp, C context, CAstVisitor<C> visitor) {
     if (assign ? visitor.visitArrayRefAssign(n, v, a, context, visitor)

@@ -121,7 +121,7 @@ public class Instantiator implements IInstantiator {
      *  If T is a class-type all its constructors are searched for the one found best suited (takes the least arguments, ...).
      *  New instances are created for all parameters, then the constructor is called.
      *
-     *  If T represents multiple frontend (is an interface, abstract class, ...) _all_ implementors of that type are instantiated
+     *  If T represents multiple types (is an interface, abstract class, ...) _all_ implementors of that type are instantiated
      *  After that they get Phi-ed together.
      *
      *  If T is an array-type a new array of length 1 is generated.
@@ -240,7 +240,7 @@ public class Instantiator implements IInstantiator {
                     payload = createInstance(payloadType, false, new UniqueKey(), seen); 
                 }
             }
-            //assert (frontend.size() == 1);   // TODO
+            //assert (types.size() == 1);   // TODO
             
             // Generate an array of length 1
             final SSANewInstruction newInst;
@@ -277,7 +277,7 @@ public class Instantiator implements IInstantiator {
                 final IClass subKlass = this.cha.lookupClass(type);
 
                 if (subKlass.isAbstract() || subKlass.isInterface()) { 
-                    // All "regular" classes in consideration should already be in frontend
+                    // All "regular" classes in consideration should already be in types
                     continue;
                 }
                
@@ -425,7 +425,7 @@ public class Instantiator implements IInstantiator {
     }
 
     /**
-     *  Get all sub-frontend a type represents until concrete ones are reached.
+     *  Get all sub-types a type represents until concrete ones are reached.
      *
      *  A concrete type only represents itself.
      *

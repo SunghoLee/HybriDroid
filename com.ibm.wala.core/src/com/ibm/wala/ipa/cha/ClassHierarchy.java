@@ -797,8 +797,8 @@ public class ClassHierarchy implements IClassHierarchy {
   }
 
   /*
-   * @see com.ibm.wala.ipa.cha.IClassHierarchy#getLeastCommonSuperclass(com.ibm.wala.frontend.TypeReference,
-   * com.ibm.wala.frontend.TypeReference)
+   * @see com.ibm.wala.ipa.cha.IClassHierarchy#getLeastCommonSuperclass(com.ibm.wala.types.TypeReference,
+   * com.ibm.wala.types.TypeReference)
    */
   @Override
   public TypeReference getLeastCommonSuperclass(TypeReference a, TypeReference b) {

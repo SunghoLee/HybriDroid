@@ -367,7 +367,7 @@ public final class ClassHierarchy {
 
       switch (t1.charAt(0)) {
       case 'L':
-        // two non-array frontend
+        // two non-array types
         // if either one is constant null, return the other one
         if (t1.equals(Constants.TYPE_null)) {
           return t2;

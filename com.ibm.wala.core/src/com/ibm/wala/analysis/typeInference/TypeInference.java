@@ -94,7 +94,7 @@ public class TypeInference extends SSAInference<TypeVariable> implements FixedPo
   private final static PiOperator piOp = new PiOperator();
 
   /**
-   * should type inference track primitive frontend?
+   * should type inference track primitive types?
    */
   protected final boolean doPrimitives;
 

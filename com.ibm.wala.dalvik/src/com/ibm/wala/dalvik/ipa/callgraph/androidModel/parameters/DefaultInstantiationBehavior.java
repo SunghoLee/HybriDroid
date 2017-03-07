@@ -343,7 +343,7 @@ public class DefaultInstantiationBehavior extends IInstantiationBehavior impleme
     private static final long serialVersionUID = 89220020131212L;
    
     /**
-     *  Including the cache may be useful to get all seen frontend.
+     *  Including the cache may be useful to get all seen types.
      */
     public transient boolean serializationIncludesCache = true;
 

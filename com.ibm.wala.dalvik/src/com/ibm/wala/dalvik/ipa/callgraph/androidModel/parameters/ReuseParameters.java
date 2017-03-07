@@ -124,10 +124,10 @@ public class ReuseParameters {
                 { // determine paramType
                     final TypeReference[] types = ep.getParameterTypes(i);
                     if (types.length < 1) {
-                        throw new IllegalStateException("The Etrypoint " + ep + " did not return any frontend for its " + i + "th parameter");
+                        throw new IllegalStateException("The Etrypoint " + ep + " did not return any types for its " + i + "th parameter");
                     }
                     
-                    // Assert the rest of the frontend have the same name
+                    // Assert the rest of the types have the same name
                     for (int j = 0; j < types.length; ++j) {
                         final TypeName paramType = types[j].getName();
 

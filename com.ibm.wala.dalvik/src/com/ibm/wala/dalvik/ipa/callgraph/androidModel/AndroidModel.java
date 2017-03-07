@@ -111,7 +111,7 @@ import com.ibm.wala.util.strings.Atom;
  *  Between the calls to the AndroidEntryPoints special behavior is inserted. You can change that behavior
  *  by implementing an AbstractAndroidModel or set one of the existing ones in the AnalysisOptions.
  *
- *  Additionally care of how frontend are instantiated is taken. You can change this behavior by setting the
+ *  Additionally care of how types are instantiated is taken. You can change this behavior by setting the
  *  IInstanciationBehavior in the AnalysisOptions.
  *  
  *  Smaller Models exist: 
@@ -519,7 +519,7 @@ public class AndroidModel /* makes SummarizedMethod */
 
                     if (this.paramManager.isSeen(returnKey)) {
                         // if it's seen it most likely is a REUSE-Type. However probably it makes sense for 
-                        // other frontend too so we don't test on isReuse.
+                        // other types too so we don't test on isReuse.
                         
 
                         final SSAValue oldValue = this.paramManager.getCurrent(returnKey);

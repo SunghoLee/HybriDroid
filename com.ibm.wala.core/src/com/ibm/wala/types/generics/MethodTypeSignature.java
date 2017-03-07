@@ -95,7 +95,7 @@ public class MethodTypeSignature extends Signature {
   }
 
   /**
-   * @return {@link TypeSignature} for arguments, which includes information about generic frontend
+   * @return {@link TypeSignature} for arguments, which includes information about generic types
    * @throws InvalidClassFileException
    */
   public static TypeSignature[] getArguments(IMethod method) throws InvalidClassFileException {

@@ -24,7 +24,7 @@ import com.ibm.wala.types.FieldReference;
 public interface RTAContextInterpreter extends CHAContextInterpreter {
 
   /**
-   * @return an Iterator of the frontend that may be allocated by a given method in a given context.
+   * @return an Iterator of the types that may be allocated by a given method in a given context.
    */
   public abstract Iterator<NewSiteReference> iterateNewSites(CGNode node);
 

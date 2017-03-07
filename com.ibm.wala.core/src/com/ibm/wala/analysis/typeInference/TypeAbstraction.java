@@ -66,7 +66,7 @@ public abstract class TypeAbstraction implements ContextItem {
   public abstract int hashCode();
 
   /**
-   * A TypeReference representing the frontend of this abstraction
+   * A TypeReference representing the types of this abstraction
    */
   public abstract TypeReference getTypeReference();
 

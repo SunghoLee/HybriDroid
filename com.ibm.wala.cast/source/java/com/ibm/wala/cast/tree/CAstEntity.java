@@ -73,7 +73,7 @@ public interface CAstEntity {
   /**
    *  Languages that introduce new kinds of CAstEntity should use this
    * number as the base of integers chosen to denote the new entity
-   * frontend.
+   * types.
    */
   public static final int SUB_LANGUAGE_BASE = 100;
 
@@ -162,7 +162,7 @@ public interface CAstEntity {
   CAstSourcePositionMap.Position getPosition();
 
   /**
-   * The map from CAstNodes to frontend. Valid for nodes that have an explicitly
+   * The map from CAstNodes to types. Valid for nodes that have an explicitly
    * declared type (e.g. local vars).
    */
   CAstNodeTypeMap getNodeTypeMap();

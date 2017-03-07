@@ -21,7 +21,7 @@ import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 
 /**
- * 0-1-CFA Call graph builder, optimized to not disambiguate instances of "uninteresting" frontend.
+ * 0-1-CFA Call graph builder, optimized to not disambiguate instances of "uninteresting" types.
  */
 public class AstJavaZeroXCFABuilder extends AstJavaCFABuilder {
 

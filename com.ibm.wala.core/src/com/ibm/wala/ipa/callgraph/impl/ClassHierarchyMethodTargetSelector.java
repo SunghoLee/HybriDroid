@@ -79,7 +79,7 @@ public class ClassHierarchyMethodTargetSelector implements MethodTargetSelector 
   }
 
   /*
-   * @see com.ibm.wala.ipa.callgraph.MethodTargetSelector#mightReturnSyntheticMethod(com.ibm.wala.frontend.MethodReference)
+   * @see com.ibm.wala.ipa.callgraph.MethodTargetSelector#mightReturnSyntheticMethod(com.ibm.wala.types.MethodReference)
    */
   public boolean mightReturnSyntheticMethod(MethodReference declaredTarget) {
     return false;

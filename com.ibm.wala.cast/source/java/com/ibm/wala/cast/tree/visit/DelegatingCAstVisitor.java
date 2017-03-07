@@ -104,7 +104,7 @@ public abstract class DelegatingCAstVisitor<C extends CAstVisitor.Context> exten
 
   /**
    * Entity processing hook; sub-classes are expected to override if they
-   * introduce new entity frontend.
+   * introduce new entity types.
    * Should invoke super.doVisitEntity() for unprocessed entities.
    * @return true if entity was handled
    */
@@ -259,7 +259,7 @@ public abstract class DelegatingCAstVisitor<C extends CAstVisitor.Context> exten
 
   /**
    * Node processing hook; sub-classes are expected to override if they
-   * introduce new node frontend.
+   * introduce new node types.
    * Should invoke super.doVisit() for unprocessed nodes.
    * @return true if node was handled
    */

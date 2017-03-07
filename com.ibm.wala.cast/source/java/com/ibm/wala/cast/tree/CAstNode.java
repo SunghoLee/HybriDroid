@@ -29,13 +29,13 @@ package com.ibm.wala.cast.tree;
  * implementations that understand how to do that.
  *
  *  Also note that this interface does not assume that you need some
- * great big class hierarchy to structure frontend of nodes in an ast.
+ * great big class hierarchy to structure types of nodes in an ast.
  * Some people prefer such hierarchies as a matter of taste, but this
  * interface is designed to not inflict this design choice on others.
  *
- *  Finally note that the set of node frontend in this file is not meant
+ *  Finally note that the set of node types in this file is not meant
  * to be exhaustive.  As new languages are added, feel free to add new
- * nodes frontend as needed.
+ * nodes types as needed.
  *
  * @author Julian Dolby (dolby@us.ibm.com)
  * @author Robert M. Fuhrer (rfuhrer@watson.ibm.com)

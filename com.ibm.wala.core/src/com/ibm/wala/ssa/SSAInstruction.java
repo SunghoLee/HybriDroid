@@ -265,7 +265,7 @@ public abstract class SSAInstruction {
   /**
    * This method should never return null.
    * 
-   * @return the set of exception frontend that an instruction might throw ... disregarding athrows and invokes.
+   * @return the set of exception types that an instruction might throw ... disregarding athrows and invokes.
    */
   public Collection<TypeReference> getExceptionTypes() {
     assert !isPEI();

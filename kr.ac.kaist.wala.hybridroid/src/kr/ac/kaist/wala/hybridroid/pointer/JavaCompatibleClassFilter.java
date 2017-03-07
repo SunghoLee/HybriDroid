@@ -20,7 +20,7 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.intset.*;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker;
-import kr.ac.kaist.wala.hybridroid.frontend.AndroidJavaJavaScriptTypeMap;
+import kr.ac.kaist.wala.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 
 import java.util.HashSet;
 import java.util.Set;

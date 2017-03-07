@@ -8,7 +8,7 @@
 * Contributors:
 * KAIST - initial API and implementation
 *******************************************************************************/
-package kr.ac.kaist.wala.hybridroid.frontend;
+package kr.ac.kaist.wala.hybridroid.types;
 
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.types.ClassLoaderReference;

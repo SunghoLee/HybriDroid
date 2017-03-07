@@ -124,7 +124,7 @@ public abstract class ShrikeBTMethod implements IMethod, BytecodeConstants {
     protected int[][] localVariableMap;
 
     /**
-     * Exception frontend this method might throw. Computed on demand.
+     * Exception types this method might throw. Computed on demand.
      */
     private TypeReference[] exceptionTypes;
   }

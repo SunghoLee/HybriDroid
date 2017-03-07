@@ -139,7 +139,7 @@ public class ExposedNamesCollector extends CAstVisitor<ExposedNamesCollector.Ent
 
   @Override
   protected boolean doVisit(CAstNode n, EntityContext context, CAstVisitor<EntityContext> visitor) {
-    // assume unknown node frontend don't do anything relevant to exposed names.
+    // assume unknown node types don't do anything relevant to exposed names.
     // override if this is untrue
     return true;
   }

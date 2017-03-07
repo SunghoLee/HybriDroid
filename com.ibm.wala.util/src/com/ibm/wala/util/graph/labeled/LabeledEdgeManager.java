@@ -57,7 +57,7 @@ import com.ibm.wala.util.graph.EdgeManager;
  * An object which tracks labeled edges in a graph.
  * 
  * @param <T> type of nodes in this graph
- * @param <U> frontend of edge labels.
+ * @param <U> types of edge labels.
  */
 public interface LabeledEdgeManager<T, U> extends EdgeManager<T> {
 

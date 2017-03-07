@@ -40,7 +40,7 @@ import com.ibm.wala.util.intset.MutableMapping;
 import com.ibm.wala.util.intset.OrdinalSet;
 
 /**
- * A trivial field-based pointer analysis solution, which only uses the information of which frontend (classes) are live.
+ * A trivial field-based pointer analysis solution, which only uses the information of which types (classes) are live.
  */
 public class TypeBasedPointerAnalysis extends AbstractPointerAnalysis {
 

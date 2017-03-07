@@ -43,7 +43,7 @@ import com.ibm.wala.util.warnings.Warning;
 public abstract class CAstAbstractLoader implements IClassLoader {
 
   /**
-   * frontend loaded by this
+   * types loaded by this
    */
   protected final Map<TypeName,IClass> types = HashMapFactory.make();
 

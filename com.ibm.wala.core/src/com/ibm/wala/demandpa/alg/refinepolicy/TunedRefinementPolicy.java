@@ -40,7 +40,7 @@ package com.ibm.wala.demandpa.alg.refinepolicy;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 
 /**
- * A refinement policy that iteratively adds more frontend to refine, based on which type was encountered first in each
+ * A refinement policy that iteratively adds more types to refine, based on which type was encountered first in each
  * analysis pass.
  * 
  * @author Manu Sridharan

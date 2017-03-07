@@ -86,7 +86,7 @@ public class CodeScanner {
   }
 
   /**
-   * get the element frontend of the arrays that m may update
+   * get the element types of the arrays that m may update
    * 
    * @throws InvalidClassFileException
    */
@@ -155,7 +155,7 @@ public class CodeScanner {
   }
 
   /**
-   * Return the frontend this method may cast to
+   * Return the types this method may cast to
    * 
    * @return iterator of TypeReference
    * @throws InvalidClassFileException

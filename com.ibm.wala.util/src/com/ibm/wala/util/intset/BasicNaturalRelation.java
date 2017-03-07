@@ -31,7 +31,7 @@ public final class BasicNaturalRelation implements IBinaryNaturalRelation, Seria
   private final static boolean DEBUG = false;
 
   /**
-   * Tokens used as enumerated frontend to control the representation
+   * Tokens used as enumerated types to control the representation
    */
   public final static byte SIMPLE = 0;
 

@@ -94,8 +94,8 @@ public abstract class Instruction implements Constants, Cloneable, IInstruction 
   /**
    * Computes the type of data pushed onto the stack, or null if none is pushed.
    * 
-   * @param poppedTypesToCheck the frontend of the data popped off the stack by this instruction; if poppedTypes is null, then we don't
-   *          know the incoming stack frontend and the result of this method may be less accurate
+   * @param poppedTypesToCheck the types of the data popped off the stack by this instruction; if poppedTypes is null, then we don't
+   *          know the incoming stack types and the result of this method may be less accurate
    */
   @Override
   public String getPushedType(String[] poppedTypesToCheck) {

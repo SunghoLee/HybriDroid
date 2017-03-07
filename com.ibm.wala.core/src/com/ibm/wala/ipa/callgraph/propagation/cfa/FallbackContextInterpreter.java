@@ -37,9 +37,9 @@ import com.ibm.wala.util.collections.EmptyIterator;
 
 
 /**
- * This ContextInterpreter can be used when using another WALA frontend than the shrike frontend. WALA's standard ContextInterpreters, like
+ * This ContextInterpreter can be used when using another WALA types than the shrike types. WALA's standard ContextInterpreters, like
  * e.g. DefaultSSAInterpreter delegate to CodeScanner, which assumes, that the provided methods are instances of shrike classes.
- * When using these ContextInterpreter with another frontend than shrike, this leads to ClassCastExceptions. This class can be used to
+ * When using these ContextInterpreter with another types than shrike, this leads to ClassCastExceptions. This class can be used to
  * work around this issue. It delegates to a given ContextInterpreter, if the CGNode's IMethod is a Shrike class. 
  * Otherwise, it retrieves the required information from the CGNode's IR, which should always work.
  * 

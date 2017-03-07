@@ -20,7 +20,7 @@ import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
 
 /**
- * An entrypoint whose parameter frontend are the declared frontend.
+ * An entrypoint whose parameter types are the declared types.
  */
 public class DefaultEntrypoint extends Entrypoint {
   private final TypeReference[][] paramTypes;

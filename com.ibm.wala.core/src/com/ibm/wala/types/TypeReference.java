@@ -131,7 +131,7 @@ public final class TypeReference implements Serializable {
   public final static TypeReference ShortArray = findOrCreateArrayOf(Short);
 
   /*********************************************************************************************************************
-   * Special object frontend *
+   * Special object types *
    ********************************************************************************************************************/
 
   private final static TypeName JavaLangArithmeticExceptionName = TypeName.string2TypeName("Ljava/lang/ArithmeticException");
@@ -528,7 +528,7 @@ public final class TypeReference implements Serializable {
   }
 
   /**
-   * Return the dimensionality of the type. By convention, class frontend have dimensionality 0, primitives -1, and arrays
+   * Return the dimensionality of the type. By convention, class types have dimensionality 0, primitives -1, and arrays
    * the number of [ in their descriptor.
    */
   public final int getDerivedMask() {

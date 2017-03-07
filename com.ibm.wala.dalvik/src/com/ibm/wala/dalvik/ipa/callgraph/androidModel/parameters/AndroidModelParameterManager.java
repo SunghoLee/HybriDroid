@@ -177,7 +177,7 @@ public class AndroidModelParameterManager {
             for (ManagedParameter param : seenTypes.get(type)) {
                 if (param.status == ValueStatus.UNALLOCATED) {
                     // XXX: Allow more?
-                    assert (param.type.equals(type)) : "Inequal frontend";
+                    assert (param.type.equals(type)) : "Inequal types";
                 
                     if ((ssaValue + 1) > nextLocal) {
                         nextLocal = ssaValue + 1;
@@ -229,7 +229,7 @@ public class AndroidModelParameterManager {
      *  @param  ssaValue the number the SSA-Instruction assignes to
      *  @param  setBy   the Phi-Instruction itself - may be null
      *  @throws IllegalArgumentException if you assign to a number requested using
-     *      {@link #getFree(TypeReference)} but frontend mismach.
+     *      {@link #getFree(TypeReference)} but types mismach.
      *  @throws IllegalStateException if you forgot to close some Phis
      */
     public void setPhi(TypeReference type, int ssaValue, SSAInstruction setBy) {
@@ -248,7 +248,7 @@ public class AndroidModelParameterManager {
                     (param.status == ValueStatus.FREE_INVALIDATED) ||
                     (param.status == ValueStatus.FREE_CLOSED)) {
                     // XXX: Allow more?
-                    assert (param.type.equals(type)) : "Inequal frontend";
+                    assert (param.type.equals(type)) : "Inequal types";
                     if (param.ssa != ssaValue) {
                         if ((param.status == ValueStatus.FREE) &&
                             (param.setInScope == currentScope)) {
@@ -416,7 +416,7 @@ public class AndroidModelParameterManager {
             for (ManagedParameter param : seenTypes.get(type)) {
                 if ((param.status == ValueStatus.FREE) ||
                     (param.status == ValueStatus.ALLOCATED)) {
-                    assert (param.type.equals(type)) : "Inequal frontend";
+                    assert (param.type.equals(type)) : "Inequal types";
                     if (param.setInScope > currentScope) {
                         
                         continue;
@@ -482,7 +482,7 @@ public class AndroidModelParameterManager {
             for (ManagedParameter param : seenTypes.get(type)) {
                 if ((param.status == ValueStatus.FREE) ||
                     (param.status == ValueStatus.ALLOCATED)) {
-                    assert (param.type.equals(type)) : "Inequal frontend";
+                    assert (param.type.equals(type)) : "Inequal types";
                   
                     ret.add(param.ssa);
                 } else if ((param.status == ValueStatus.INVALIDATED) &&

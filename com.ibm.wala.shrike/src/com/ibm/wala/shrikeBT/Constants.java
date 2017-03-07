@@ -17,9 +17,9 @@ package com.ibm.wala.shrikeBT;
  * <ul>
  * <li>The OP_ constants define the JVM instruction opcodes.
  * <li>The ACC_ constants define the accessibility flags for classes, fields and methods.
- * <li>The CONSTANT_ constants define the constant pool item frontend.
- * <li>The T_ constants define the frontend of arrays that can be created by OP_newarray.
- * <li>The TYPE_ constants define the string representations of various JVM frontend. Two special non-JVM frontend are defined, TYPE_null
+ * <li>The CONSTANT_ constants define the constant pool item types.
+ * <li>The T_ constants define the types of arrays that can be created by OP_newarray.
+ * <li>The TYPE_ constants define the string representations of various JVM types. Two special non-JVM types are defined, TYPE_null
  * and TYPE_unknown, as noted below.
  * </ul>
  * 
@@ -27,7 +27,7 @@ package com.ibm.wala.shrikeBT;
  * <ul>
  * <li>The OPR_ constants define the set of operators present in JVM instructions.
  * <li>The operatorNames array gives the string names of those operators.
- * <li>The TYPE_..._index constants define numeric representations of the JVM base frontend.
+ * <li>The TYPE_..._index constants define numeric representations of the JVM base types.
  * <li>The indexedTypes array maps those numeric representations to their official string representations.
  * <li>The indexedTypes_T array maps those numeric representations to the corresponding T_ constant.
  * </ul>

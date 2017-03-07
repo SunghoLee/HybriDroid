@@ -502,14 +502,14 @@ public class Analyzer {
     }
 
     /**
-     * @return the frontend of the local variabls at the instruction.
+     * @return the types of the local variabls at the instruction.
      */
     public String[] getLocals() {
       return locals;
     }
 
     /**
-     * @return the frontend of the working stack at the instruction.
+     * @return the types of the working stack at the instruction.
      */
     public String[] getStack() {
       return stack;
@@ -823,7 +823,7 @@ public class Analyzer {
   }
 
   /**
-   * Verify the method and compute frontend at every program point.
+   * Verify the method and compute types at every program point.
    * 
    * @throws FailureException the method contains invalid bytecode
    */
@@ -839,7 +839,7 @@ public class Analyzer {
   }
 
   /**
-   * @return an array indexed by instruction index; each entry is an array of Strings giving the frontend of the locals at that
+   * @return an array indexed by instruction index; each entry is an array of Strings giving the types of the locals at that
    *         instruction.
    */
   final public String[][] getLocalTypes() {
@@ -847,7 +847,7 @@ public class Analyzer {
   }
 
   /**
-   * @return an array indexed by instruction index; each entry is an array of Strings giving the frontend of the stack elements at that
+   * @return an array indexed by instruction index; each entry is an array of Strings giving the types of the stack elements at that
    *         instruction. The top of the stack is the last element of the array.
    */
   final public String[][] getStackTypes() {

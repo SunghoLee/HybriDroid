@@ -31,7 +31,7 @@ import com.ibm.wala.util.debug.UnimplementedError;
 import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis.ResourceInfo;
 import kr.ac.kaist.wala.hybridroid.pointer.ResourceInstanceKey;
-import kr.ac.kaist.wala.hybridroid.frontend.HybriDroidTypes;
+import kr.ac.kaist.wala.hybridroid.types.HybriDroidTypes;
 import kr.ac.kaist.wala.hybridroid.utils.Wrapper;
 
 import java.util.HashMap;
