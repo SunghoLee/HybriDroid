@@ -14,7 +14,7 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
-import kr.ac.kaist.wala.hybridroid.frontend.HybriDroidTypes;
+import kr.ac.kaist.wala.hybridroid.types.HybriDroidTypes;
 
 import java.util.ArrayList;
 import java.util.HashSet;

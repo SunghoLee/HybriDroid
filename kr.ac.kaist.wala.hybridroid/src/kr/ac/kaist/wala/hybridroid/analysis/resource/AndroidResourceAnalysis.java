@@ -10,18 +10,13 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.analysis.resource;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import com.ibm.wala.util.debug.Assertions;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import com.ibm.wala.util.debug.Assertions;
 
 
 public class AndroidResourceAnalysis {
@@ -88,8 +83,11 @@ public class AndroidResourceAnalysis {
 		}
 		
 		Set<File> rSet = getFiles(smaliDir, "R$string.smali", "R.java");
-		if(rSet.isEmpty() && !DEBUG)
-			throw new InternalError("there is no R$string.smali file.");
+
+		if(rSet.isEmpty() && !DEBUG) {
+			System.err.println("[WARNING] there is no R$string.smali file. resource analysis is aborted.");
+//			throw new InternalError("there is no R$string.smali file.");
+		}
 		
 		for(File f : rSet){
 			String classpath = getClassPath(f);

@@ -36,13 +36,14 @@ import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.wala.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.wala.hybridroid.analysis.string.Hotspot;
+import kr.ac.kaist.wala.hybridroid.frontend.bridge.BridgeInfo;
+import kr.ac.kaist.wala.hybridroid.frontend.bridge.ClassInfo;
+import kr.ac.kaist.wala.hybridroid.types.HybriDroidTypes;
 import kr.ac.kaist.wala.hybridroid.util.file.FileCollector;
 import kr.ac.kaist.wala.hybridroid.util.file.FilePrinter;
 import kr.ac.kaist.wala.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.wala.hybridroid.utils.LocalFileReader;
-import kr.ac.kaist.wala.hybridroid.frontend.bridge.BridgeInfo;
-import kr.ac.kaist.wala.hybridroid.frontend.bridge.ClassInfo;
 
 import java.io.*;
 import java.net.URL;
