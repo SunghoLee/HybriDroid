@@ -19,12 +19,16 @@ import java.util.Iterator;
  */
 public class IRPrinter {
 
-    public static void printIR(CallGraph cg, String out){
+    public static void printIR(CallGraph cg, String out, Filter f){
+        if(f == null)
+            f = Filter.defaultFilter();
 
         File outFile = new File(out);
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(outFile));
             for(CGNode n : cg) {
+                if(!f.filter(n))
+                    continue;
                 bw.write("N" + n.toString() + "\n");
                 bw.write("=======================================\n");
                 IR ir = makeIR(n);
@@ -34,7 +38,7 @@ public class IRPrinter {
                     for (int i = 0; i < insts.length; i++) {
                         SSAInstruction inst = insts[i];
                         if (inst != null) {
-                            bw.write("( " + (index++) + " ) " + inst + "\n");
+                            bw.write("( " + (i) + " ) " + inst + "\n");
                         }
                     }
                     bw.write("[Succ]=================================\n");
@@ -67,5 +71,13 @@ public class IRPrinter {
             }
         }
         return ir;
+    }
+
+    public interface Filter{
+        static Filter defaultFilter(){
+            return n -> true;
+        }
+
+        boolean filter(CGNode n);
     }
 }
