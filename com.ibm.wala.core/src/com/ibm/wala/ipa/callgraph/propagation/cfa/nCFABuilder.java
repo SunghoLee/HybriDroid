@@ -48,5 +48,4 @@ public class nCFABuilder extends SSAPropagationCallGraphBuilder {
     SSAContextInterpreter contextInterpreter = appContextInterpreter == null ? defI : new DelegatingSSAContextInterpreter(appContextInterpreter, defI);
     setContextInterpreter(contextInterpreter);
   }
-
 }

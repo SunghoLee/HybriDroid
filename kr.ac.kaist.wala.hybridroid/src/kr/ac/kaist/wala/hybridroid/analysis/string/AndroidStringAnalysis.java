@@ -353,8 +353,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 					continue;
 				
 				for(Hotspot hotspot : hotspots){
-					if(isHotspot(inst, hotspot)){
-
+					if(isHotspot(cg, node, inst, hotspot)){
 						int useVar = inst.getUse(hotspot.index() + 1);
 						IBox nBox = new VarBox(node, i, useVar);
 						boxes.add(nBox);
@@ -371,7 +370,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 						for(InstanceKey receiver : receivers){
 							for(Iterator<Object> ipk = hg.getPredNodes(receiver); ipk.hasNext();){
 								Object o = ipk.next();
-								if(o instanceof LocalPointerKey){
+								if(o instanceof LocalPointerKey) {
 									LocalPointerKey rpk = (LocalPointerKey) o;
 									rpSet.add(new Pointing(rpk.getNode(), rpk.getValueNumber()));
 								}
@@ -390,6 +389,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 								}
 							}
 						}
+
 						putHotspotDesciptor(hotspot, new HotspotDescriptor(node, inst.iindex, nBox, rpSet, upSet));
 					}
 				}
@@ -416,7 +416,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		return iks;
 	}
 	
-	private boolean isHotspot(SSAInstruction inst, Hotspot hotspot){
+	private boolean isHotspot(CallGraph cg, CGNode n, SSAInstruction inst, Hotspot hotspot){
 		if(hotspot instanceof ArgumentHotspot){
 			ArgumentHotspot argHotspot = (ArgumentHotspot) hotspot;
 			if(inst instanceof SSAAbstractInvokeInstruction){
@@ -424,8 +424,30 @@ public class AndroidStringAnalysis implements StringAnalysis{
 				MethodReference targetMr = invokeInst.getDeclaredTarget();
 				TypeReference cTRef = targetMr.getDeclaringClass();
 				Selector mSelector = targetMr.getSelector();
-				if(cTRef.equals(argHotspot.getClassDescriptor()) && mSelector.equals(argHotspot.getMethodDescriptor()))
+				IClass klass = cg.getClassHierarchy().lookupClass(cTRef);
+				IClass hotspotClass = cg.getClassHierarchy().lookupClass(((ArgumentHotspot) hotspot).getClassDescriptor());
+
+				if(klass == null || hotspotClass == null || ( !klass.equals(hotspotClass) && !cg.getClassHierarchy().isSubclassOf(klass, hotspotClass)))
+					return false;
+
+				if(((SSAAbstractInvokeInstruction) inst).getDeclaredTarget().getSelector().equals(((ArgumentHotspot) hotspot).getMethodDescriptor())) {
 					return true;
+				}
+
+//				MethodReference hotspotMRef = null;
+//				for(IMethod m : klass.getDeclaredMethods()){
+//					if(m.getSelector().equals(argHotspot.getMethodDescriptor())) {
+//						hotspotMRef = m.getReference();
+//						break;
+//					}
+//				}
+//				if(cg.getPossibleTargets(n, ((SSAAbstractInvokeInstruction) inst).getCallSite()).contains(hotspotMRef)) {
+//					System.out.println(" => " + inst);
+//					return true;
+//				}
+
+//				if(cTRef.equals(argHotspot.getClassDescriptor()) && mSelector.equals(argHotspot.getMethodDescriptor()))
+//					return true;
 			}
 		}
 

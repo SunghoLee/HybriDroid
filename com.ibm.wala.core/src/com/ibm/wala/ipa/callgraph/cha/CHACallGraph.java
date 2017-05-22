@@ -10,44 +10,30 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.cha;
 
-import java.lang.ref.SoftReference;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
 import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.NewSiteReference;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
-import com.ibm.wala.ipa.callgraph.AnalysisOptions;
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.Context;
-import com.ibm.wala.ipa.callgraph.Entrypoint;
-import com.ibm.wala.ipa.callgraph.impl.BasicCallGraph;
-import com.ibm.wala.ipa.callgraph.impl.Everywhere;
-import com.ibm.wala.ipa.callgraph.impl.FakeRootMethod;
-import com.ibm.wala.ipa.callgraph.impl.FakeWorldClinitMethod;
+import com.ibm.wala.ipa.callgraph.*;
+import com.ibm.wala.ipa.callgraph.impl.*;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.shrikeBT.IInvokeInstruction;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.Predicate;
-import com.ibm.wala.util.collections.ComposedIterator;
-import com.ibm.wala.util.collections.EmptyIterator;
-import com.ibm.wala.util.collections.FilterIterator;
-import com.ibm.wala.util.collections.HashMapFactory;
-import com.ibm.wala.util.collections.HashSetFactory;
-import com.ibm.wala.util.collections.Iterator2Collection;
-import com.ibm.wala.util.collections.IteratorUtil;
-import com.ibm.wala.util.collections.MapIterator;
-import com.ibm.wala.util.collections.NonNullSingletonIterator;
+import com.ibm.wala.util.collections.*;
 import com.ibm.wala.util.functions.Function;
 import com.ibm.wala.util.graph.NumberedEdgeManager;
 import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.IntSetUtil;
 import com.ibm.wala.util.intset.MutableIntSet;
+
+import java.lang.ref.SoftReference;
+import java.util.*;
 
 public class CHACallGraph extends BasicCallGraph<CHAContextInterpreter> {
   private final IClassHierarchy cha;
@@ -112,11 +98,33 @@ public class CHACallGraph extends BasicCallGraph<CHAContextInterpreter> {
   public void init(Iterable<Entrypoint> entrypoints) throws CancelException {
     super.init();
 
+    //Lee - start
     CGNode root = getFakeRootNode();
     int programCounter = 0;
+    FakeRootMethod frm = (FakeRootMethod)root.getMethod();
+    IClass activity = cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/app/Activity"));
+
+    Map<TypeReference, Integer> receiverMap = new HashMap<>();
+
     for(Entrypoint e : entrypoints) {
-      root.addTarget(e.makeSite(programCounter++), null);
+//
+      TypeReference tr = e.getMethod().getDeclaringClass().getReference();
+      IClass k = cha.lookupClass(tr);
+      if(cha.isSubclassOf(k, activity)){
+        if(!receiverMap.containsKey(tr)) {
+          SSANewInstruction newInst = frm.addAllocation(tr);
+          receiverMap.put(tr, newInst.getDef());
+        }
+
+        CallSiteReference csr = e.makeSite(programCounter++);
+        if(receiverMap.containsKey(e.getMethod().getDeclaringClass().getReference())){
+          int receiver = receiverMap.get(e.getMethod().getDeclaringClass().getReference());
+          frm.addInvocation(new int[]{receiver}, csr);
+        }
+        root.addTarget(csr, makeNewNode(e.getMethod(), Everywhere.EVERYWHERE));
+      }
     }
+    //Lee - end
     newNodes.push(root);
     closure();
     isInitialized = true;
@@ -162,7 +170,7 @@ public class CHACallGraph extends BasicCallGraph<CHAContextInterpreter> {
               return null;
             }
           }
-        }));        
+        }));
   }
 
   @Override
@@ -236,20 +244,24 @@ public class CHACallGraph extends BasicCallGraph<CHAContextInterpreter> {
   private void closure() throws CancelException {
     while (! newNodes.isEmpty()) {
       CGNode n = newNodes.pop();
-      for(Iterator<CallSiteReference> sites = n.iterateCallSites(); sites.hasNext(); ) {
-        Iterator<IMethod> methods = getPossibleTargets(sites.next());
-        while (methods.hasNext()) {
-          IMethod target = methods.next();
-          if (!target.isAbstract()) {
-            CGNode callee = getNode(target, Everywhere.EVERYWHERE);
-            if (callee == null) {
-              callee = findOrCreateNode(target, Everywhere.EVERYWHERE);
-              if (n == getFakeRootNode()) {
-                registerEntrypoint(callee);
+      try {
+        for (Iterator<CallSiteReference> sites = n.iterateCallSites(); sites.hasNext(); ) {
+          Iterator<IMethod> methods = getPossibleTargets(sites.next());
+          while (methods.hasNext()) {
+            IMethod target = methods.next();
+            if (!target.isAbstract()) {
+              CGNode callee = getNode(target, Everywhere.EVERYWHERE);
+              if (callee == null) {
+                callee = findOrCreateNode(target, Everywhere.EVERYWHERE);
+                if (n == getFakeRootNode()) {
+                  registerEntrypoint(callee);
+                }
               }
             }
           }
         }
+      }catch(NullPointerException e){
+        continue;
       }
     }
   }

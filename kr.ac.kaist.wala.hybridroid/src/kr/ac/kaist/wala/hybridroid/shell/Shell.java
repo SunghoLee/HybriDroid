@@ -24,6 +24,8 @@ import com.ibm.wala.util.collections.Pair;
 import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.wala.hybridroid.callgraph.graphutils.WalaCGVisualizer;
 import kr.ac.kaist.wala.hybridroid.command.CommandArguments;
+import kr.ac.kaist.wala.hybridroid.test.ModeledCallGraphForTaint;
+import kr.ac.kaist.wala.hybridroid.test.PrivateLeakageDetector;
 import kr.ac.kaist.wala.hybridroid.utils.LocalFileReader;
 import org.apache.commons.cli.ParseException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
@@ -110,15 +112,18 @@ public class Shell {
 //				Shell.START = System.currentTimeMillis();
 				HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
 				Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(targetPath, LocalFileReader.androidJar(Shell.walaProperties).getPath());
+				CallGraph cg = p.fst;
+				PointerAnalysis<InstanceKey> pa = p.snd;
+
 //				PointerAnalysis<InstanceKey> pa = p.snd;
 //				Shell.END = System.currentTimeMillis();
 //				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
 
 //				System.err.println("Graph Modeling for taint...");
-//				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
+				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
 				
-//				PrivateLeakageDetector pld = new PrivateLeakageDetector(mcg, p.snd);
-//				pld.analyze();
+				PrivateLeakageDetector pld = new PrivateLeakageDetector(mcg, p.snd);
+				pld.analyze();
 //				Shell.END = System.currentTimeMillis();
 //				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
 //				for(LeakWarning w : pld.getWarnings()){
@@ -181,4 +186,5 @@ public class Shell {
 		}
 		return fileList;
 	}
+
 }
