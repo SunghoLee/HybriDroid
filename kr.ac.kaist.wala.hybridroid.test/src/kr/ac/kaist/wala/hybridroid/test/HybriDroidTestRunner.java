@@ -61,6 +61,7 @@ public class HybriDroidTestRunner {
 		runTest(MultipleHTMLLoadTest.class, "multiple pages load");
 		runTest(DynamicJSExectionTest.class, "dynamic js execution");
 		runTest(MultipleWebViewTest.class, "multiple webview execution");
-		runTest(SubClassWebViewTest.class, "sub WebView test");
+		runTest(SubClassWebViewTest.class, "sub WebView class");
+		runTest(BridgeFieldTest.class, "bridge field access");
 	}
 }
