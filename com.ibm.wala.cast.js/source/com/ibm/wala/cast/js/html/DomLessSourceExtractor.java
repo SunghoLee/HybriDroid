@@ -10,6 +10,14 @@
  *****************************************************************************/
 package com.ibm.wala.cast.js.html;
 
+import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
+import com.ibm.wala.cast.js.html.jericho.JerichoHtmlParser;
+import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
+import com.ibm.wala.util.collections.Pair;
+import com.ibm.wala.util.functions.Function;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,15 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.input.BOMInputStream;
-
-import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
-import com.ibm.wala.cast.js.html.jericho.JerichoHtmlParser;
-import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
-import com.ibm.wala.util.collections.Pair;
-import com.ibm.wala.util.functions.Function;
 
 /**
  * extracts JavaScript source code from HTML, with no model of the actual
@@ -248,12 +247,13 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
       Reader scriptInputStream;
       try {
         BOMInputStream bs = new BOMInputStream(scriptSrc.openConnection().getInputStream(), false,
-            ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
+            ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
             ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE);
         if (bs.hasBOM()) {
           System.err.println("removing BOM " + bs.getBOM());
-        }
-        scriptInputStream = new InputStreamReader(bs, bs.getBOMCharsetName());
+          scriptInputStream = new InputStreamReader(bs, bs.getBOMCharsetName());
+        }else
+          scriptInputStream = new InputStreamReader(bs);
 //        scriptInputStream = new InputStreamReader(scriptSrc.openConnection().getInputStream());
       } catch (Exception e) {
         //it looks like this happens when we can't resolve the url?

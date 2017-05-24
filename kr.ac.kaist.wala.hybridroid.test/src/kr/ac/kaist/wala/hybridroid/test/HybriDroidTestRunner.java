@@ -1,23 +1,18 @@
 package kr.ac.kaist.wala.hybridroid.test;
 
+import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.util.CancelException;
+import kr.ac.kaist.wala.hybridroid.test.annotation.AnnotationTest;
+import kr.ac.kaist.wala.hybridroid.test.callgraph.*;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
-
-import com.ibm.wala.ipa.cha.ClassHierarchyException;
-import com.ibm.wala.util.CancelException;
-
-import kr.ac.kaist.wala.hybridroid.test.annotation.AnnotationTest;
-import kr.ac.kaist.wala.hybridroid.test.callgraph.DynamicJSExectionTest;
-import kr.ac.kaist.wala.hybridroid.test.callgraph.MultipleHTMLLoadTest;
-import kr.ac.kaist.wala.hybridroid.test.callgraph.MultipleWebViewTest;
-import kr.ac.kaist.wala.hybridroid.test.callgraph.ReachableBridgeTest;
 
 public class HybriDroidTestRunner {
 
@@ -28,7 +23,7 @@ public class HybriDroidTestRunner {
 	static{
 		testProperties = new Properties();
 		try {
-			testProperties.load(new FileInputStream(new File("test.config")));
+			testProperties.load(new FileInputStream(new File("kr.ac.kaist.wala.hybridroid.test/test.config")));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -66,5 +61,6 @@ public class HybriDroidTestRunner {
 		runTest(MultipleHTMLLoadTest.class, "multiple pages load");
 		runTest(DynamicJSExectionTest.class, "dynamic js execution");
 		runTest(MultipleWebViewTest.class, "multiple webview execution");
+		runTest(SubClassWebViewTest.class, "sub WebView test");
 	}
 }
