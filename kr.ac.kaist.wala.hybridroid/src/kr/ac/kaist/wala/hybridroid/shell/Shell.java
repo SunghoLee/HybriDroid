@@ -10,10 +10,6 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.shell;
 
-import com.ibm.wala.cast.js.ipa.callgraph.JSCFABuilder;
-import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
-import com.ibm.wala.cast.js.test.JSCallGraphBuilderUtil;
-import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -22,9 +18,7 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.Pair;
 import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
-import kr.ac.kaist.wala.hybridroid.callgraph.graphutils.WalaCGVisualizer;
 import kr.ac.kaist.wala.hybridroid.command.CommandArguments;
-import kr.ac.kaist.wala.hybridroid.test.ModeledCallGraphForTaint;
 import kr.ac.kaist.wala.hybridroid.test.PrivateLeakageDetector;
 import kr.ac.kaist.wala.hybridroid.utils.LocalFileReader;
 import org.apache.commons.cli.ParseException;
@@ -34,7 +28,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -95,18 +88,18 @@ public class Shell {
 		// Build Control-flow Graph.
 		if (Shell.args.has(CommandArguments.CFG_ARG)) {
 			if(Shell.args.has(CommandArguments.ONLY_JS_ARG)){
-				File analysisfile = new File(targetPath);
-					    URL url = analysisfile.toURI().toURL();
-					    // Setting WALA analyzer
-					    CAstRhinoTranslatorFactory translatorFactory = new CAstRhinoTranslatorFactory();
-					    JSCallGraphUtil.setTranslatorFactory(translatorFactory);
-					    // make actual file name and directory
-					    JSCFABuilder b = JSCallGraphBuilderUtil.makeHTMLCGBuilder(url);
-					    CallGraph callGraph = b.makeCallGraph(b.getOptions());
-					    PointerAnalysis<InstanceKey> pa = b.getPointerAnalysis();	
-					    WalaCGVisualizer vis = new WalaCGVisualizer();
-					    vis.visualize(callGraph, "cfg.dot");
-					    vis.printLabel("jslabel.txt");
+//				File analysisfile = new File(targetPath);
+//					    URL url = analysisfile.toURI().toURL();
+//					    // Setting WALA analyzer
+//					    CAstRhinoTranslatorFactory translatorFactory = new CAstRhinoTranslatorFactory();
+//					    JSCallGraphUtil.setTranslatorFactory(translatorFactory);
+//					    // make actual file name and directory
+//					    JSCFABuilder b = JSCallGraphBuilderUtil.makeHTMLCGBuilder(url);
+//					    CallGraph callGraph = b.makeCallGraph(b.getOptions());
+//					    PointerAnalysis<InstanceKey> pa = b.getPointerAnalysis();
+//					    WalaCGVisualizer vis = new WalaCGVisualizer();
+//					    vis.visualize(callGraph, "cfg.dot");
+//					    vis.printLabel("jslabel.txt");
 			}else{
 				
 //				Shell.START = System.currentTimeMillis();
@@ -119,19 +112,19 @@ public class Shell {
 //				Shell.END = System.currentTimeMillis();
 //				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
 
-//				System.err.println("Graph Modeling for taint...");
-				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
-				
-				PrivateLeakageDetector pld = new PrivateLeakageDetector(mcg, p.snd);
+				System.err.println("Graph Modeling for taint...");
+//				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
+				System.err.println("Taint analysis...");
+				PrivateLeakageDetector pld = new PrivateLeakageDetector(p.fst, p.snd);
 				pld.analyze();
 //				Shell.END = System.currentTimeMillis();
-//				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
-//				for(LeakWarning w : pld.getWarnings()){
-//					System.out.println("=========");
-//					System.out.println(w);
-//					System.out.println("=========");
+				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
+				for(PrivateLeakageDetector.LeakWarning w : pld.getWarnings()){
+					System.out.println("=========");
+					System.out.println(w);
+					System.out.println("=========");
 //					w.printPathFlow("leak.dot");
-//				}
+				}
 			}
 		} else {
 			// TODO: support several functions

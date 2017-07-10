@@ -1,18 +1,5 @@
 package kr.ac.kaist.wala.hybridroid.test.callgraph;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-
-import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
-import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
-
-import org.junit.Test;
-
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -28,6 +15,15 @@ import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Pair;
+import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import static org.junit.Assert.*;
 
 public class ReachableBridgeTest {
 	public static String TEST_DIR = "callgraph" + File.separator + "reachability";
