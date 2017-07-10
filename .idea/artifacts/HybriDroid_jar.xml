@@ -1,0 +1,50 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HybriDroid:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HybriDroid_jar</output-path>
+    <root id="archive" name="HybriDroid.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/com.ibm.wala.dalvik/models/src/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="kr.ac.kaist.wala.hybridroid" />
+      <element id="module-output" name="kr.ac.kaist.wala.hybridroid.util" />
+      <element id="module-output" name="kr.ac.kaist.wala.hybridroid.frontend" />
+      <element id="module-output" name="kr.ac.kaist.wala.hybridroid.test" />
+      <element id="module-output" name="models" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js/libs/commons-io-2.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/kr.ac.kaist.wala.hybridroid/src/resources/apktool_2.0.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.test/libs/junit-4.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.dalvik/libs/logback-classic-1.0.9.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.dalvik/libs/logback-core-1.0.9.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.dalvik/libs/commons-lang3-3.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.dalvik/libs/slf4j-api-1.7.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.dalvik/libs/dexlib-1.3.4-dev.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.dalvik/libs/guava-13.0.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.dalvik/libs/commons-cli-1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js.test/libs/junit-4.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/kr.ac.kaist.wala.hybridroid/bin/resources/apktool_2.0.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/kr.ac.kaist.wala.hybridroid/libs/wala.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/kr.ac.kaist.wala.hybridroid.test/libs/junit-4.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.core.tests/libs/junit-4.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.core.tests/libs/jericho-html-3.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.core.tests/libs/java-hamcrest-2.0.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.core.tests/libs/apache-ant-1.8.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.core.tests/libs/org.osgi.core-4.2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.core.tests/libs/org.eclipse.core.runtime-3.1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.js.rhino.test/libs/junit-4.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/kr.ac.kaist.wala.hybridroid/libs/apktool_2.0.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/data/android.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/data/android_stub.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/kr.ac.kaist.wala.hybridroid.types/libs/json_simple-1.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.java.test/libs/org.osgi.core-4.2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.java.test/libs/junit-4.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com.ibm.wala.cast.java.test/libs/org.eclipse.core.runtime-3.1.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 
-import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.wala.hybridroid.test.FileCollector;
 import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
 

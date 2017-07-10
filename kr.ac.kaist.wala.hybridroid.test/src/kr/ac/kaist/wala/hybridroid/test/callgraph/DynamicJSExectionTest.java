@@ -25,7 +25,7 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Pair;
 
-import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
 
 public class DynamicJSExectionTest {

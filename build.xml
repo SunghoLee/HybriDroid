@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="hybridroid" default="all">
+  
+  
+  <property file="build.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="700m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/*.hprof/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/*.rbc/**"/>
+    <exclude name="**/*.yarb/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/_svn/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.war"/>
+    <include name="*.swc"/>
+    <include name="*.zip"/>
+    <include name="*.ear"/>
+    <include name="*.egg"/>
+    <include name="*.ane"/>
+    <include name="*.jar"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <exclude name="**/?*.java"/>
+    <exclude name="**/?*.form"/>
+    <exclude name="**/?*.class"/>
+    <exclude name="**/?*.groovy"/>
+    <exclude name="**/?*.scala"/>
+    <exclude name="**/?*.flex"/>
+    <exclude name="**/?*.kt"/>
+    <exclude name="**/?*.clj"/>
+    <exclude name="**/?*.aj"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+  
+  <property name="jdk.bin.1.8" value="${jdk.home.1.8}/bin"/>
+  <path id="jdk.classpath.1.8">
+    <fileset dir="${jdk.home.1.8}">
+      <include name="jre/lib/charsets.jar"/>
+      <include name="jre/lib/deploy.jar"/>
+      <include name="jre/lib/ext/cldrdata.jar"/>
+      <include name="jre/lib/ext/dnsns.jar"/>
+      <include name="jre/lib/ext/jaccess.jar"/>
+      <include name="jre/lib/ext/jfxrt.jar"/>
+      <include name="jre/lib/ext/localedata.jar"/>
+      <include name="jre/lib/ext/nashorn.jar"/>
+      <include name="jre/lib/ext/sunec.jar"/>
+      <include name="jre/lib/ext/sunjce_provider.jar"/>
+      <include name="jre/lib/ext/sunpkcs11.jar"/>
+      <include name="jre/lib/ext/zipfs.jar"/>
+      <include name="jre/lib/javaws.jar"/>
+      <include name="jre/lib/jce.jar"/>
+      <include name="jre/lib/jfr.jar"/>
+      <include name="jre/lib/jfxswt.jar"/>
+      <include name="jre/lib/jsse.jar"/>
+      <include name="jre/lib/management-agent.jar"/>
+      <include name="jre/lib/plugin.jar"/>
+      <include name="jre/lib/resources.jar"/>
+      <include name="jre/lib/rt.jar"/>
+      <include name="lib/ant-javafx.jar"/>
+      <include name="lib/dt.jar"/>
+      <include name="lib/javafx-mx.jar"/>
+      <include name="lib/jconsole.jar"/>
+      <include name="lib/packager.jar"/>
+      <include name="lib/sa-jdi.jar"/>
+      <include name="lib/tools.jar"/>
+    </fileset>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home.1.8}"/>
+  <property name="project.jdk.bin" value="${jdk.bin.1.8}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath.1.8"/>
+  
+  
+  <!-- Project Libraries -->
+  
+  <path id="library.apktool_2.0.2.classpath">
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/src/resources/apktool_2.0.2.jar"/>
+  </path>
+  
+  <path id="library.apktool_2.0.21.classpath">
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/bin/resources/apktool_2.0.2.jar"/>
+  </path>
+  
+  <path id="library.data.classpath">
+    <pathelement location="${basedir}/data/android.jar"/>
+    <pathelement location="${basedir}/data/android_stub.jar"/>
+  </path>
+  
+  <path id="library.json_simple-1.1.classpath">
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid.types/libs/json_simple-1.1.jar"/>
+  </path>
+  
+  <path id="library.junit-4.11.classpath">
+    <pathelement location="${basedir}/com.ibm.wala.cast.js.rhino.test/libs/junit-4.11.jar"/>
+  </path>
+  
+  <path id="library.junit-4.111.classpath">
+    <pathelement location="${basedir}/com.ibm.wala.cast.test/libs/junit-4.11.jar"/>
+  </path>
+  
+  <path id="library.junit-4.112.classpath">
+    <pathelement location="${basedir}/com.ibm.wala.cast.js.test/libs/junit-4.11.jar"/>
+  </path>
+  
+  <path id="library.junit-4.113.classpath">
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid.test/libs/junit-4.11.jar"/>
+  </path>
+  
+  <path id="library.libs.classpath">
+    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
+  </path>
+  
+  <path id="library.libs2.classpath">
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/apktool_2.0.2.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
+  </path>
+  
+  <path id="library.libs3.classpath">
+    <pathelement location="${basedir}/com.ibm.wala.cast.java.test/libs/junit-4.11.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.java.test/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.cast.java.test/libs/org.osgi.core-4.2.0.jar"/>
+  </path>
+  
+  <path id="library.libs4.classpath">
+    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/commons-cli-1.2.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/commons-lang3-3.1.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/dexlib-1.3.4-dev.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/guava-13.0.1.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/logback-classic-1.0.9.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/logback-core-1.0.9.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/slf4j-api-1.7.2.jar"/>
+  </path>
+  
+  <path id="library.libs8.classpath">
+    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/apache-ant-1.8.2.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/java-hamcrest-2.0.0.0.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/jericho-html-3.2.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/junit-4.11.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/org.osgi.core-4.2.0.jar"/>
+  </path>
+  <!-- Register Custom Compiler Taskdefs -->
+  <property name="javac2.home" value="${idea.home}/lib"/>
+  <path id="javac2.classpath">
+    <pathelement location="${javac2.home}/javac2.jar"/>
+    <pathelement location="${javac2.home}/jdom.jar"/>
+    <pathelement location="${javac2.home}/asm-all.jar"/>
+    <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
+  </path>
+  <target name="register.custom.compilers">
+    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
+    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
+  </target>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module e44 -->
+  
+  <dirname property="module.e44.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.e44" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.e44" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.e44" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.e44" value="-encoding UTF-8 -source 1.5 -target 1.5 ${compiler.args}"/>
+  
+  <property name="e44.output.dir" value="${module.e44.basedir}/targets/e44/target/classes"/>
+  <property name="e44.testoutput.dir" value="${module.e44.basedir}/targets/e44/target/test-classes"/>
+  
+  <path id="e44.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="e44.module.production.classpath">
+    <path refid="${module.jdk.classpath.e44}"/>
+  </path>
+  
+  <path id="e44.runtime.production.module.classpath">
+    <pathelement location="${e44.output.dir}"/>
+  </path>
+  
+  <path id="e44.module.classpath">
+    <path refid="${module.jdk.classpath.e44}"/>
+    <pathelement location="${e44.output.dir}"/>
+  </path>
+  
+  <path id="e44.runtime.module.classpath">
+    <pathelement location="${e44.testoutput.dir}"/>
+    <pathelement location="${e44.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.e44">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.e44">
+    <patternset refid="excluded.from.module.e44"/>
+  </patternset>
+  
+  
+  <target name="compile.module.e44" depends="compile.module.e44.production,compile.module.e44.tests" description="Compile module e44"/>
+  
+  <target name="compile.module.e44.production" depends="register.custom.compilers" description="Compile module e44; production classes"/>
+  
+  <target name="compile.module.e44.tests" depends="register.custom.compilers,compile.module.e44.production" description="compile module e44; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.e44" description="cleanup module">
+    <delete dir="${e44.output.dir}"/>
+    <delete dir="${e44.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module kr.ac.kaist.wala.hybridroid.util -->
+  
+  <dirname property="module.kr.ac.kaist.wala.hybridroid.util.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.kr.ac.kaist.wala.hybridroid.util" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.kr.ac.kaist.wala.hybridroid.util" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.kr.ac.kaist.wala.hybridroid.util" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.kr.ac.kaist.wala.hybridroid.util" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="kr.ac.kaist.wala.hybridroid.util.output.dir" value="${module.kr.ac.kaist.wala.hybridroid.util.basedir}/out/production/kr.ac.kaist.wala.hybridroid.util"/>
+  <property name="kr.ac.kaist.wala.hybridroid.util.testoutput.dir" value="${module.kr.ac.kaist.wala.hybridroid.util.basedir}/out/test/kr.ac.kaist.wala.hybridroid.util"/>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.util.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.util.module.production.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.util}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.util.runtime.production.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.util.module.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.util}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.util.runtime.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.kr.ac.kaist.wala.hybridroid.util">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.util">
+    <patternset refid="excluded.from.module.kr.ac.kaist.wala.hybridroid.util"/>
+  </patternset>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.util.module.sourcepath">
+    <dirset dir="${module.kr.ac.kaist.wala.hybridroid.util.basedir}/kr.ac.kaist.wala.hybridroid.util">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.util" depends="compile.module.kr.ac.kaist.wala.hybridroid.util.production,compile.module.kr.ac.kaist.wala.hybridroid.util.tests" description="Compile module kr.ac.kaist.wala.hybridroid.util"/>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.util.production" depends="register.custom.compilers" description="Compile module kr.ac.kaist.wala.hybridroid.util; production classes">
+    <mkdir dir="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <javac2 destdir="${kr.ac.kaist.wala.hybridroid.util.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.kr.ac.kaist.wala.hybridroid.util}/javac">
+      <compilerarg line="${compiler.args.kr.ac.kaist.wala.hybridroid.util}"/>
+      <bootclasspath refid="kr.ac.kaist.wala.hybridroid.util.module.bootclasspath"/>
+      <classpath refid="kr.ac.kaist.wala.hybridroid.util.module.production.classpath"/>
+      <src refid="kr.ac.kaist.wala.hybridroid.util.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.util"/>
+    </javac2>
+    
+    <copy todir="${kr.ac.kaist.wala.hybridroid.util.output.dir}">
+      <fileset dir="${module.kr.ac.kaist.wala.hybridroid.util.basedir}/kr.ac.kaist.wala.hybridroid.util/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.util.tests" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid.util.production" description="compile module kr.ac.kaist.wala.hybridroid.util; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.kr.ac.kaist.wala.hybridroid.util" description="cleanup module">
+    <delete dir="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <delete dir="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module models -->
+  
+  <dirname property="module.models.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.models" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.models" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.models" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.models" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="models.output.dir" value="${module.models.basedir}/out/production/models"/>
+  <property name="models.testoutput.dir" value="${module.models.basedir}/out/test/models"/>
+  
+  <path id="models.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="models.module.production.classpath">
+    <path refid="${module.jdk.classpath.models}"/>
+    <path refid="library.data.classpath"/>
+  </path>
+  
+  <path id="models.runtime.production.module.classpath">
+    <pathelement location="${models.output.dir}"/>
+    <path refid="library.data.classpath"/>
+  </path>
+  
+  <path id="models.module.classpath">
+    <path refid="${module.jdk.classpath.models}"/>
+    <pathelement location="${models.output.dir}"/>
+    <path refid="library.data.classpath"/>
+  </path>
+  
+  <path id="models.runtime.module.classpath">
+    <pathelement location="${models.testoutput.dir}"/>
+    <pathelement location="${models.output.dir}"/>
+    <path refid="library.data.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.models">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.models">
+    <patternset refid="excluded.from.module.models"/>
+  </patternset>
+  
+  <path id="models.module.sourcepath">
+    <dirset dir="${module.models.basedir}/com.ibm.wala.dalvik/models">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.models" depends="compile.module.models.production,compile.module.models.tests" description="Compile module models"/>
+  
+  <target name="compile.module.models.production" depends="register.custom.compilers" description="Compile module models; production classes">
+    <mkdir dir="${models.output.dir}"/>
+    <javac2 destdir="${models.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.models}/javac">
+      <compilerarg line="${compiler.args.models}"/>
+      <bootclasspath refid="models.module.bootclasspath"/>
+      <classpath refid="models.module.production.classpath"/>
+      <src refid="models.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.models"/>
+    </javac2>
+    
+    <copy todir="${models.output.dir}">
+      <fileset dir="${module.models.basedir}/com.ibm.wala.dalvik/models/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.models.tests" depends="register.custom.compilers,compile.module.models.production" description="compile module models; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.models" description="cleanup module">
+    <delete dir="${models.output.dir}"/>
+    <delete dir="${models.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module WALA -->
+  
+  <dirname property="module.wala.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.wala" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.wala" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.wala" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.wala" value="-encoding UTF-8 -source 1.5 -target 1.5 ${compiler.args}"/>
+  
+  <property name="wala.output.dir" value="${module.wala.basedir}/target/classes"/>
+  <property name="wala.testoutput.dir" value="${module.wala.basedir}/target/test-classes"/>
+  
+  <path id="wala.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="wala.module.production.classpath">
+    <path refid="${module.jdk.classpath.wala}"/>
+  </path>
+  
+  <path id="wala.runtime.production.module.classpath">
+    <pathelement location="${wala.output.dir}"/>
+  </path>
+  
+  <path id="wala.module.classpath">
+    <path refid="${module.jdk.classpath.wala}"/>
+    <pathelement location="${wala.output.dir}"/>
+  </path>
+  
+  <path id="wala.runtime.module.classpath">
+    <pathelement location="${wala.testoutput.dir}"/>
+    <pathelement location="${wala.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.wala">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.wala">
+    <patternset refid="excluded.from.module.wala"/>
+  </patternset>
+  
+  
+  <target name="compile.module.wala" depends="compile.module.wala.production,compile.module.wala.tests" description="Compile module WALA"/>
+  
+  <target name="compile.module.wala.production" depends="register.custom.compilers" description="Compile module WALA; production classes"/>
+  
+  <target name="compile.module.wala.tests" depends="register.custom.compilers,compile.module.wala.production" description="compile module WALA; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.wala" description="cleanup module">
+    <delete dir="${wala.output.dir}"/>
+    <delete dir="${wala.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module kr.ac.kaist.wala.hybridroid -->
+  
+  <dirname property="module.kr.ac.kaist.wala.hybridroid.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.kr.ac.kaist.wala.hybridroid" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.kr.ac.kaist.wala.hybridroid" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.kr.ac.kaist.wala.hybridroid" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.kr.ac.kaist.wala.hybridroid" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="kr.ac.kaist.wala.hybridroid.output.dir" value="${module.kr.ac.kaist.wala.hybridroid.basedir}/out/production/kr.ac.kaist.wala.hybridroid"/>
+  <property name="kr.ac.kaist.wala.hybridroid.testoutput.dir" value="${module.kr.ac.kaist.wala.hybridroid.basedir}/out/test/kr.ac.kaist.wala.hybridroid"/>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.module.production.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.runtime.production.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.module.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.runtime.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.kr.ac.kaist.wala.hybridroid">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.kr.ac.kaist.wala.hybridroid">
+    <patternset refid="excluded.from.module.kr.ac.kaist.wala.hybridroid"/>
+  </patternset>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.module.sourcepath">
+    <dirset dir="${module.kr.ac.kaist.wala.hybridroid.basedir}/kr.ac.kaist.wala.hybridroid">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid" depends="compile.module.kr.ac.kaist.wala.hybridroid.production,compile.module.kr.ac.kaist.wala.hybridroid.tests" description="Compile module kr.ac.kaist.wala.hybridroid"/>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.production" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid.util" description="Compile module kr.ac.kaist.wala.hybridroid; production classes">
+    <mkdir dir="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <javac2 destdir="${kr.ac.kaist.wala.hybridroid.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.kr.ac.kaist.wala.hybridroid}/javac">
+      <compilerarg line="${compiler.args.kr.ac.kaist.wala.hybridroid}"/>
+      <bootclasspath refid="kr.ac.kaist.wala.hybridroid.module.bootclasspath"/>
+      <classpath refid="kr.ac.kaist.wala.hybridroid.module.production.classpath"/>
+      <src refid="kr.ac.kaist.wala.hybridroid.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.kr.ac.kaist.wala.hybridroid"/>
+    </javac2>
+    
+    <copy todir="${kr.ac.kaist.wala.hybridroid.output.dir}">
+      <fileset dir="${module.kr.ac.kaist.wala.hybridroid.basedir}/kr.ac.kaist.wala.hybridroid/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.tests" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid.production" description="compile module kr.ac.kaist.wala.hybridroid; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.kr.ac.kaist.wala.hybridroid" description="cleanup module">
+    <delete dir="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <delete dir="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module kr.ac.kaist.wala.hybridroid.frontend -->
+  
+  <dirname property="module.kr.ac.kaist.wala.hybridroid.frontend.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.kr.ac.kaist.wala.hybridroid.frontend" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.kr.ac.kaist.wala.hybridroid.frontend" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.kr.ac.kaist.wala.hybridroid.frontend" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.kr.ac.kaist.wala.hybridroid.frontend" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="kr.ac.kaist.wala.hybridroid.frontend.output.dir" value="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/out/production/kr.ac.kaist.wala.hybridroid.frontend"/>
+  <property name="kr.ac.kaist.wala.hybridroid.frontend.testoutput.dir" value="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/out/test/kr.ac.kaist.wala.hybridroid.frontend"/>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.production.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.frontend}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.json_simple-1.1.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.frontend.runtime.production.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.json_simple-1.1.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.frontend}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.json_simple-1.1.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.frontend.runtime.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.frontend.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.json_simple-1.1.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.kr.ac.kaist.wala.hybridroid.frontend">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.frontend">
+    <patternset refid="excluded.from.module.kr.ac.kaist.wala.hybridroid.frontend"/>
+  </patternset>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.sourcepath">
+    <dirset dir="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/kr.ac.kaist.wala.hybridroid.frontend">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.frontend" depends="compile.module.kr.ac.kaist.wala.hybridroid.frontend.production,compile.module.kr.ac.kaist.wala.hybridroid.frontend.tests" description="Compile module kr.ac.kaist.wala.hybridroid.frontend"/>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.frontend.production" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid,compile.module.kr.ac.kaist.wala.hybridroid.util" description="Compile module kr.ac.kaist.wala.hybridroid.frontend; production classes">
+    <mkdir dir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
+    <javac2 destdir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.kr.ac.kaist.wala.hybridroid.frontend}/javac">
+      <compilerarg line="${compiler.args.kr.ac.kaist.wala.hybridroid.frontend}"/>
+      <bootclasspath refid="kr.ac.kaist.wala.hybridroid.frontend.module.bootclasspath"/>
+      <classpath refid="kr.ac.kaist.wala.hybridroid.frontend.module.production.classpath"/>
+      <src refid="kr.ac.kaist.wala.hybridroid.frontend.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.frontend"/>
+    </javac2>
+    
+    <copy todir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}">
+      <fileset dir="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/kr.ac.kaist.wala.hybridroid.frontend/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.frontend.tests" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid.frontend.production" description="compile module kr.ac.kaist.wala.hybridroid.frontend; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.kr.ac.kaist.wala.hybridroid.frontend" description="cleanup module">
+    <delete dir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
+    <delete dir="${kr.ac.kaist.wala.hybridroid.frontend.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module kr.ac.kaist.wala.hybridroid.test -->
+  
+  <dirname property="module.kr.ac.kaist.wala.hybridroid.test.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.kr.ac.kaist.wala.hybridroid.test" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.kr.ac.kaist.wala.hybridroid.test" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.kr.ac.kaist.wala.hybridroid.test" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.kr.ac.kaist.wala.hybridroid.test" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="kr.ac.kaist.wala.hybridroid.test.output.dir" value="${module.kr.ac.kaist.wala.hybridroid.test.basedir}/out/production/kr.ac.kaist.wala.hybridroid.test"/>
+  <property name="kr.ac.kaist.wala.hybridroid.test.testoutput.dir" value="${module.kr.ac.kaist.wala.hybridroid.test.basedir}/out/test/kr.ac.kaist.wala.hybridroid.test"/>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.test.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.test.module.production.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.test}"/>
+    <path refid="library.libs3.classpath"/>
+    <path refid="library.junit-4.111.classpath"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.junit-4.113.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
+    <path refid="library.junit-4.112.classpath"/>
+    <path refid="library.libs8.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.test.runtime.production.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.test.output.dir}"/>
+    <path refid="library.libs3.classpath"/>
+    <path refid="library.junit-4.111.classpath"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.junit-4.113.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
+    <path refid="library.junit-4.112.classpath"/>
+    <path refid="library.libs8.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.test.module.classpath">
+    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.test}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.test.output.dir}"/>
+    <path refid="library.libs3.classpath"/>
+    <path refid="library.junit-4.111.classpath"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.junit-4.113.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
+    <path refid="library.junit-4.112.classpath"/>
+    <path refid="library.libs8.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.test.runtime.module.classpath">
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.test.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.test.output.dir}"/>
+    <path refid="library.libs3.classpath"/>
+    <path refid="library.junit-4.111.classpath"/>
+    <path refid="library.data.classpath"/>
+    <path refid="library.junit-4.113.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
+    <path refid="library.junit-4.112.classpath"/>
+    <path refid="library.libs8.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+    <path refid="library.libs.classpath"/>
+    <path refid="library.apktool_2.0.2.classpath"/>
+    <path refid="library.libs2.classpath"/>
+    <path refid="library.apktool_2.0.21.classpath"/>
+    <path refid="library.libs4.classpath"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
+    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.kr.ac.kaist.wala.hybridroid.test">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.test">
+    <patternset refid="excluded.from.module.kr.ac.kaist.wala.hybridroid.test"/>
+  </patternset>
+  
+  <path id="kr.ac.kaist.wala.hybridroid.test.module.sourcepath">
+    <dirset dir="${module.kr.ac.kaist.wala.hybridroid.test.basedir}/kr.ac.kaist.wala.hybridroid.test">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.test" depends="compile.module.kr.ac.kaist.wala.hybridroid.test.production,compile.module.kr.ac.kaist.wala.hybridroid.test.tests" description="Compile module kr.ac.kaist.wala.hybridroid.test"/>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.test.production" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid" description="Compile module kr.ac.kaist.wala.hybridroid.test; production classes">
+    <mkdir dir="${kr.ac.kaist.wala.hybridroid.test.output.dir}"/>
+    <javac2 destdir="${kr.ac.kaist.wala.hybridroid.test.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.kr.ac.kaist.wala.hybridroid.test}/javac">
+      <compilerarg line="${compiler.args.kr.ac.kaist.wala.hybridroid.test}"/>
+      <bootclasspath refid="kr.ac.kaist.wala.hybridroid.test.module.bootclasspath"/>
+      <classpath refid="kr.ac.kaist.wala.hybridroid.test.module.production.classpath"/>
+      <src refid="kr.ac.kaist.wala.hybridroid.test.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.test"/>
+    </javac2>
+    
+    <copy todir="${kr.ac.kaist.wala.hybridroid.test.output.dir}">
+      <fileset dir="${module.kr.ac.kaist.wala.hybridroid.test.basedir}/kr.ac.kaist.wala.hybridroid.test/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.kr.ac.kaist.wala.hybridroid.test.tests" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid.test.production" description="compile module kr.ac.kaist.wala.hybridroid.test; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.kr.ac.kaist.wala.hybridroid.test" description="cleanup module">
+    <delete dir="${kr.ac.kaist.wala.hybridroid.test.output.dir}"/>
+    <delete dir="${kr.ac.kaist.wala.hybridroid.test.testoutput.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.e44, clean.module.kr.ac.kaist.wala.hybridroid.util, clean.module.models, clean.module.wala, clean.module.kr.ac.kaist.wala.hybridroid, clean.module.kr.ac.kaist.wala.hybridroid.frontend, clean.module.kr.ac.kaist.wala.hybridroid.test" description="cleanup all"/>
+  
+  <target name="build.modules" depends="init, clean, compile.module.e44, compile.module.kr.ac.kaist.wala.hybridroid.util, compile.module.models, compile.module.wala, compile.module.kr.ac.kaist.wala.hybridroid, compile.module.kr.ac.kaist.wala.hybridroid.frontend, compile.module.kr.ac.kaist.wala.hybridroid.test" description="build all modules"/>
+  
+  <target name="init.artifacts">
+    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+    <property name="artifact.output.hybridroid:jar" value="${basedir}/out/artifacts/HybriDroid_jar"/>
+    <mkdir dir="${artifacts.temp.dir}"/>
+    <property name="temp.jar.path.HybriDroid.jar" value="${artifacts.temp.dir}/HybriDroid.jar"/>
+  </target>
+  
+  <target name="artifact.hybridroid:jar" depends="init.artifacts, compile.module.kr.ac.kaist.wala.hybridroid, compile.module.kr.ac.kaist.wala.hybridroid.util, compile.module.kr.ac.kaist.wala.hybridroid.frontend, compile.module.kr.ac.kaist.wala.hybridroid.test, compile.module.models" description="Build &#39;HybriDroid:jar&#39; artifact">
+    <property name="artifact.temp.output.hybridroid:jar" value="${artifacts.temp.dir}/HybriDroid_jar"/>
+    <mkdir dir="${artifact.temp.output.hybridroid:jar}"/>
+    <jar destfile="${temp.jar.path.HybriDroid.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <zipfileset file="${basedir}/com.ibm.wala.dalvik/models/src/META-INF/MANIFEST.MF" prefix="META-INF"/>
+      <zipfileset dir="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
+      <zipfileset dir="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
+      <zipfileset dir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
+      <zipfileset dir="${kr.ac.kaist.wala.hybridroid.test.output.dir}"/>
+      <zipfileset dir="${models.output.dir}"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
+      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/src/resources/apktool_2.0.2.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.test/libs/junit-4.11.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/logback-classic-1.0.9.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/logback-core-1.0.9.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/commons-lang3-3.1.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/slf4j-api-1.7.2.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/dexlib-1.3.4-dev.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/guava-13.0.1.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/commons-cli-1.2.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js.test/libs/junit-4.11.jar"/>
+      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/bin/resources/apktool_2.0.2.jar"/>
+      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
+      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid.test/libs/junit-4.11.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/junit-4.11.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/jericho-html-3.2.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/java-hamcrest-2.0.0.0.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/apache-ant-1.8.2.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/org.osgi.core-4.2.0.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.js.rhino.test/libs/junit-4.11.jar"/>
+      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
+      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/apktool_2.0.2.jar"/>
+      <zipfileset src="${basedir}/data/android.jar"/>
+      <zipfileset src="${basedir}/data/android_stub.jar"/>
+      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid.types/libs/json_simple-1.1.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.java.test/libs/org.osgi.core-4.2.0.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.java.test/libs/junit-4.11.jar"/>
+      <zipfileset src="${basedir}/com.ibm.wala.cast.java.test/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+    </jar>
+    <copy file="${temp.jar.path.HybriDroid.jar}" tofile="${artifact.temp.output.hybridroid:jar}/HybriDroid.jar"/>
+  </target>
+  
+  <target name="build.all.artifacts" depends="artifact.hybridroid:jar" description="Build all artifacts">
+    <mkdir dir="${artifact.output.hybridroid:jar}"/>
+    <copy todir="${artifact.output.hybridroid:jar}">
+      <fileset dir="${artifact.temp.output.hybridroid:jar}"/>
+    </copy>
+    
+    <!-- Delete temporary files -->
+    <delete dir="${artifacts.temp.dir}"/>
+  </target>
+  
+  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+</project>

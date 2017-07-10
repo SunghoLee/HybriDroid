@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import kr.ac.kaist.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
 
 import org.junit.Test;

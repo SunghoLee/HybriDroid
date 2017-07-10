@@ -74,8 +74,13 @@ public class IRPrinter {
     }
 
     public interface Filter{
-        static Filter defaultFilter(){
-            return n -> true;
+        static public Filter defaultFilter(){
+            return new Filter() {
+				@Override
+				public boolean filter(CGNode n) {
+					return true;
+				}
+			};
         }
 
         boolean filter(CGNode n);
