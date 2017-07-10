@@ -47,111 +47,36 @@
 
 package com.ibm.wala.dalvik.classLoader;
 
-import static org.jf.dexlib.Util.AccessFlags.ABSTRACT;
-import static org.jf.dexlib.Util.AccessFlags.BRIDGE;
-import static org.jf.dexlib.Util.AccessFlags.DECLARED_SYNCHRONIZED;
-import static org.jf.dexlib.Util.AccessFlags.FINAL;
-import static org.jf.dexlib.Util.AccessFlags.NATIVE;
-import static org.jf.dexlib.Util.AccessFlags.PRIVATE;
-import static org.jf.dexlib.Util.AccessFlags.PROTECTED;
-import static org.jf.dexlib.Util.AccessFlags.PUBLIC;
-import static org.jf.dexlib.Util.AccessFlags.STATIC;
-import static org.jf.dexlib.Util.AccessFlags.VOLATILE;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import org.jf.dexlib.AnnotationDirectoryItem;
-import org.jf.dexlib.AnnotationItem;
-import org.jf.dexlib.AnnotationSetItem;
-import org.jf.dexlib.ClassDataItem.EncodedMethod;
-import org.jf.dexlib.CodeItem.EncodedTypeAddrPair;
-import org.jf.dexlib.CodeItem.TryItem;
-import org.jf.dexlib.FieldIdItem;
-import org.jf.dexlib.MethodIdItem;
-import org.jf.dexlib.StringIdItem;
-import org.jf.dexlib.TypeIdItem;
-import org.jf.dexlib.Code.InstructionWithReference;
-import org.jf.dexlib.Code.Opcode;
-import org.jf.dexlib.Code.TwoRegisterInstruction;
-import org.jf.dexlib.Code.Format.ArrayDataPseudoInstruction;
-import org.jf.dexlib.Code.Format.Instruction10t;
-import org.jf.dexlib.Code.Format.Instruction11n;
-import org.jf.dexlib.Code.Format.Instruction11x;
-import org.jf.dexlib.Code.Format.Instruction12x;
-import org.jf.dexlib.Code.Format.Instruction20t;
-import org.jf.dexlib.Code.Format.Instruction21c;
-import org.jf.dexlib.Code.Format.Instruction21h;
-import org.jf.dexlib.Code.Format.Instruction21s;
-import org.jf.dexlib.Code.Format.Instruction21t;
-import org.jf.dexlib.Code.Format.Instruction22b;
-import org.jf.dexlib.Code.Format.Instruction22c;
-import org.jf.dexlib.Code.Format.Instruction22s;
-import org.jf.dexlib.Code.Format.Instruction22t;
-import org.jf.dexlib.Code.Format.Instruction22x;
-import org.jf.dexlib.Code.Format.Instruction23x;
-import org.jf.dexlib.Code.Format.Instruction30t;
-import org.jf.dexlib.Code.Format.Instruction31c;
-import org.jf.dexlib.Code.Format.Instruction31i;
-import org.jf.dexlib.Code.Format.Instruction31t;
-import org.jf.dexlib.Code.Format.Instruction32x;
-import org.jf.dexlib.Code.Format.Instruction35c;
-import org.jf.dexlib.Code.Format.Instruction3rc;
-import org.jf.dexlib.Code.Format.Instruction51l;
-import org.jf.dexlib.Code.Format.PackedSwitchDataPseudoInstruction;
-import org.jf.dexlib.Code.Format.SparseSwitchDataPseudoInstruction;
-import org.jf.dexlib.EncodedValue.ArrayEncodedValue;
-import org.jf.dexlib.EncodedValue.TypeEncodedValue;
-
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IBytecodeMethod;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.NewSiteReference;
-import com.ibm.wala.dalvik.dex.instructions.ArrayFill;
-import com.ibm.wala.dalvik.dex.instructions.ArrayGet;
+import com.ibm.wala.dalvik.dex.instructions.*;
 import com.ibm.wala.dalvik.dex.instructions.ArrayGet.Type;
-import com.ibm.wala.dalvik.dex.instructions.ArrayLength;
-import com.ibm.wala.dalvik.dex.instructions.ArrayPut;
-import com.ibm.wala.dalvik.dex.instructions.BinaryLiteralOperation;
-import com.ibm.wala.dalvik.dex.instructions.BinaryOperation;
-import com.ibm.wala.dalvik.dex.instructions.Branch;
-import com.ibm.wala.dalvik.dex.instructions.CheckCast;
-import com.ibm.wala.dalvik.dex.instructions.Constant;
-import com.ibm.wala.dalvik.dex.instructions.GetField;
-import com.ibm.wala.dalvik.dex.instructions.Goto;
-import com.ibm.wala.dalvik.dex.instructions.InstanceOf;
-import com.ibm.wala.dalvik.dex.instructions.Instruction;
-import com.ibm.wala.dalvik.dex.instructions.Invoke;
-import com.ibm.wala.dalvik.dex.instructions.Monitor;
-import com.ibm.wala.dalvik.dex.instructions.New;
-import com.ibm.wala.dalvik.dex.instructions.NewArray;
-import com.ibm.wala.dalvik.dex.instructions.NewArrayFilled;
-import com.ibm.wala.dalvik.dex.instructions.PackedSwitchPad;
-import com.ibm.wala.dalvik.dex.instructions.PutField;
-import com.ibm.wala.dalvik.dex.instructions.Return;
-import com.ibm.wala.dalvik.dex.instructions.SparseSwitchPad;
-import com.ibm.wala.dalvik.dex.instructions.Switch;
-import com.ibm.wala.dalvik.dex.instructions.Throw;
-import com.ibm.wala.dalvik.dex.instructions.UnaryOperation;
 import com.ibm.wala.dalvik.dex.instructions.UnaryOperation.OpID;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.shrikeBT.ExceptionHandler;
 import com.ibm.wala.shrikeBT.IInstruction;
 import com.ibm.wala.shrikeBT.IndirectionData;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
-import com.ibm.wala.types.ClassLoaderReference;
-import com.ibm.wala.types.Descriptor;
-import com.ibm.wala.types.MethodReference;
-import com.ibm.wala.types.Selector;
-import com.ibm.wala.types.TypeName;
-import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.types.*;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.strings.Atom;
 import com.ibm.wala.util.strings.ImmutableByteArray;
+import org.jf.dexlib.*;
+import org.jf.dexlib.ClassDataItem.EncodedMethod;
+import org.jf.dexlib.Code.Format.*;
+import org.jf.dexlib.Code.InstructionWithReference;
+import org.jf.dexlib.Code.Opcode;
+import org.jf.dexlib.Code.TwoRegisterInstruction;
+import org.jf.dexlib.CodeItem.EncodedTypeAddrPair;
+import org.jf.dexlib.CodeItem.TryItem;
+import org.jf.dexlib.EncodedValue.ArrayEncodedValue;
+import org.jf.dexlib.EncodedValue.TypeEncodedValue;
+
+import java.util.*;
+
+import static org.jf.dexlib.Util.AccessFlags.*;
 
 
 /**
@@ -261,7 +186,7 @@ public class DexIMethod implements IBytecodeMethod {
 	/**
 	 * XXX not fully about the + 2.
 	 * @return the RegisterCount + 2 to make some room for the return and exception register
-	 * @see com.ibm.wala.classLoader.IMethod#getMaxLocals()
+//	 * @see com.ibm.wala.classLoader.IMethod#getMaxLocals()
 	 */
 	public int getMaxLocals() {
 		return eMethod.codeItem.getRegisterCount() + 2;
@@ -705,7 +630,10 @@ public class DexIMethod implements IBytecodeMethod {
 
 
 	protected void parseBytecode() {
-		org.jf.dexlib.Code.Instruction[] instrucs = eMethod.codeItem.getInstructions();
+		org.jf.dexlib.Code.Instruction[] instrucs = new org.jf.dexlib.Code.Instruction[0];
+
+		if(eMethod.codeItem != null)
+			instrucs = eMethod.codeItem.getInstructions();
 
 		//      for (org.jfmethod.getInstructionIndex(.dexlib.Code.Instruction inst: instrucs)
 		//      {

@@ -175,10 +175,14 @@ public class Driver {
 				}
 			}
 		}
-
 		return m;
 	}
-	
+
+//	private boolean isPossibleTarget( cha, MethodReference call, MethodReference target){
+//
+//		return false;
+//	}
+
 	/**
 	 * Make a map representing the relation between WebView and bridge information attached to the WebView.
 	 * @param pa a pointer analysis result.
@@ -203,9 +207,9 @@ public class Driver {
 			Iterator<CallSiteReference> icsr = n.iterateCallSites();
 			while (icsr.hasNext()) {
 				CallSiteReference csr = icsr.next();
-				if (!csr.getDeclaredTarget().equals(addJsM))
+				if(!cg.getPossibleTargets(n, csr).contains(addJsIM))
 					continue;
-				
+
 				IR ir = n.getIR();
 				if (ir != null) {
 					SymbolTable symTab = ir.getSymbolTable();
@@ -216,7 +220,7 @@ public class Driver {
 						if (symTab.isStringConstant(invokeInst.getUse(2))) {
 							bridgeName = symTab.getStringValue(invokeInst.getUse(2));
 						}
-						
+
 						PointerKey bridgePK = pa.getHeapModel().getPointerKeyForLocal(n, invokeInst.getUse(1));
 
 						Set<IClass> bridgeClassSet = new HashSet<IClass>();
@@ -232,7 +236,7 @@ public class Driver {
 				}
 			}
 		}
-		
+
 		return m;
 	}
 

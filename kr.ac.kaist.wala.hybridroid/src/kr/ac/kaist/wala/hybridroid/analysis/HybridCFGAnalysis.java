@@ -10,12 +10,16 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.analysis;
 
+import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
 import com.ibm.wala.cast.ipa.cha.CrossLanguageClassHierarchy;
+import com.ibm.wala.cast.ir.ssa.AstGlobalRead;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.ipa.callgraph.JavaScriptConstructTargetSelector;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
+import com.ibm.wala.cast.js.types.JavaScriptTypes;
+import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
@@ -24,10 +28,14 @@ import com.ibm.wala.ipa.callgraph.AnalysisOptions.ReflectionOptions;
 import com.ibm.wala.ipa.callgraph.impl.ComposedEntrypoints;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.IRFactory;
+import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
@@ -46,6 +54,7 @@ import kr.ac.kaist.wala.hybridroid.util.file.FileCollector;
 import kr.ac.kaist.wala.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser.YMLData;
+import kr.ac.kaist.wala.hybridroid.util.print.IRPrinter;
 
 import java.io.File;
 import java.io.IOException;
@@ -254,7 +263,9 @@ public class HybridCFGAnalysis {
 
 		CallGraph cg = b.makeCallGraph(options);
 		PointerAnalysis<InstanceKey> pa = b.getPointerAnalysis();
-		
+
+//		test(b, cg, pa);
+
 		warnings = b.getWarning();
 		//print warning
 		System.out.println("===== Not Found Error =====");
@@ -265,7 +276,51 @@ public class HybridCFGAnalysis {
 
 		return Pair.make(cg, pa);
 	}
-	
+
+
+	private void test(AndroidHybridCallGraphBuilder b, CallGraph cg, PointerAnalysis<InstanceKey> pa){
+		for(CGNode n : cg){
+			if(n.toString().contains("error_page")){
+				IRPrinter.printIR(cg, "ir-print", (node) -> {
+					if(node.toString().contains("error_page"))
+						return true;
+					return false;
+				});
+				if(n.toString().contains("Node: <Code body of function L/var/folders/57/cz70blns3w35yrztpxd3_rv40000gn/T/error_page.htm") && n.toString().endsWith(".js/__WINDOW_MAIN__> Context: Everywhere")){
+					//L/var/folders/57/cz70blns3w35yrztpxd3_rv40000gn/T/
+					IR ir = n.getIR();
+					SSAInstruction[] insts = ir.getInstructions();
+					PointerKey pk = pa.getHeapModel().getPointerKeyForLocal(n, 18);
+					System.out.println("PK: " + pk);
+					for(InstanceKey ik : pa.getPointsToSet(pk)){
+						System.out.println("\tIK: " + ik);
+					}
+
+					int i = 1;
+					for(SSAInstruction inst : insts){
+						if(inst == null)
+							continue;
+						System.out.println("( " + (inst.iindex) + " ) " + inst + ", " + ((inst == null)? "" : inst.getClass().getName()));
+						if(inst != null && inst instanceof AstGlobalRead && inst.toString().contains("errorRetriever")){
+							AstGlobalRead read = (AstGlobalRead) inst;
+							FieldReference fr = read.getDeclaredField();
+							IField field = cg.getClassHierarchy().resolveField(fr);
+							for(GlobalObjectKey gok : b.getGlobalObjects(JavaScriptTypes.jsName)){
+								if(gok.toString().contains("error_page")){
+									PointerKey fieldPK = pa.getHeapModel().getPointerKeyForInstanceField(gok, field);
+									System.out.println("FIELD: " + fieldPK);
+									for(InstanceKey ik : pa.getPointsToSet(fieldPK)){
+										System.out.println("\tIK: " + ik);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public Set<String> getWarnings(){
 		return warnings;
 	}
