@@ -1,18 +1,17 @@
 package kr.ac.kaist.wala.hybridroid.test.annotation;
 
-import static org.junit.Assert.*;
+import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.util.CancelException;
+import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
+import kr.ac.kaist.wala.hybridroid.test.FileCollector;
+import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Test;
-
-import com.ibm.wala.ipa.cha.ClassHierarchyException;
-import com.ibm.wala.util.CancelException;
-
-import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
-import kr.ac.kaist.wala.hybridroid.test.FileCollector;
-import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AnnotationTest {
 	

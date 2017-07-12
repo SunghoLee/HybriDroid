@@ -1,15 +1,5 @@
 package kr.ac.kaist.wala.hybridroid.test.callgraph;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.junit.Test;
-
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -24,9 +14,17 @@ import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Pair;
-
 import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import static org.junit.Assert.assertTrue;
 
 public class MultipleHTMLLoadTest {
 	public static String TEST_DIR = "callgraph" + File.separator + "reachability";
@@ -50,12 +48,12 @@ public class MultipleHTMLLoadTest {
 				
 				CGNode getLastNameN = cg.getNode(getLastNameM, Everywhere.EVERYWHERE);
 				CGNode getFirstNameN = cg.getNode(getFirstNameM, Everywhere.EVERYWHERE);
-				
+
 				Set<CGNode> lastPreds = new HashSet<CGNode>();
 				
 				for(Iterator<CGNode> iPred = cg.getPredNodes(getLastNameN); iPred.hasNext();)
 					lastPreds.add(iPred.next());
-				
+
 				assertTrue("getLastName method must have two predecessors.", lastPreds.size() == 2);
 				
 				boolean index1 = false;
