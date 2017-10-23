@@ -9,7 +9,11 @@
    -->
   
   <!-- Compiler options -->
-  
+  <!-- Modify this: start -->
+  <property name="jdk.home.1.8"
+	    value="/Library/Java/JavaVirtualMachines/jdk1.8.0_101.jdk/Contents/Home"/>
+    <property name="idea.home" value="/Applications/IntelliJ IDEA CE.app/Contents"/>
+  <!-- Modify this: end -->  
   <property name="compiler.debug" value="on"/>
   <property name="compiler.generate.no.warnings" value="off"/>
   <property name="compiler.args" value=""/>
@@ -2714,213 +2718,7 @@
   <target name="clean.module.com.ibm.wala.cast.js.rhino.test" description="cleanup module">
     <delete dir="${com.ibm.wala.cast.js.rhino.test.output.dir}"/>
     <delete dir="${com.ibm.wala.cast.js.rhino.test.testoutput.dir}"/>
-  </target>
-  
-  
-  <!-- Module kr.ac.kaist.wala.hybridroid.frontend -->
-  
-  <dirname property="module.kr.ac.kaist.wala.hybridroid.frontend.basedir" file="${ant.file}"/>
-  
-  
-  <property name="module.jdk.home.kr.ac.kaist.wala.hybridroid.frontend" value="${jdk.home.1.8}"/>
-  <property name="module.jdk.bin.kr.ac.kaist.wala.hybridroid.frontend" value="${jdk.bin.1.8}"/>
-  <property name="module.jdk.classpath.kr.ac.kaist.wala.hybridroid.frontend" value="jdk.classpath.1.8"/>
-  
-  <property name="compiler.args.kr.ac.kaist.wala.hybridroid.frontend" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
-  
-  <property name="kr.ac.kaist.wala.hybridroid.frontend.output.dir" value="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/kr.ac.kaist.wala.hybridroid.types/bin"/>
-  <property name="kr.ac.kaist.wala.hybridroid.frontend.testoutput.dir" value="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/kr.ac.kaist.wala.hybridroid.types/bin"/>
-  
-  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.production.classpath">
-    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.frontend}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid.frontend/libs/json_simple-1.1.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
-  </path>
-  
-  <path id="kr.ac.kaist.wala.hybridroid.frontend.runtime.production.module.classpath">
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
-    <path refid="library.libs.classpath"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
-    <pathelement location="${com.ibm.wala.core.output.dir}"/>
-    <pathelement location="${com.ibm.wala.util.output.dir}"/>
-    <pathelement location="${com.ibm.wala.shrike.output.dir}"/>
-    <pathelement location="${com.ibm.wala.dalvik.output.dir}"/>
-    <pathelement location="${com.ibm.wala.cast.output.dir}"/>
-    <pathelement location="${com.ibm.wala.core.tests.output.dir}"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/apache-ant-1.8.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/java-hamcrest-2.0.0.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/jericho-html-3.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/junit-4.11.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast/libs/commons-io-2.4.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/commons-lang3-3.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/dexlib-1.3.4-dev.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/guava-13.0.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/logback-classic-1.0.9.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/logback-core-1.0.9.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/slf4j-api-1.7.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/apktool_2.0.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/org-apache-commons-lang.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${com.ibm.wala.cast.js.output.dir}"/>
-    <path refid="library.apktool_2.0.2.classpath"/>
-    <path refid="library.libs1.classpath"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${com.ibm.wala.cast.js.rhino.output.dir}"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js.rhino/libs/rhino-1.7.7.1.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid.frontend/libs/json_simple-1.1.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
-  </path>
-  
-  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.classpath">
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
-    <path refid="${module.jdk.classpath.kr.ac.kaist.wala.hybridroid.frontend}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid.frontend/libs/json_simple-1.1.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
-  </path>
-  
-  <path id="kr.ac.kaist.wala.hybridroid.frontend.runtime.module.classpath">
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.testoutput.dir}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.output.dir}"/>
-    <path refid="library.libs.classpath"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.testoutput.dir}"/>
-    <pathelement location="${kr.ac.kaist.wala.hybridroid.util.output.dir}"/>
-    <pathelement location="${com.ibm.wala.core.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.core.output.dir}"/>
-    <pathelement location="${com.ibm.wala.util.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.util.output.dir}"/>
-    <pathelement location="${com.ibm.wala.shrike.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.shrike.output.dir}"/>
-    <pathelement location="${com.ibm.wala.dalvik.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.dalvik.output.dir}"/>
-    <pathelement location="${com.ibm.wala.cast.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.cast.output.dir}"/>
-    <pathelement location="${com.ibm.wala.core.tests.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.core.tests.output.dir}"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/apache-ant-1.8.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/java-hamcrest-2.0.0.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/jericho-html-3.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/junit-4.11.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.core.tests/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast/libs/commons-io-2.4.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/commons-lang3-3.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/dexlib-1.3.4-dev.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/guava-13.0.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/logback-classic-1.0.9.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/logback-core-1.0.9.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.dalvik/libs/slf4j-api-1.7.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/apktool_2.0.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/org-apache-commons-lang.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${com.ibm.wala.cast.js.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.cast.js.output.dir}"/>
-    <path refid="library.apktool_2.0.2.classpath"/>
-    <path refid="library.libs1.classpath"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${com.ibm.wala.cast.js.rhino.testoutput.dir}"/>
-    <pathelement location="${com.ibm.wala.cast.js.rhino.output.dir}"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.osgi.core-4.2.0.jar"/>
-    <pathelement location="${basedir}/com.ibm.wala.cast.js.rhino/libs/rhino-1.7.7.1.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid.frontend/libs/json_simple-1.1.jar"/>
-    <pathelement location="${basedir}/kr.ac.kaist.wala.hybridroid/libs/wala.jar"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.kr.ac.kaist.wala.hybridroid.frontend">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.frontend">
-    <patternset refid="excluded.from.module.kr.ac.kaist.wala.hybridroid.frontend"/>
-  </patternset>
-  
-  <path id="kr.ac.kaist.wala.hybridroid.frontend.module.sourcepath">
-    <dirset dir="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/kr.ac.kaist.wala.hybridroid.frontend">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.kr.ac.kaist.wala.hybridroid.frontend" depends="compile.module.kr.ac.kaist.wala.hybridroid.frontend.production,compile.module.kr.ac.kaist.wala.hybridroid.frontend.tests" description="Compile module kr.ac.kaist.wala.hybridroid.frontend"/>
-  
-  <target name="compile.module.kr.ac.kaist.wala.hybridroid.frontend.production" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid,compile.module.kr.ac.kaist.wala.hybridroid.util" description="Compile module kr.ac.kaist.wala.hybridroid.frontend; production classes">
-    <mkdir dir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
-    <javac2 destdir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.kr.ac.kaist.wala.hybridroid.frontend}/javac">
-      <compilerarg line="${compiler.args.kr.ac.kaist.wala.hybridroid.frontend}"/>
-      <bootclasspath refid="kr.ac.kaist.wala.hybridroid.frontend.module.bootclasspath"/>
-      <classpath refid="kr.ac.kaist.wala.hybridroid.frontend.module.production.classpath"/>
-      <src refid="kr.ac.kaist.wala.hybridroid.frontend.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.kr.ac.kaist.wala.hybridroid.frontend"/>
-    </javac2>
-    
-    <copy todir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}">
-      <fileset dir="${module.kr.ac.kaist.wala.hybridroid.frontend.basedir}/kr.ac.kaist.wala.hybridroid.frontend/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.kr.ac.kaist.wala.hybridroid.frontend.tests" depends="register.custom.compilers,compile.module.kr.ac.kaist.wala.hybridroid.frontend.production" description="compile module kr.ac.kaist.wala.hybridroid.frontend; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.kr.ac.kaist.wala.hybridroid.frontend" description="cleanup module">
-    <delete dir="${kr.ac.kaist.wala.hybridroid.frontend.output.dir}"/>
-    <delete dir="${kr.ac.kaist.wala.hybridroid.frontend.testoutput.dir}"/>
-  </target>
-  
+  </target>  
   
   <!-- Module com.ibm.wala.cast.js.html.nu_validator -->
   
@@ -3425,9 +3223,9 @@
     <!-- Perform any build initialization in this target -->
   </target>
   
-  <target name="clean" depends="clean.module.com.ibm.wala-feature, clean.module.com.ibm.wala.cast.java.test.data, clean.module.com.ibm.wala.cast.js.test.data, clean.module.com.ibm.wala.core.testdata, clean.module.com.ibm.wala.tests-feature, clean.module.com.ibm.wala.tests.ide-feature, clean.module.com.ibm.wala.util, clean.module.kr.ac.kaist.wala.hybridroid.test.data, clean.module.com.ibm.wala.shrike, clean.module.com.ibm.wala.core, clean.module.com.ibm.wala.core.tests, clean.module.com.ibm.wala.cast, clean.module.com.ibm.wala.cast.java, clean.module.com.ibm.wala.cast.js, clean.module.com.ibm.wala.cast.test, clean.module.com.ibm.wala.dalvik, clean.module.com.ibm.wala.cast.java.test, clean.module.com.ibm.wala.cast.js.rhino, clean.module.kr.ac.kaist.wala.hybridroid.util, clean.module.com.ibm.wala.cast.js.test, clean.module.kr.ac.kaist.wala.hybridroid, clean.module.com.ibm.wala.cast.js.rhino.test, clean.module.kr.ac.kaist.wala.hybridroid.frontend, clean.module.com.ibm.wala.cast.js.html.nu_validator, clean.module.kr.ac.kaist.wala.hybridroid.test" description="cleanup all"/>
+  <target name="clean" depends="clean.module.com.ibm.wala-feature, clean.module.com.ibm.wala.cast.java.test.data, clean.module.com.ibm.wala.cast.js.test.data, clean.module.com.ibm.wala.core.testdata, clean.module.com.ibm.wala.tests-feature, clean.module.com.ibm.wala.tests.ide-feature, clean.module.com.ibm.wala.util, clean.module.kr.ac.kaist.wala.hybridroid.test.data, clean.module.com.ibm.wala.shrike, clean.module.com.ibm.wala.core, clean.module.com.ibm.wala.core.tests, clean.module.com.ibm.wala.cast, clean.module.com.ibm.wala.cast.java, clean.module.com.ibm.wala.cast.js, clean.module.com.ibm.wala.cast.test, clean.module.com.ibm.wala.dalvik, clean.module.com.ibm.wala.cast.java.test, clean.module.com.ibm.wala.cast.js.rhino, clean.module.kr.ac.kaist.wala.hybridroid.util, clean.module.com.ibm.wala.cast.js.test, clean.module.kr.ac.kaist.wala.hybridroid, clean.module.com.ibm.wala.cast.js.rhino.test, clean.module.com.ibm.wala.cast.js.html.nu_validator, clean.module.kr.ac.kaist.wala.hybridroid.test" description="cleanup all"/>
   
-  <target name="build.modules" depends="init, clean, compile.module.com.ibm.wala-feature, compile.module.com.ibm.wala.cast.java.test.data, compile.module.com.ibm.wala.cast.js.test.data, compile.module.com.ibm.wala.core.testdata, compile.module.com.ibm.wala.tests-feature, compile.module.com.ibm.wala.tests.ide-feature, compile.module.com.ibm.wala.util, compile.module.kr.ac.kaist.wala.hybridroid.test.data, compile.module.com.ibm.wala.shrike, compile.module.com.ibm.wala.core, compile.module.com.ibm.wala.core.tests, compile.module.com.ibm.wala.cast, compile.module.com.ibm.wala.cast.java, compile.module.com.ibm.wala.cast.js, compile.module.com.ibm.wala.cast.test, compile.module.com.ibm.wala.dalvik, compile.module.com.ibm.wala.cast.java.test, compile.module.com.ibm.wala.cast.js.rhino, compile.module.kr.ac.kaist.wala.hybridroid.util, compile.module.com.ibm.wala.cast.js.test, compile.module.kr.ac.kaist.wala.hybridroid, compile.module.com.ibm.wala.cast.js.rhino.test, compile.module.kr.ac.kaist.wala.hybridroid.frontend, compile.module.com.ibm.wala.cast.js.html.nu_validator, compile.module.kr.ac.kaist.wala.hybridroid.test" description="build all modules"/>
+  <target name="build.modules" depends="init, clean, compile.module.com.ibm.wala-feature, compile.module.com.ibm.wala.cast.java.test.data, compile.module.com.ibm.wala.cast.js.test.data, compile.module.com.ibm.wala.core.testdata, compile.module.com.ibm.wala.tests-feature, compile.module.com.ibm.wala.tests.ide-feature, compile.module.com.ibm.wala.util, compile.module.kr.ac.kaist.wala.hybridroid.test.data, compile.module.com.ibm.wala.shrike, compile.module.com.ibm.wala.core, compile.module.com.ibm.wala.core.tests, compile.module.com.ibm.wala.cast, compile.module.com.ibm.wala.cast.java, compile.module.com.ibm.wala.cast.js, compile.module.com.ibm.wala.cast.test, compile.module.com.ibm.wala.dalvik, compile.module.com.ibm.wala.cast.java.test, compile.module.com.ibm.wala.cast.js.rhino, compile.module.kr.ac.kaist.wala.hybridroid.util, compile.module.com.ibm.wala.cast.js.test, compile.module.kr.ac.kaist.wala.hybridroid, compile.module.com.ibm.wala.cast.js.rhino.test, compile.module.com.ibm.wala.cast.js.html.nu_validator, compile.module.kr.ac.kaist.wala.hybridroid.test" description="build all modules"/>
   
   <target name="init.artifacts">
     <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
