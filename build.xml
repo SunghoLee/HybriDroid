@@ -3248,39 +3248,47 @@
       <zipfileset dir="${com.ibm.wala.core.tests.output.dir}"/>
       <zipfileset dir="${com.ibm.wala.cast.js.output.dir}"/>
       <zipfileset dir="${com.ibm.wala.cast.js.rhino.output.dir}"/>
-      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/logback-core-1.0.9.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js.rhino/libs/rhino-1.7.7.1.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.osgi.core-4.2.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast/libs/commons-io-2.4.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast/libs/org.osgi.core-4.2.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/dexlib-1.3.4-dev.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/commons-cli-1.2.jar"/>
-      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/org-apache-commons-lang.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/commons-lang3-3.1.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/apache-ant-1.8.2.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/java-hamcrest-2.0.0.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/jericho-html-3.2.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/junit-4.11.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.core.tests/libs/org.osgi.core-4.2.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/guava-13.0.1.jar"/>
-      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/apktool_2.0.2.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/logback-classic-1.0.9.jar"/>
-      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.dalvik/libs/slf4j-api-1.7.2.jar"/>
-      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid.util/libs/gs-core-1.3.jar"/>
-      <zipfileset src="${basedir}/kr.ac.kaist.wala.hybridroid.util/libs/gs-ui-1.3.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
-      <zipfileset src="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.dalvik/libs/logback-core-1.0.9.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js.rhino/libs/rhino-1.7.7.1.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js.rhino/libs/org.osgi.core-4.2.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast/libs/commons-io-2.4.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast/libs/org.osgi.core-4.2.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.dalvik/libs/dexlib-1.3.4-dev.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.dalvik/libs/commons-cli-1.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/org-apache-commons-lang.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.dalvik/libs/commons-lang3-3.1.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.core.tests/libs/apache-ant-1.8.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.core.tests/libs/java-hamcrest-2.0.0.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.core.tests/libs/jericho-html-3.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.core.tests/libs/junit-4.11.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.core.tests/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.core.tests/libs/org.osgi.core-4.2.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.dalvik/libs/guava-13.0.1.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/apktool_2.0.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.dalvik/libs/logback-classic-1.0.9.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/kr.ac.kaist.wala.hybridroid/libs/commons-cli-1.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.dalvik/libs/slf4j-api-1.7.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/kr.ac.kaist.wala.hybridroid.util/libs/gs-core-1.3.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/kr.ac.kaist.wala.hybridroid.util/libs/gs-ui-1.3.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js/libs/commons-cli-1.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js/libs/commons-compiler-2.6.1.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js/libs/commons-io-2.4.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js/libs/commons-lang3-3.1.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js/libs/jericho-html-3.2.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF" src="${basedir}/com.ibm.wala.cast.js/libs/org.eclipse.core.runtime-3.1.0.jar"/>
+      <zipfileset excludes="META-INF/.SF,META-INF/.RSA,META-INF/*SF"
+	src="${basedir}/com.ibm.wala.cast.js/libs/org.osgi.core-4.2.0.jar"/>
+
+		      
+      <manifest>
+	<attribute name="Main-Class" value="kr.ac.kaist.wala.hybridroid.shell.Shell"/>
+      </manifest>
     </jar>
-    <copy file="${temp.jar.path.kr.ac.kaist.wala.hybridroid.jar}" tofile="${artifact.temp.output.kr.ac.kaist.wala.hybridroid:jar}/kr.ac.kaist.wala.hybridroid.jar"/>
+    <copy file="${temp.jar.path.kr.ac.kaist.wala.hybridroid.jar}"
+	  tofile="${artifact.temp.output.kr.ac.kaist.wala.hybridroid:jar}/kr.ac.kaist.wala.hybridroid.jar"/>
+
   </target>
   
   <target name="build.all.artifacts" depends="artifact.kr.ac.kaist.wala.hybridroid:jar" description="Build all artifacts">
