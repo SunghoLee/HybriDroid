@@ -110,22 +110,22 @@ public class Shell {
 
 //				PointerAnalysis<InstanceKey> pa = p.snd;
 //				Shell.END = System.currentTimeMillis();
-//				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
+				//				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
 
-				System.err.println("Graph Modeling for taint...");
+//				System.err.println("Graph Modeling for taint...");
 //				ModeledCallGraphForTaint mcg = new ModeledCallGraphForTaint(p.fst);
-				System.err.println("Taint analysis...");
-				PrivateLeakageDetector pld = new PrivateLeakageDetector(p.fst, p.snd);
-				pld.analyze();
+//				System.err.println("Taint analysis...");
+//				PrivateLeakageDetector pld = new PrivateLeakageDetector(p.fst, p.snd);
+//				pld.analyze();
 //				Shell.END = System.currentTimeMillis();
-				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
-				for(PrivateLeakageDetector.LeakWarning w : pld.getWarnings()){
-					System.out.println("=========");
-					System.out.println(w);
-					System.out.println("=========");
-//					w.printPathFlow("leak.dot");
-				}
-			}
+//				System.err.println("#time: " + (((double)(Shell.END - Shell.START))/1000d) + "s");
+// 				for(PrivateLeakageDetector.LeakWarning w : pld.getWarnings()){
+// 					System.out.println("=========");
+// 					System.out.println(w);
+// 					System.out.println("=========");
+// //					w.printPathFlow("leak.dot");
+// 				}
+ 			}
 		} else {
 			// TODO: support several functions
 		}
