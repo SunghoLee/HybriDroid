@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="libs/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="libs/apktool_2.0.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kr.ac.kaist.wala.hybridroid.util"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java.test"/>
@@ -18,7 +17,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.dalvik"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/kr.ac.kaist.wala.hybridroid.util"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="libs/apktool_2.2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

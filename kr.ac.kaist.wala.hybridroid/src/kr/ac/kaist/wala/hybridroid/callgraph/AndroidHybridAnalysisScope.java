@@ -138,13 +138,13 @@ public class AndroidHybridAnalysisScope extends AnalysisScope {
 				}
 			});
 		}else{
-			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getResource("prologue.js")) {
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getClassLoader().getResource("prologue.js")) {
 				@Override
 				public String getName() {
 					return "prologue.js";
 				}
 			});
-			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getResource("preamble.js")) {
+			scope.addToScope(scope.getJavaScriptLoader(), new SourceURLModule(AndroidHybridAppModel.class.getClassLoader().getResource("preamble.js")) {
 				@Override
 				public String getName() {
 					return "preamble.js";

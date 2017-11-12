@@ -200,7 +200,7 @@ public class PrivateLeakageDetector {
 		IClassHierarchy cha = cg.getClassHierarchy();
 		this.cg = cg;
 		this.pa = pa;
-		this.supergraph = ICFGSupergraph.make(cg, new AnalysisCache());
+		this.supergraph = ICFGSupergraph.make(cg);
 		this.cha = cg.getClassHierarchy();
 		activityClass = cha.lookupClass(activityTR);
 		wvClass = cha.lookupClass(wvTR);

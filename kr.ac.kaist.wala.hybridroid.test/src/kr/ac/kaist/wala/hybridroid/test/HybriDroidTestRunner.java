@@ -23,7 +23,7 @@ public class HybriDroidTestRunner {
 	static{
 		testProperties = new Properties();
 		try {
-			testProperties.load(new FileInputStream(new File("kr.ac.kaist.wala.hybridroid.test/test.config")));
+			testProperties.load(new FileInputStream(new File("test.config")));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

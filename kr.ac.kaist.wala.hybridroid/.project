@@ -25,11 +25,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.pde.PluginNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>tmp/string-2.1</name>
-			<type>2</type>
-			<location>/Users/leesh/Downloads/string-2.1</location>
-		</link>
-	</linkedResources>
 </projectDescription>

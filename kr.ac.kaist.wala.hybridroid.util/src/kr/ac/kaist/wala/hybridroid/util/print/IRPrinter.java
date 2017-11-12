@@ -1,5 +1,11 @@
 package kr.ac.kaist.wala.hybridroid.util.print;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Iterator;
+
 import com.ibm.wala.dalvik.classLoader.DexIRFactory;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
@@ -8,12 +14,6 @@ import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAOptions;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Iterator;
-
 /**
  * Created by leesh on 07/03/2017.
  */
@@ -21,7 +21,7 @@ public class IRPrinter {
 
     public static void printIR(CallGraph cg, String out, Filter f){
         if(f == null)
-            f = Filter.defaultFilter();
+            f = defaultFilter();
 
         File outFile = new File(out);
         try {
@@ -74,15 +74,16 @@ public class IRPrinter {
     }
 
     public interface Filter{
-        static public Filter defaultFilter(){
-            return new Filter() {
-				@Override
-				public boolean filter(CGNode n) {
-					return true;
-				}
-			};
-        }
-
         boolean filter(CGNode n);
     }
+    
+    static public Filter defaultFilter(){
+        return new Filter() {
+			@Override
+			public boolean filter(CGNode n) {
+				return true;
+			}
+		};
+    }
+
 }

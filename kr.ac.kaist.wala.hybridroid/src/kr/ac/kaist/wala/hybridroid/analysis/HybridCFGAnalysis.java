@@ -251,7 +251,7 @@ public class HybridCFGAnalysis {
 		AnalysisOptions options = new AnalysisOptions(scope, null);
 		IClassHierarchy cha = CrossLanguageClassHierarchy.make(scope, loaders);
 		IRFactory<IMethod> factory = new HybridIRFactory();
-		AnalysisCache cache = new AnalysisCache(factory);
+		AnalysisCache cache = new AnalysisCacheImpl(factory);
 		ComposedEntrypoints roots = AndroidHybridAppModel.getEntrypoints(cha,
 				scope, options, cache);
 		options.setEntrypoints(roots);

@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import kr.ac.kaist.wala.hybridroid.util.debug.Debug;
-
 import com.ibm.wala.cast.ir.ssa.AssignInstruction;
 import com.ibm.wala.cast.ir.ssa.AstAssertInstruction;
 import com.ibm.wala.cast.ir.ssa.AstEchoInstruction;
@@ -53,7 +51,6 @@ import com.ibm.wala.dataflow.IFDS.PartiallyBalancedTabulationSolver;
 import com.ibm.wala.dataflow.IFDS.PathEdge;
 import com.ibm.wala.dataflow.IFDS.TabulationDomain;
 import com.ibm.wala.dataflow.IFDS.TabulationResult;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.cfg.BasicBlockInContext;
@@ -92,6 +89,8 @@ import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.MutableMapping;
 import com.ibm.wala.util.intset.MutableSparseIntSet;
 import com.ibm.wala.util.strings.Atom;
+
+import kr.ac.kaist.wala.hybridroid.util.debug.Debug;
 
 public class TaintAnalysisForHybrid {
 	private final ISupergraph<BasicBlockInContext<IExplodedBasicBlock>, CGNode> supergraph;
@@ -150,7 +149,7 @@ public class TaintAnalysisForHybrid {
 		this.cg = cg;
 		pendingAssignForReturn = new HashMap<BasicBlockInContext<IExplodedBasicBlock>, Set<Pair<CGNode,Integer>>>();
 		System.out.println("#building super graph...");
-		this.supergraph = ICFGSupergraph.make(cg, new AnalysisCache());
+		this.supergraph = ICFGSupergraph.make(cg);
 		System.out.println("\tdone.");
 	}
 	
