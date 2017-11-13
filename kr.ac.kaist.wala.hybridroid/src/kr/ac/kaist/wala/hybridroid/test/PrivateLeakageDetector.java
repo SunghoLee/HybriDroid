@@ -37,6 +37,7 @@ import com.ibm.wala.util.intset.SparseIntSet;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.util.graph.visualize.Visualizer;
 import kr.ac.kaist.wala.hybridroid.util.graph.visualize.Visualizer.GraphType;
+import kr.ac.kaist.wala.hybridroid.utils.TypeRefHelper;
 
 import java.io.IOException;
 import java.util.*;
@@ -53,12 +54,12 @@ public class PrivateLeakageDetector {
 	private final IClass mapClass;
 	private final IClass bitmapClass;
 	
-	private final TypeReference activityTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/app/Activity");
-	private final TypeReference wvTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/webkit/WebView");
-	private final TypeReference contextTR = TypeReference.find(ClassLoaderReference.Primordial, "Landroid/content/Context");
-	private final TypeReference mapTR = TypeReference.find(ClassLoaderReference.Application, "Ljava/util/Map");
-	private final TypeReference bitmapTR = TypeReference.find(ClassLoaderReference.Application, "Landroid/graphics/Bitmap");
-	
+	private final TypeName activityTN = TypeName.findOrCreate("Landroid/app/Activity");
+	private final TypeName wvTN = TypeName.findOrCreate("Landroid/webkit/WebView");
+	private final TypeName contextTN = TypeName.findOrCreate("Landroid/content/Context");
+	private final TypeName mapTN = TypeName.findOrCreate("Ljava/util/Map");
+	private final TypeName bitmapTN = TypeName.findOrCreate("Ljava/util/Map");
+
 	//Application, Ljava/util/Map
 	private final Selector oncreateSelector = Selector.make("onCreate(Landroid/os/Bundle;)V");
 	private final Selector startActivitySelector = Selector.make("startActivity(Landroid/content/Intent;)V");
@@ -108,41 +109,40 @@ public class PrivateLeakageDetector {
 		return sl;
 	}
 	
-	private static MethodReference[] mSourceRefs = {
-			//for wifi information
-			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Application, "Landroid/telephony/TelephonyManager"), Selector.make("getLine1Number()Ljava/lang/String;")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/net/wifi/WifiManager"), Selector.make("getWifiApState()I")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/net/wifi/WifiManager"), Selector.make("getConnectionInfo()Landroid/net/wifi/WifiInfo;")),
-	};
+	private List<MethodReference> mSourceRefs = new ArrayList<>();
+//			{
+//			//for wifi information
+//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Application, "Landroid/telephony/TelephonyManager"), Selector.make("getLine1Number()Ljava/lang/String;")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/net/wifi/WifiManager"), Selector.make("getWifiApState()I")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/net/wifi/WifiManager"), Selector.make("getConnectionInfo()Landroid/net/wifi/WifiInfo;")),
+//	};
 	/*
 < Primordial, Ljava/net/URLConnection, setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
 
 	 */
-	private static MethodReference[] mSinkRefs = {
-			MethodReference.findOrCreate(TypeReference.find(JavaScriptTypes.jsLoader, "Lpreamble.js/XMLHttpRequest/xhr_send"), Selector.make("do()LRoot")),
-			//for http connetion
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/net/URLConnection"), Selector.make("setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V")),
-//			//for write something 
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write(Ljava/lang/String;)V")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write(Ljava/lang/String;II)V")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write([C)V")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write([CII)V")),
-//			//for Log
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("d(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("d(Ljava/lang/String;Ljava/lang/String;)I")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("e(Ljava/lang/String;Ljava/lang/String;)I")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("i(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I")),
-//			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("i(Ljava/lang/String;Ljava/lang/String;)I")),
-	};
+	private List<MethodReference> mSinkRefs = new ArrayList<>();
+
+//		{
+//			MethodReference.findOrCreate(TypeReference.find(JavaScriptTypes.jsLoader, "Lpreamble.js/XMLHttpRequest/xhr_send"), Selector.make("do()LRoot")),
+//			//for http connetion
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/net/URLConnection"), Selector.make("setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V")),
+////			//for write something
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write(Ljava/lang/String;)V")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write(Ljava/lang/String;II)V")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write([C)V")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Ljava/io/Writer"), Selector.make("write([CII)V")),
+////			//for Log
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("d(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("d(Ljava/lang/String;Ljava/lang/String;)I")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("e(Ljava/lang/String;Ljava/lang/String;)I")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("i(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I")),
+////			MethodReference.findOrCreate(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"), Selector.make("i(Ljava/lang/String;Ljava/lang/String;)I")),
+//	};
 	
-	private static FieldReference[] fSourceRefs = {
-			
-	};
+	private List<FieldReference> fSourceRefs = new ArrayList<>();
 	
-	private static FieldReference[] fSinkRefs = {
-			
-	};
+	private List<FieldReference> fSinkRefs = new ArrayList<>();
 	
 	public boolean isSourceMethod(MethodReference mr){
 		for(MethodReference sr : mSourceRefs){
@@ -202,13 +202,52 @@ public class PrivateLeakageDetector {
 		this.pa = pa;
 		this.supergraph = ICFGSupergraph.make(cg, new AnalysisCache());
 		this.cha = cg.getClassHierarchy();
+
+		TypeReference activityTR = TypeRefHelper.findTypeReferenceByName(activityTN, ClassLoaderReference.Primordial, false);
+		TypeReference wvTR = TypeRefHelper.findTypeReferenceByName(wvTN, ClassLoaderReference.Primordial, false);
+		TypeReference contextTR = TypeRefHelper.findTypeReferenceByName(contextTN, ClassLoaderReference.Primordial, false);
+		TypeReference mapTR = TypeRefHelper.findTypeReferenceByName(mapTN, ClassLoaderReference.Primordial, false);
+		TypeReference bitmapTR = TypeRefHelper.findTypeReferenceByName(bitmapTN, ClassLoaderReference.Primordial, false);
+
 		activityClass = cha.lookupClass(activityTR);
 		wvClass = cha.lookupClass(wvTR);
 		contextClass = cha.lookupClass(contextTR);
 		mapClass = cha.lookupClass(mapTR);
 		bitmapClass = cha.lookupClass(bitmapTR);
 	}
-	
+
+	/**
+	 * Add a Method as a sink
+	 * @param mr MethodReference object denoting a method
+	 */
+	public void addSink(MethodReference mr){
+		mSinkRefs.add(mr);
+	}
+
+	/**
+	 * Add a Method as a source
+	 * @param mr MethodReference object denoting a method
+	 */
+	public void addSource(MethodReference mr){
+		mSourceRefs.add(mr);
+	}
+
+	/**
+	 * Add a Field as a sink
+	 * @param fr FieldReference object denoting a field
+	 */
+	public void addSink(FieldReference fr){
+		fSinkRefs.add(fr);
+	}
+
+	/**
+	 * Add a Field as a source
+	 * @param fr FieldReference object denoting a field
+	 */
+	public void addSource(FieldReference fr){
+		fSourceRefs.add(fr);
+	}
+
 	private class TaintDomain implements TabulationDomain<PointerKey, BasicBlockInContext<IExplodedBasicBlock>>{
 		private final Map<PointerKey, Integer> indexMap;
 		private final Map<Integer, PointerKey> fastSearchMap;

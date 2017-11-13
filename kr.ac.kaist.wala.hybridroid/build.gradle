@@ -1,0 +1,67 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'kr/ac/kaist/wala/hybridroid/shell/Shell'
+
+repositories {
+    mavenCentral()
+            maven {
+    	    url "https://repo.eclipse.org/content/groups/releases/"
+	    }
+}
+
+
+sourceSets {
+    main {
+        java  {
+    	    srcDir 'src'
+    	    }
+    	}
+    test {
+        java {
+    	    srcDir 'test'
+    	    }
+    	}
+}
+
+jar {
+  manifest {
+    attributes(
+      'Main-Class': 'kr.ac.kaist.wala.hybridroid.shell.Shell'
+    )
+  }
+
+  from({ (configurations.runtime).collect { it.isDirectory() ? it : zipTree(it) } }){
+  	exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+  }
+
+  from('src'){
+	include '**/*.txt'
+	include '**/*.js'
+  }
+}
+
+dependencies {
+    compile project(':kr.ac.kaist.wala.hybridroid.util')
+	compile project(':com.ibm.wala.cast.js.rhino')
+	compile project(':com.ibm.wala.util')
+	compile project(':com.ibm.wala.cast.js.html.nu_validator')
+	compile project(':com.ibm.wala.cast')
+	compile project(':com.ibm.wala.dalvik')
+	compile project(':com.ibm.wala.core')
+	compile project(':com.ibm.wala.cast.js.rhino.test')
+	compile project(':com.ibm.wala.core.tests')
+	compile project(':com.ibm.wala.shrike')
+	compile project(':com.ibm.wala.cast.js')
+	compile project(':com.ibm.wala.cast.js.test')
+	compile project(':com.ibm.wala.cast.java')
+	compile project(':com.ibm.wala.core')
+	compile project(':com.ibm.wala.core.tests')
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	// https://mvnrepository.com/artifact/commons-cli/commons-cli
+	compile group: 'commons-cli', name: 'commons-cli', version: '1.2'
+	compile files('libs/apktool_2.0.2.jar')
+}
