@@ -27,7 +27,7 @@ It tries to build HybriDroid using Gradle, and below message would be shown if t
 BUILD SUCCESSFUL in [xx]s
 ```
 
-The build script creates hybridroid.jar file in the same directory with in which the script is.
+The build script creates hybridroid.jar file in the directory in which the script is.
 
 ## Running HybriDroid
 
