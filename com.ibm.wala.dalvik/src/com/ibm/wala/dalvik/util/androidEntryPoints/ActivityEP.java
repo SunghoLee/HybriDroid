@@ -87,7 +87,7 @@ public final class ActivityEP {
     /**
      *  Called a view steps before the Activity gets visible.
      *
-     *  Called after onCreate(Bundle) — or after onRestart() when the activity had been stopped, but is now again 
+     *  Called after onCreate(Bundle) or after onRestart() when the activity had been stopped, but is now again 
      *  being displayed to the user. It will be followed by onResume(). 
      */
 	public static final AndroidPossibleEntryPoint onStart = new AndroidPossibleEntryPoint(AndroidComponent.ACTIVITY, 
