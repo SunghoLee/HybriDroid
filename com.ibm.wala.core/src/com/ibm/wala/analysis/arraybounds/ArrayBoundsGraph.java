@@ -49,7 +49,7 @@ import com.ibm.wala.util.collections.Pair;
  * <li>array length nodes (see {@link ArrayBoundsGraph#arrayLength})
  * </ul>
  *
- * [1] Bodík, Rastislav, Rajiv Gupta, and Vivek Sarkar.
+ * [1] , Rastislav, Rajiv Gupta, and Vivek Sarkar.
  * "ABCD: eliminating array bounds checks on demand." ACM SIGPLAN Notices. Vol.
  * 35. No. 5. ACM, 2000.
  * 

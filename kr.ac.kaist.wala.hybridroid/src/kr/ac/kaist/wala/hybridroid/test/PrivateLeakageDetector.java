@@ -247,7 +247,7 @@ public class PrivateLeakageDetector {
 	public void addSource(FieldReference fr){
 		fSourceRefs.add(fr);
 	}
-	
+
 	private class TaintDomain implements TabulationDomain<PointerKey, BasicBlockInContext<IExplodedBasicBlock>>{
 		private final Map<PointerKey, Integer> indexMap;
 		private final Map<Integer, PointerKey> fastSearchMap;

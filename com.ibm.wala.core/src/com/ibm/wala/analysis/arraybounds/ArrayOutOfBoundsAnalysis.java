@@ -18,7 +18,7 @@ import com.ibm.wala.util.ssa.InstructionByIIndexMap;
  * [1]. And a shortest path computation as suggested ibid. as possible solver
  * for the inequality graph.
  *
- * [1] Bodík, Rastislav, Rajiv Gupta, and Vivek Sarkar.
+ * [1] , Rastislav, Rajiv Gupta, and Vivek Sarkar.
  * "ABCD: eliminating array bounds checks on demand." ACM SIGPLAN Notices. Vol.
  * 35. No. 5. ACM, 2000.
  *

@@ -1,0 +1,30 @@
+apply plugin: 'java'
+    
+repositories {
+    mavenCentral()
+            maven {
+    	    url "https://repo.eclipse.org/content/groups/releases/"
+	    }
+}
+
+
+
+sourceSets {
+    main {
+        java  {
+    	    srcDir 'src'
+    	    }
+    	}
+    test {
+        java {
+    	    srcDir 'test'
+    	    }
+    	}
+}
+
+
+dependencies {
+	compile project(':com.ibm.wala.util')
+	compile project(':com.ibm.wala.dalvik')
+	compile project(':com.ibm.wala.core')
+}
