@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
 
 public class HybriDroidTestRunner {
 
@@ -43,8 +45,20 @@ public class HybriDroidTestRunner {
 	}
 	
 	private static void runTest(Class c, String test){
+	    PrintStream tmpOutStream = System.out;
+	    PrintStream tmpErrStream = System.err;
+   	    PrintStream privPrintStream = new PrintStream(new ByteArrayOutputStream()){
+		   @Override
+		   public void println(String x){
+		   }
+		};
+
+	    System.out.println(test + " test...");
+	    System.setOut(privPrintStream);
+	    System.setErr(privPrintStream);
 		Result result = JUnitCore.runClasses(c);
-		
+		System.setOut(tmpOutStream);
+		System.setErr(tmpErrStream);
 		if(result.getFailures().isEmpty()){
 			System.out.println("Pass all " + test + " tests.");
 		}else{
