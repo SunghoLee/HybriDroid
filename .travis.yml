@@ -1,4 +1,4 @@
 language: java
 os: osx
 
-script: ./build.sh
+script: gradle build
