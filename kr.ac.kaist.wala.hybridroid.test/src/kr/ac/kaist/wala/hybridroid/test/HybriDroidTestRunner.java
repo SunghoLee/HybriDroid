@@ -44,7 +44,7 @@ public class HybriDroidTestRunner {
 		return testProperties.getProperty(LIB_JAR);
 	}
 
-        private boolean isSucceeded = true;
+        private static boolean isSucceeded = true;
 	private static void runTest(Class c, String test){
 	    
 	     PrintStream tmpOutStream = System.out;
