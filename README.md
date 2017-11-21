@@ -1,4 +1,4 @@
-# HybriDroid
+# HybriDroid [![Build Status](https://travis-ci.org/SunghoLee/HybriDroid.svg?branch=master)](https://travis-ci.org/SunghoLee/HybriDroid)
 
 A static analysis framework to analyze Android hybrid applications.
 
