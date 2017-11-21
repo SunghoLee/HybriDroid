@@ -54,14 +54,14 @@ public class FileProvider {
     return getJarFileFromClassLoader(fileName, loader);
   }
 
-  public URL getResource(String fileName) throws IOException {
+  public URL getResource(String fileName) {
     if (fileName == null) {
       throw new IllegalArgumentException("null fileName");
     }
     return getResource(fileName, FileProvider.class.getClassLoader());
   }
 
-  public URL getResource(String fileName, ClassLoader loader) throws IOException {
+  public URL getResource(String fileName, ClassLoader loader) {
     if (fileName == null) {
       throw new IllegalArgumentException("null fileName");
     }
@@ -159,7 +159,7 @@ public class FileProvider {
       try {
         return new JarFileModule(new JarFile(fileName, false));
       } catch (ZipException e) {
-        throw new IOException("Could not find file: " + fileName);
+        throw new IOException("Could not find file: " + fileName, e);
       }
     }
     if (url.getProtocol().equals("jar")) {

@@ -19,16 +19,16 @@ import com.ibm.wala.cast.js.ipa.callgraph.correlations.CorrelationFinder;
 import com.ibm.wala.cast.js.ipa.callgraph.correlations.extraction.ClosureExtractor;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.ContextItem;
 import com.ibm.wala.ipa.callgraph.ContextKey;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.propagation.ConstantKey;
-import com.ibm.wala.ipa.callgraph.propagation.SelectiveCPAContext;
 import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey.SingleInstanceFilter;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.SelectiveCPAContext;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.ReflectiveMemberAccess;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
@@ -51,8 +51,8 @@ import com.ibm.wala.util.intset.MutableIntSet;
 public class PropertyNameContextSelector implements ContextSelector {
   public final static ContextKey PROPNAME_KEY = new ContextKey() { };
   public static final ContextItem PROPNAME_MARKER = new ContextItem() { };
-
   public final static ContextKey PROPNAME_PARM_INDEX = new ContextKey() { };
+  public final static ContextKey INSTANCE_KEY_KEY = new ContextKey() { };
   
   /** Context representing a particular name accessed by a correlated read/write pair. */
   public class PropNameContext extends SelectiveCPAContext {
@@ -66,6 +66,8 @@ public class PropertyNameContextSelector implements ContextSelector {
         return PROPNAME_MARKER;
       } else if(PROPNAME_PARM_INDEX.equals(key)) {
         return ContextItem.Value.make(index);
+      } else if(INSTANCE_KEY_KEY.equals(key)) {
+        return ContextItem.Value.make(((SingleInstanceFilter)get(ContextKey.PARAMETERS[index])).getInstance());
       } else {
         return super.get(key);
       }
@@ -74,13 +76,6 @@ public class PropertyNameContextSelector implements ContextSelector {
     @Override
     public String toString() {
       return "property name context for " + get(ContextKey.PARAMETERS[index]) + " over " + this.base;
-    }
-
-    /**
-     * get the {@link InstanceKey} used to distinguish this context 
-     */
-    public InstanceKey getInstanceKey() {
-      return ((SingleInstanceFilter)get(ContextKey.PARAMETERS[index])).getInstance();
     }
   }
    
@@ -103,24 +98,16 @@ public class PropertyNameContextSelector implements ContextSelector {
      */
     @Override
     public ContextItem get(ContextKey key) {
-      final ContextItem contextItem = super.get(key);
-      return (contextItem instanceof SingleInstanceFilter) ? null : contextItem;
-    }
-
-    /**
-     * we need to override this method since
-     * {@link MarkerForInContext#get(ContextKey)} does not return the
-     * {@link SingleInstanceFilter} containing the {@link InstanceKey}. Instead,
-     * we invoke {@link PropNameContext#get(ContextKey)} from the superclass.
-     */
-    @Override
-    public InstanceKey getInstanceKey() {
-      return ((SingleInstanceFilter)super.get(ContextKey.PARAMETERS[index])).getInstance();
-    }
-    
+      if (INSTANCE_KEY_KEY.equals(key)) {
+        return ContextItem.Value.make(((SingleInstanceFilter)super.get(ContextKey.PARAMETERS[index])).getInstance());        
+      } else {
+        final ContextItem contextItem = super.get(key);
+        return (contextItem instanceof SingleInstanceFilter) ? null : contextItem;
+      }
+    }    
   }
   
-  private final AnalysisCache cache;
+  private final IAnalysisCacheView cache;
   private final ContextSelector base;
   private final int index;
   
@@ -156,17 +143,17 @@ public class PropertyNameContextSelector implements ContextSelector {
     return dependentParameters;
   }
   
-  public PropertyNameContextSelector(AnalysisCache cache, ContextSelector base) {
+  public PropertyNameContextSelector(IAnalysisCacheView cache, ContextSelector base) {
     this(cache, 2, base);
   }
   
-  public PropertyNameContextSelector(AnalysisCache cache, int index, ContextSelector base) {
+  public PropertyNameContextSelector(IAnalysisCacheView cache, int index, ContextSelector base) {
     this.cache = cache;
     this.index = index;
     this.base = base;
   }
   
-  private enum Frequency { NEVER, SOMETIMES, ALWAYS };
+  private enum Frequency { NEVER, SOMETIMES, ALWAYS }
   private final HashMap<MethodReference, Frequency> usesFirstArgAsPropertyName_cache = HashMapFactory.make();
   
   /** Determine whether the method never/sometimes/always uses its first argument as a property name. */
@@ -218,8 +205,8 @@ public class PropertyNameContextSelector implements ContextSelector {
     if (PROPNAME_MARKER.equals(caller.getContext().get(PROPNAME_KEY))) {
       if (!identifyDependentParameters(caller, site).isEmpty()) {
         // use a MarkerForInContext to clone based on the InstanceKey used in the caller context
-        // TODO the cast below isn't safe; fix
-        InstanceKey callerIk = ((PropNameContext)caller.getContext()).getInstanceKey();
+        @SuppressWarnings("unchecked")
+        InstanceKey callerIk = ((ContextItem.Value<InstanceKey>)caller.getContext().get(INSTANCE_KEY_KEY)).getValue();
         return new MarkerForInContext(baseContext, callerIk);
       } else {
         return baseContext;

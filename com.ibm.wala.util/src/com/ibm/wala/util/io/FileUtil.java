@@ -14,19 +14,21 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.HashSetFactory;
-import com.ibm.wala.util.functions.VoidFunction;
 
 /**
  * Simple utilities for accessing files.
@@ -84,27 +86,15 @@ public class FileUtil {
     if (destFileName == null) {
       throw new IllegalArgumentException("destFileName is null");
     }
-    FileChannel src = null;
-    FileChannel dest = null;
-    try {
-      src = new FileInputStream(srcFileName).getChannel();
-      dest = new FileOutputStream(destFileName).getChannel();
+    try (
+      final FileInputStream srcStream = new FileInputStream(srcFileName);
+      final FileOutputStream dstStream = new FileOutputStream(destFileName);
+      final FileChannel src = srcStream.getChannel();
+      final FileChannel dest = dstStream.getChannel();
+    ) {
       long n = src.size();
       MappedByteBuffer buf = src.map(FileChannel.MapMode.READ_ONLY, 0, n);
       dest.write(buf);
-    } finally {
-      if (dest != null) {
-        try {
-          dest.close();
-        } catch (IOException e1) {
-        }
-      }
-      if (src != null) {
-        try {
-          src.close();
-        } catch (IOException e1) {
-        }
-      }
     }
   }
 
@@ -175,16 +165,16 @@ public class FileUtil {
     if (s == null) {
       throw new IllegalArgumentException("null s");
     }
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    byte[] b = new byte[1024];
-    int n = s.read(b);
-    while (n != -1) {
-      out.write(b, 0, n);
-      n = s.read(b);
+    try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      byte[] b = new byte[1024];
+      int n = s.read(b);
+      while (n != -1) {
+        out.write(b, 0, n);
+        n = s.read(b);
+      }
+      byte[] bb = out.toByteArray();
+      return bb;
     }
-    byte[] bb = out.toByteArray();
-    out.close();
-    return bb;
   }
 
   /**
@@ -195,12 +185,12 @@ public class FileUtil {
    * @throws IOException
    */
   public static void writeFile(File f, String content) throws IOException {
-    final FileWriter fw = new FileWriter(f);
-    fw.append(content);
-    fw.close();
+    try (final Writer fw = Files.newBufferedWriter(f.toPath(), StandardCharsets.UTF_8)) {
+      fw.append(content);
+    }
   }
 
-  public static void recurseFiles(VoidFunction<File> action, final Predicate<File> filter, File top) {
+  public static void recurseFiles(Consumer<File> action, final Predicate<File> filter, File top) {
   	if (top.isDirectory()) {
   		for(File f : top.listFiles(new FileFilter() {
   			@Override
@@ -211,7 +201,7 @@ public class FileUtil {
   			recurseFiles(action, filter, f);
   		}
   	} else {
-  		action.apply(top);
+  		action.accept(top);
   	}
   }
 }

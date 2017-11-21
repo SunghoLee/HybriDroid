@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 
 import com.ibm.wala.util.collections.SimpleVector;
@@ -83,7 +84,9 @@ public class StringTable extends Table<String> implements Cloneable {
     if (f == null) {
       throw new IllegalArgumentException("null f");
     }
-    return readFromStream(new FileInputStream(f), comment);
+    try (final FileInputStream in = new FileInputStream(f)) {
+      return readFromStream(in, comment);
+    }
   }
 
   /**
@@ -106,7 +109,7 @@ public class StringTable extends Table<String> implements Cloneable {
     }
     StringTable result = new StringTable();
 
-    LineNumberReader reader = new LineNumberReader(new InputStreamReader(s));
+    LineNumberReader reader = new LineNumberReader(new InputStreamReader(s, StandardCharsets.UTF_8));
 
     // LineNumberReader reader = new LineNumberReader(new
     // InputStreamReader(new FileInputStream(f)));
@@ -153,7 +156,7 @@ public class StringTable extends Table<String> implements Cloneable {
     int nColumns = st.countTokens();
     Assertions.productionAssertion(nColumns == getNumberOfColumns(), "expected " + getNumberOfColumns() + " got " + nColumns
         + " row " + row + " " + line.length() + " " + line);
-    SimpleVector<String> r = new SimpleVector<String>();
+    SimpleVector<String> r = new SimpleVector<>();
     rows.add(row, r);
     for (int i = 0; i < nColumns; i++) {
       r.set(i, (String) st.nextElement());

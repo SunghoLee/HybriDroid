@@ -126,7 +126,7 @@ public abstract class IRTests {
   protected static class EdgeAssertions implements IRAssertion {
     public final String srcDescriptor;
 
-    public final List/* <String> */<String> tgtDescriptors = new ArrayList<String>();
+    public final List/* <String> */<String> tgtDescriptors = new ArrayList<>();
 
     public EdgeAssertions(String srcDescriptor) {
       this.srcDescriptor = srcDescriptor;
@@ -346,11 +346,11 @@ public abstract class IRTests {
     return new String[] { "L" + pkgName + "/" + getTestName().substring(4) };
   }
 
-  protected abstract AbstractAnalysisEngine getAnalysisEngine(String[] mainClassDescriptors, Collection<String> sources, List<String> libs);
+  protected abstract <I extends InstanceKey> AbstractAnalysisEngine<I> getAnalysisEngine(String[] mainClassDescriptors, Collection<String> sources, List<String> libs);
 
-  public Pair<CallGraph, PointerAnalysis<InstanceKey>> runTest(Collection<String> sources, List<String> libs,
+  public <I extends InstanceKey> Pair<CallGraph, PointerAnalysis<I>> runTest(Collection<String> sources, List<String> libs,
         String[] mainClassDescriptors, List<? extends IRAssertion> ca, boolean assertReachable) throws IllegalArgumentException, CancelException, IOException {
-      AbstractAnalysisEngine engine = getAnalysisEngine(mainClassDescriptors, sources, libs);
+      AbstractAnalysisEngine<I> engine = getAnalysisEngine(mainClassDescriptors, sources, libs);
 
       CallGraph callGraph;
         callGraph = engine.buildDefaultCallGraph();
@@ -369,7 +369,7 @@ public abstract class IRTests {
         return Pair.make(callGraph, engine.getPointerAnalysis());
   }
 
-  protected static void dumpIR(CallGraph cg, Collection<String> sources, boolean assertReachable) throws IOException {
+  protected static void dumpIR(CallGraph cg, Collection<String> sources, boolean assertReachable) {
     Set<String> sourcePaths = HashSetFactory.make();
     for(String src : sources) {
       sourcePaths.add(src.substring(src.lastIndexOf(File.separator)+1));
@@ -378,8 +378,8 @@ public abstract class IRTests {
     Set<IMethod> unreachable = HashSetFactory.make();
     IClassHierarchy cha = cg.getClassHierarchy();
     IClassLoader sourceLoader = cha.getLoader(JavaSourceAnalysisScope.SOURCE);
-    for (Iterator iter = sourceLoader.iterateAllClasses(); iter.hasNext();) {
-      IClass clazz = (IClass) iter.next();
+    for (Iterator<IClass> iter = sourceLoader.iterateAllClasses(); iter.hasNext();) {
+      IClass clazz = iter.next();
 
       System.err.println(clazz);
       if (clazz.isInterface())
@@ -389,7 +389,7 @@ public abstract class IRTests {
         if (m.isAbstract()) {
           System.err.println(m);
         } else {
-          Iterator nodeIter = cg.getNodes(m.getReference()).iterator();
+          Iterator<CGNode> nodeIter = cg.getNodes(m.getReference()).iterator();
           if (!nodeIter.hasNext()) {
             if (m instanceof AstMethod) {
               String fn = ((AstClass)m.getDeclaringClass()).getSourcePosition().getURL().getFile();
@@ -400,7 +400,7 @@ public abstract class IRTests {
             }
             continue;
           }
-          CGNode node = (CGNode) nodeIter.next();
+          CGNode node = nodeIter.next();
           System.err.println(node.getIR());
         }
       }
@@ -450,7 +450,7 @@ public abstract class IRTests {
     return null;
   }
 
-  public static void populateScope(JavaSourceAnalysisEngine engine, Collection<String> sources, List<String> libs) {
+  public static void populateScope(JavaSourceAnalysisEngine<?> engine, Collection<String> sources, List<String> libs) {
     boolean foundLib = false;
     for (String lib : libs) {
       File libFile = new File(lib);

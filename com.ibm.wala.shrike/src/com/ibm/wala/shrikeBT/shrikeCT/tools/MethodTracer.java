@@ -51,16 +51,17 @@ public class MethodTracer {
 
   public static void main(String[] args) throws Exception {
     for (int i = 0; i < 1; i++) {
-      instrumenter = new OfflineInstrumenter(true);
+      instrumenter = new OfflineInstrumenter();
 
-      Writer w = new BufferedWriter(new FileWriter("report", false));
+      try (final Writer w = new BufferedWriter(new FileWriter("report", false))) {
 
-      instrumenter.parseStandardArgs(args);
-      instrumenter.setPassUnmodifiedClasses(false);
-      instrumenter.beginTraversal();
-      ClassInstrumenter ci;
-      while ((ci = instrumenter.nextClass()) != null) {
-        doClass(ci, w);
+        instrumenter.parseStandardArgs(args);
+        instrumenter.setPassUnmodifiedClasses(false);
+        instrumenter.beginTraversal();
+        ClassInstrumenter ci;
+        while ((ci = instrumenter.nextClass()) != null) {
+          doClass(ci, w);
+        }
       }
       instrumenter.close();
     }

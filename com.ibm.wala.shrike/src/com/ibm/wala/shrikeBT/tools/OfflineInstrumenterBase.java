@@ -27,7 +27,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 
 import com.ibm.wala.shrikeBT.analysis.ClassHierarchyProvider;
 
@@ -38,9 +37,9 @@ import com.ibm.wala.shrikeBT.analysis.ClassHierarchyProvider;
 public abstract class OfflineInstrumenterBase {
   private int inputIndex;
 
-  final private HashSet<String> entryNames = new HashSet<String>();
+  final private HashSet<String> entryNames = new HashSet<>();
 
-  final private ArrayList<Input> inputs = new ArrayList<Input>();
+  final private ArrayList<Input> inputs = new ArrayList<>();
 
   final private BitSet ignoringInputs = new BitSet();
 
@@ -128,6 +127,7 @@ public abstract class OfflineInstrumenterBase {
     }
 
     @Override
+    @SuppressWarnings("resource")
     public InputStream open() throws IOException {
       JarFile cachedJar = openCachedJar(file);
       return cachedJar.getInputStream(cachedJar.getEntry(name));
@@ -151,6 +151,7 @@ public abstract class OfflineInstrumenterBase {
     /**
      * Get the underlying ZipEntry corresponding to this resource.
      */
+    @SuppressWarnings("resource")
     public ZipEntry getEntry() throws IOException {
       JarFile cachedJar = openCachedJar(file);
       return cachedJar.getEntry(name);
@@ -230,19 +231,19 @@ public abstract class OfflineInstrumenterBase {
    * Add a JAR file containing source classes to instrument.
    */
   final public void addInputJar(File f) throws IOException {
-    JarFile jf = new JarFile(f, false);
-    for (Enumeration<JarEntry> e = jf.entries(); e.hasMoreElements();) {
-      JarEntry entry = e.nextElement();
-      String name = entry.getName();
-      inputs.add(new JarInput(f, name));
+    try (final JarFile jf = new JarFile(f, false)) {
+      for (Enumeration<JarEntry> e = jf.entries(); e.hasMoreElements();) {
+        JarEntry entry = e.nextElement();
+        String name = entry.getName();
+        inputs.add(new JarInput(f, name));
+      }
     }
-    jf.close();
   }
 
   /**
    * Add a JAR entry containing a source class to instrument.
    */
-  final public void addInputJarEntry(File f, String name) throws IOException {
+  final public void addInputJarEntry(File f, String name) {
     inputs.add(new JarInput(f, name));
   }
 
@@ -329,7 +330,7 @@ public abstract class OfflineInstrumenterBase {
     if (args == null) {
       throw new IllegalArgumentException("args == null");
     }
-    ArrayList<String> leftover = new ArrayList<String>();
+    ArrayList<String> leftover = new ArrayList<>();
 
     for (int i = 0; i < args.length; i++) {
       String a = args[i];
@@ -388,14 +389,11 @@ public abstract class OfflineInstrumenterBase {
         if (ignoringInputs.get(inputIndex - 1) || !in.isClass()) {
           continue;
         }
-        BufferedInputStream s = new BufferedInputStream(in.open());
-        try {
+        try (final BufferedInputStream s = new BufferedInputStream(in.open())) {
           Object r = makeClassFromStream(in.getInputName(), s);
           String name = getClassName(r);
           in.setClassName(name);
           return r;
-        } finally {
-          s.close();
         }
       }
     }
@@ -455,14 +453,16 @@ public abstract class OfflineInstrumenterBase {
         throw new IllegalStateException("Output file was not set");
       }
 
-      outputJar = new JarOutputStream(new FileOutputStream(outputFile));
+      @SuppressWarnings("resource")
+      final FileOutputStream out = new FileOutputStream(outputFile);
+      outputJar = new JarOutputStream(out);
     }
   }
 
   /**
    * Skip the last class returned in every future traversal of the class list.
    */
-  final public void setIgnore(boolean ignore) throws IllegalArgumentException {
+  final public void setIgnore() throws IllegalArgumentException {
     if (inputIndex == 0) {
       throw new IllegalArgumentException("Must get a class before ignoring it");
     }
@@ -540,8 +540,7 @@ public abstract class OfflineInstrumenterBase {
         if (in instanceof JarInput) {
           JarInput jin = (JarInput) in;
           ZipEntry entry = jin.getEntry();
-          InputStream s = jin.open();
-          try {
+          try (final InputStream s = jin.open()) {
             ZipEntry newEntry = new ZipEntry(entry.getName());
             newEntry.setComment(entry.getComment());
             newEntry.setExtra(entry.getExtra());
@@ -549,8 +548,6 @@ public abstract class OfflineInstrumenterBase {
             putNextEntry(newEntry);
             copyStream(s, outputJar);
             outputJar.closeEntry();
-          } finally {
-            s.close();
           }
         } else {
           throw new Error("Unknown non-class input: " + in);
@@ -558,8 +555,7 @@ public abstract class OfflineInstrumenterBase {
       } else {
         String name = in.getClassName();
         if (name == null) {
-          BufferedInputStream s = new BufferedInputStream(in.open(), 65536);
-          try {
+          try (final BufferedInputStream s = new BufferedInputStream(in.open(), 65536)) {
             Object cl = makeClassFromStream(in.getInputName(), s);
             String entryName = toEntryName(getClassName(cl));
             if (!entryNames.contains(entryName)) {
@@ -569,21 +565,16 @@ public abstract class OfflineInstrumenterBase {
               clOut.flush();
               outputJar.closeEntry();
             }
-          } finally {
-            s.close();
           }
         } else {
           String entryName = toEntryName(name);
           if (!entryNames.contains(entryName)) {
-            BufferedInputStream s = new BufferedInputStream(in.open());
-            try {
+            try (final BufferedInputStream s = new BufferedInputStream(in.open())) {
               putNextEntry(new ZipEntry(entryName));
               BufferedOutputStream clOut = new BufferedOutputStream(outputJar);
               copyStream(s, clOut);
               clOut.flush();
               outputJar.closeEntry();
-            } finally {
-              s.close();
             }
           }
         }

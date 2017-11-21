@@ -10,24 +10,47 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph;
 
-import com.ibm.wala.classLoader.*;
-import com.ibm.wala.shrikeCT.InvalidClassFileException;
-import com.ibm.wala.types.*;
-import com.ibm.wala.util.PlatformUtil;
-import com.ibm.wala.util.collections.HashMapFactory;
-import com.ibm.wala.util.collections.HashSetFactory;
-import com.ibm.wala.util.collections.MapUtil;
-import com.ibm.wala.util.config.SetOfClasses;
-import com.ibm.wala.util.debug.Assertions;
-import com.ibm.wala.util.strings.Atom;
-import com.ibm.wala.util.strings.ImmutableByteArray;
-
 import java.io.File;
 import java.io.NotSerializableException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import com.ibm.wala.classLoader.ArrayClassLoader;
+import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
+import com.ibm.wala.classLoader.ClassFileModule;
+import com.ibm.wala.classLoader.IClassLoader;
+import com.ibm.wala.classLoader.JarFileModule;
+import com.ibm.wala.classLoader.Language;
+import com.ibm.wala.classLoader.Module;
+import com.ibm.wala.classLoader.SourceDirectoryTreeModule;
+import com.ibm.wala.classLoader.SourceFileModule;
+import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.types.Descriptor;
+import com.ibm.wala.types.MethodReference;
+import com.ibm.wala.types.TypeName;
+import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.collections.FilterIterator;
+import com.ibm.wala.util.collections.HashMapFactory;
+import com.ibm.wala.util.collections.HashSetFactory;
+import com.ibm.wala.util.collections.MapIterator;
+import com.ibm.wala.util.collections.MapUtil;
+import com.ibm.wala.util.config.SetOfClasses;
+import com.ibm.wala.util.debug.Assertions;
+import com.ibm.wala.util.io.RtJar;
+import com.ibm.wala.util.strings.Atom;
+import com.ibm.wala.util.strings.ImmutableByteArray;
 
 /**
  * Base class that represents a set of files to analyze.
@@ -43,7 +66,7 @@ import java.util.jar.Manifest;
  */
 public class AnalysisScope {
 
-  private final static int DEBUG_LEVEL = -1;
+  private final static int DEBUG_LEVEL = 0;
 
   public static final Atom PRIMORDIAL = Atom.findOrCreateUnicodeAtom("Primordial");
 
@@ -193,6 +216,7 @@ public class AnalysisScope {
   /**
    * Add a jar file to the scope for a loader
    */
+  @SuppressWarnings("unused")
   public void addToScope(ClassLoaderReference loader, JarFile file) {
     List<Module> s = MapUtil.findOrCreateList(moduleMap, loader);
     if (DEBUG_LEVEL > 0) {
@@ -204,6 +228,7 @@ public class AnalysisScope {
   /**
    * Add a module to the scope for a loader
    */
+  @SuppressWarnings("unused")
   public void addToScope(ClassLoaderReference loader, Module m) {
     if (m == null) {
       throw new IllegalArgumentException("null m");
@@ -232,6 +257,7 @@ public class AnalysisScope {
   /**
    * Add a module file to the scope for a loader. The classes in the added jar file will override classes added to the scope so far.
    */
+  @SuppressWarnings("unused")
   public void addToScopeHead(ClassLoaderReference loader, Module m) {
     if (m == null) {
       throw new IllegalArgumentException("null m");
@@ -351,31 +377,25 @@ public class AnalysisScope {
    * @return the rt.jar (1.4) or core.jar (1.5) file, or null if not found.
    */
   private JarFile getRtJar() {
-    for (Iterator MS = getModules(getPrimordialLoader()).iterator(); MS.hasNext();) {
-      Module M = (Module) MS.next();
-      if (M instanceof JarFileModule) {
-        JarFile JF = ((JarFileModule) M).getJarFile();
-        if (JF.getName().endsWith(File.separator + "rt.jar")) {
-          return JF;
-        }
-        if (JF.getName().endsWith(File.separator + "core.jar")) {
-          return JF;
-        }
-        // hack for Mac
-        if (PlatformUtil.onMacOSX() && JF.getName().endsWith(File.separator + "classes.jar")) {
-          return JF;
-        }
-      }
-    }
-    return null;
+    return RtJar.getRtJar(
+        new MapIterator<Module,JarFile>(
+            new FilterIterator<Module>(getModules(getPrimordialLoader()).iterator(), new Predicate<Module>() {
+              @Override
+              public boolean test(Module M) {
+                return M instanceof JarFileModule;
+              } }), new Function<Module,JarFile>() {
+
+              @Override
+              public JarFile apply(Module M) {
+                return ((JarFileModule) M).getJarFile();
+              } }));
   }
 
   public String getJavaLibraryVersion() throws IllegalStateException {
-    JarFile rtJar = getRtJar();
-    if (rtJar == null) {
-      throw new IllegalStateException("cannot find runtime libraries");
-    }
-    try {
+    try (final JarFile rtJar = getRtJar()) {
+      if (rtJar == null) {
+        throw new IllegalStateException("cannot find runtime libraries");
+      }
       Manifest man = rtJar.getManifest();
       assert man != null : "runtime library has no manifest!";
       String result = man.getMainAttributes().getValue("Specification-Version");

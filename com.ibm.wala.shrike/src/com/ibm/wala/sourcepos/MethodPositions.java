@@ -20,6 +20,8 @@ package com.ibm.wala.sourcepos;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.ibm.wala.sourcepos.InvalidRangeException.Cause;
+
 /**
  * This class represents the MethodPositions attribute.
  * 
@@ -42,6 +44,8 @@ public final class MethodPositions extends PositionsAttribute {
   private static final String ERR_POSITION_UNDEFINED = "Error in MethodPositions attribute: %1$s is undefined.";
 
   private static final String ERR_END_BEFORE_START = "Error in MethodPositions attribute: %2$s (%4$s) is before %1$s (%3$s).";
+
+  private static final String ERR_UNKNOWN_REASON = "Error in MethodPositions attribute: unknown reason %1$s.";
 
   private static final String WARN_INVALID_BLOCK_END = "Warning in MethodPositions attribute: Invalid method block end position.";
 
@@ -98,7 +102,7 @@ public final class MethodPositions extends PositionsAttribute {
    * @throws IOException
    *           if the input stream cannot be read
    */
-  private Range readRange(DataInputStream in, String startVarName, String endVarName, boolean undefinedAllowed) throws IOException {
+  private static Range readRange(DataInputStream in, String startVarName, String endVarName, boolean undefinedAllowed) throws IOException {
     boolean valid = true;
     Range range = null;
     Position start = null;
@@ -117,13 +121,19 @@ public final class MethodPositions extends PositionsAttribute {
       try {
         range = new Range(start, end);
       } catch (InvalidRangeException e) {
-        switch (e.getThisCause()) {
+        final Cause thisCause = e.getThisCause();
+        switch (thisCause) {
         case END_BEFORE_START:
           Debug.warn(ERR_END_BEFORE_START, startVarName, endVarName, start, end);
+          break;
         case START_UNDEFINED:
           Debug.warn(ERR_POSITION_UNDEFINED, startVarName);
+          break;
         case END_UNDEFINED:
           Debug.warn(ERR_POSITION_UNDEFINED, endVarName);
+          break;
+        default:
+          Debug.warn(ERR_UNKNOWN_REASON, thisCause);
         }
       }
     }
@@ -150,7 +160,7 @@ public final class MethodPositions extends PositionsAttribute {
    * @throws InvalidPositionException
    *           if the read position is invalid
    */
-  private Position readPosition(DataInputStream in, String varName) throws IOException, InvalidPositionException {
+  private static Position readPosition(DataInputStream in, String varName) throws IOException, InvalidPositionException {
     Position pos = null;
     try {
       pos = new Position(in.readInt());

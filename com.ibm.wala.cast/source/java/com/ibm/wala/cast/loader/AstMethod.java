@@ -24,6 +24,7 @@ import com.ibm.wala.cfg.IBasicBlock;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.Descriptor;
 import com.ibm.wala.types.MethodReference;
@@ -102,19 +103,19 @@ public abstract class AstMethod implements IMethod {
   }
 
   protected final IClass cls;
-  private final Collection qualifiers;
-  private final AbstractCFG cfg;
+  private final Collection<CAstQualifier> qualifiers;
+  private final AbstractCFG<?, ?> cfg;
   private final SymbolTable symtab;
   private final MethodReference ref;
   private final boolean hasCatchBlock;
   private final boolean hasMonitorOp;
-  private final Map<IBasicBlock, TypeReference[]> catchTypes;
+  private final Map<IBasicBlock<SSAInstruction>, TypeReference[]> catchTypes;
   private final AstLexicalInformation lexicalInfo;
   private final DebuggingInformation debugInfo;
   private final Collection<Annotation> annotations;
 
-  protected AstMethod(IClass cls, Collection qualifiers, AbstractCFG cfg, SymbolTable symtab, MethodReference ref,
-      boolean hasCatchBlock, Map<IBasicBlock, TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation lexicalInfo,
+  protected AstMethod(IClass cls, Collection<CAstQualifier> qualifiers, AbstractCFG<?, ?> cfg, SymbolTable symtab, MethodReference ref,
+      boolean hasCatchBlock, Map<IBasicBlock<SSAInstruction>, TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation lexicalInfo,
       DebuggingInformation debugInfo, Collection<Annotation> annotations) {
     this.cls = cls;
     this.cfg = cfg;
@@ -129,7 +130,7 @@ public abstract class AstMethod implements IMethod {
     this.annotations = annotations;
   }
 
-  protected AstMethod(IClass cls, Collection qualifiers, MethodReference ref, Collection<Annotation> annotations) {
+  protected AstMethod(IClass cls, Collection<CAstQualifier> qualifiers, MethodReference ref, Collection<Annotation> annotations) {
     this.cls = cls;
     this.qualifiers = qualifiers;
     this.ref = ref;
@@ -146,7 +147,7 @@ public abstract class AstMethod implements IMethod {
     assert isAbstract();
   }
 
-  public AbstractCFG cfg() {
+  public AbstractCFG<?, ?> cfg() {
     return cfg;
   }
 
@@ -158,7 +159,7 @@ public abstract class AstMethod implements IMethod {
     return symtab;
   }
 
-  public Map<IBasicBlock, TypeReference[]> catchTypes() {
+  public Map<IBasicBlock<SSAInstruction>, TypeReference[]> catchTypes() {
     return catchTypes;
   }
 
@@ -198,7 +199,7 @@ public abstract class AstMethod implements IMethod {
       return (o instanceof LexicalParent) && getName().equals(((LexicalParent) o).getName())
           && getMethod().equals(((LexicalParent) o).getMethod());
     }
-  };
+  }
 
   public abstract LexicalParent[] getParents();
 
@@ -297,7 +298,7 @@ public abstract class AstMethod implements IMethod {
     return qualifiers.contains(CAstQualifier.VOLATILE);
   }
 
-  public ControlFlowGraph getControlFlowGraph() {
+  public ControlFlowGraph<?, ?> getControlFlowGraph() {
     return cfg;
   }
 
@@ -319,6 +320,7 @@ public abstract class AstMethod implements IMethod {
   /*
    * @see com.ibm.wala.classLoader.IMethod#getParameterSourcePosition(int)
    */
+  @Override
   public SourcePosition getParameterSourcePosition(int paramNum) throws InvalidClassFileException {
     return null;
   }
@@ -338,6 +340,7 @@ public abstract class AstMethod implements IMethod {
     return debugInfo.getCodeBodyPosition();
   }
 
+  @Override
   public Position getSourcePosition(int instructionIndex) {
     return debugInfo.getInstructionPosition(instructionIndex);
   }

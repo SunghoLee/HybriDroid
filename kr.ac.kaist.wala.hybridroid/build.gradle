@@ -50,18 +50,16 @@ dependencies {
 	compile project(':com.ibm.wala.cast.js.html.nu_validator')
 	compile project(':com.ibm.wala.cast')
 	compile project(':com.ibm.wala.dalvik')
-	compile project(':com.ibm.wala.core')
 	compile project(':com.ibm.wala.cast.js.rhino.test')
-	compile project(':com.ibm.wala.core.tests')
 	compile project(':com.ibm.wala.shrike')
 	compile project(':com.ibm.wala.cast.js')
 	compile project(':com.ibm.wala.cast.js.test')
 	compile project(':com.ibm.wala.cast.java')
 	compile project(':com.ibm.wala.core')
 	compile project(':com.ibm.wala.core.tests')
+	compile files('libs/apktool_2.3.0.jar')
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 	// https://mvnrepository.com/artifact/commons-cli/commons-cli
-	compile group: 'commons-cli', name: 'commons-cli', version: '1.2'
-	compile files('libs/apktool_2.0.2.jar')
+//	compile group: 'commons-cli', name: 'commons-cli', version: '1.2'
 }

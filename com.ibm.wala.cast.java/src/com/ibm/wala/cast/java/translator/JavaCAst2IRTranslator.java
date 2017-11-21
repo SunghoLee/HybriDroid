@@ -15,7 +15,6 @@ package com.ibm.wala.cast.java.translator;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.ibm.wala.cast.ir.translator.AstTranslator;
@@ -37,6 +36,7 @@ import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.ModuleEntry;
 import com.ibm.wala.classLoader.NewSiteReference;
+import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.TypeName;
@@ -166,14 +166,13 @@ public class JavaCAst2IRTranslator extends AstTranslator {
     processExceptions(newNode, context);
   }
 
-  private void processExceptions(CAstNode n, WalkContext context) {
+  private static void processExceptions(CAstNode n, WalkContext context) {
     context.cfg().addPreNode(n, context.getUnwindState());
     context.cfg().newBlock(true);
 
-    Collection labels = context.getControlFlow().getTargetLabels(n);
+    Collection<Object> labels = context.getControlFlow().getTargetLabels(n);
 
-    for (Iterator iter = labels.iterator(); iter.hasNext();) {
-      Object label = iter.next();
+    for (Object label : labels) {
       CAstNode target = context.getControlFlow().getTarget(n, label);
       if (target == CAstControlFlowMap.EXCEPTION_TO_EXIT)
         context.cfg().addPreEdgeToExit(n, true);
@@ -203,10 +202,6 @@ public class JavaCAst2IRTranslator extends AstTranslator {
     processExceptions(call, context);
   }
 
-  protected void doGlobalRead(WalkContext context, int result, String name) {
-    Assertions.UNREACHABLE("doGlobalRead() called for Java code???");
-  }
-
   @Override
   protected void doGlobalWrite(WalkContext context, String name, TypeReference type, int rval) {
     Assertions.UNREACHABLE("doGlobalWrite() called for Java code???");
@@ -221,9 +216,7 @@ public class JavaCAst2IRTranslator extends AstTranslator {
     // code bodies, so we may see other things than TYPE_ENTITY here.
     IClass owner = loader.lookupClass(makeType(topEntity.getType()).getName());
 
-    if (owner == null) {
-      assert owner != null : makeType(topEntity.getType()).getName() + " not found in " + loader;
-    }
+    assert owner != null : makeType(topEntity.getType()).getName() + " not found in " + loader;
 
     ((JavaSourceLoaderImpl) loader).defineField(n, owner);
   }
@@ -236,16 +229,14 @@ public class JavaCAst2IRTranslator extends AstTranslator {
     CAstType owningType = methodType.getDeclaringType();
     IClass owner = loader.lookupClass(makeType(owningType).getName());
 
-    if (owner == null) {
-      assert owner != null : makeType(owningType).getName().toString() + " not found in " + loader;
-    }
+    assert owner != null : makeType(owningType).getName().toString() + " not found in " + loader;
 
     ((JavaSourceLoaderImpl) loader).defineAbstractFunction(N, owner);
   }
 
   @Override
-  protected void defineFunction(CAstEntity N, WalkContext definingContext, AbstractCFG cfg, SymbolTable symtab,
-      boolean hasCatchBlock, Map<IBasicBlock,TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation lexicalInfo,
+  protected void defineFunction(CAstEntity N, WalkContext definingContext, AbstractCFG<SSAInstruction, ? extends IBasicBlock<SSAInstruction>> cfg, SymbolTable symtab,
+      boolean hasCatchBlock, Map<IBasicBlock<SSAInstruction>,TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation lexicalInfo,
       DebuggingInformation debugInfo) {
     // N.B.: base class may actually ask to create a synthetic type to wrap
     // code bodies, so we may see other things than TYPE_ENTITY here.
@@ -254,9 +245,7 @@ public class JavaCAst2IRTranslator extends AstTranslator {
     TypeName typeName = makeType(owningType).getName();
     IClass owner = loader.lookupClass(typeName);
 
-    if (owner == null) {
-      assert owner != null : typeName.toString() + " not found in " + loader;
-    }
+    assert owner != null : typeName.toString() + " not found in " + loader;
 
     symtab.getConstant(0);
     symtab.getNullConstant();
@@ -411,11 +400,11 @@ public class JavaCAst2IRTranslator extends AstTranslator {
     }
   }
 
-  private CAstType getType(final String name) {
+  private static CAstType getType(final String name) {
     return new CAstType.Class() {
       
       @Override
-      public Collection getSupertypes() {
+      public Collection<CAstType> getSupertypes() {
         return Collections.emptySet();
       }
       

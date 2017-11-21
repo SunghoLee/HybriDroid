@@ -21,6 +21,8 @@ import com.ibm.wala.util.debug.Assertions;
  */
 class DebuggingMutableIntSet implements MutableIntSet {
 
+  private static final long serialVersionUID = 6879912730471879687L;
+
   final MutableIntSet primaryImpl;
 
   final MutableIntSet secondaryImpl;
@@ -314,15 +316,15 @@ class DebuggingMutableIntSet implements MutableIntSet {
     primaryImpl.foreach(new IntSetAction() {
       @Override
       public void act(int x) {
-        assert !bits.contains(new Integer(x));
-        bits.add(new Integer(x));
+        assert !bits.contains(Integer.valueOf(x));
+        bits.add(Integer.valueOf(x));
       }
     });
     secondaryImpl.foreach(new IntSetAction() {
       @Override
       public void act(int x) {
-        assert bits.contains(new Integer(x));
-        bits.remove(new Integer(x));
+        assert bits.contains(Integer.valueOf(x));
+        bits.remove(Integer.valueOf(x));
       }
     });
     assert bits.isEmpty();
@@ -339,15 +341,15 @@ class DebuggingMutableIntSet implements MutableIntSet {
     primaryImpl.foreachExcluding(X, new IntSetAction() {
       @Override
       public void act(int x) {
-        assert !bits.contains(new Integer(x));
-        bits.add(new Integer(x));
+        assert !bits.contains(Integer.valueOf(x));
+        bits.add(Integer.valueOf(x));
       }
     });
     secondaryImpl.foreachExcluding(X, new IntSetAction() {
       @Override
       public void act(int x) {
-        assert bits.contains(new Integer(x));
-        bits.remove(new Integer(x));
+        assert bits.contains(Integer.valueOf(x));
+        bits.remove(Integer.valueOf(x));
       }
     });
     assert bits.isEmpty();

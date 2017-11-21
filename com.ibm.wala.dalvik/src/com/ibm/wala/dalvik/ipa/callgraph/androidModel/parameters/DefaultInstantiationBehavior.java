@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IClassLoader;
@@ -61,9 +60,10 @@ import com.ibm.wala.util.strings.Atom;
  *  @author Tobias Blaschke <code@tobiasblaschke.de>
  *  @since  2013-10-25
  */
-public class DefaultInstantiationBehavior extends IInstantiationBehavior implements Serializable {
+public class DefaultInstantiationBehavior extends IInstantiationBehavior {
 
     /* package-private */ static final class BehviourValue implements Serializable {
+		private static final long serialVersionUID = 190943987799306506L;
 		public final InstanceBehavior behaviour;
         public final Exactness exactness;
         public final BehviourValue cacheFrom;
@@ -82,6 +82,7 @@ public class DefaultInstantiationBehavior extends IInstantiationBehavior impleme
     }
 
     /* package-private */ static final class BehaviorKey<T> implements Serializable {
+        private static final long serialVersionUID = -1932639921432060660L;
         // T is expected to be TypeName or Atom
         final T base;
 
@@ -90,21 +91,21 @@ public class DefaultInstantiationBehavior extends IInstantiationBehavior impleme
         }
 
         public static BehaviorKey<TypeName> mk(TypeName base) {
-            return new BehaviorKey<TypeName>(base);
+            return new BehaviorKey<>(base);
         }
 
         public static BehaviorKey<Atom> mk(Atom base) {
-            return new BehaviorKey<Atom>(base);
+            return new BehaviorKey<>(base);
         }
 
         public static BehaviorKey<Atom> mkPackage(String pack) {
-            return new BehaviorKey<Atom>(Atom.findOrCreateAsciiAtom(pack));
+            return new BehaviorKey<>(Atom.findOrCreateAsciiAtom(pack));
         }
 
         @Override
         public boolean equals(Object o) {
             if (o instanceof BehaviorKey) {
-                BehaviorKey other = (BehaviorKey) o;
+                BehaviorKey<?> other = (BehaviorKey<?>) o;
                 return base.equals(other.base);
             } else {
                 return false;
@@ -123,7 +124,7 @@ public class DefaultInstantiationBehavior extends IInstantiationBehavior impleme
     }
 
 
-    private final Map<BehaviorKey, BehviourValue> behaviours = new HashMap<BehaviorKey, BehviourValue>();
+    private final Map<BehaviorKey<?>, BehviourValue> behaviours = new HashMap<>();
     private final transient IClassHierarchy cha;
 
     public DefaultInstantiationBehavior(final IClassHierarchy cha) {
@@ -351,8 +352,8 @@ public class DefaultInstantiationBehavior extends IInstantiationBehavior impleme
         if (this.serializationIncludesCache) {
             stream.writeObject(this.behaviours);
         } else {
-            final Map<BehaviorKey, BehviourValue> strippedBehaviours = new HashMap<BehaviorKey, BehviourValue>();
-            for (final BehaviorKey key : this.behaviours.keySet()) {
+            final Map<BehaviorKey<?>, BehviourValue> strippedBehaviours = new HashMap<>();
+            for (final BehaviorKey<?> key : this.behaviours.keySet()) {
                 final BehviourValue val = this.behaviours.get(key);
                 if (! val.isCached() ) {
                     strippedBehaviours.put(key, val);
@@ -369,11 +370,12 @@ public class DefaultInstantiationBehavior extends IInstantiationBehavior impleme
      *  hard-coded behaviors don't get mixed with loaded ones. It may be deserialized but using a
      *  LoadedInstantiationBehavior instead may be a better way (as it starts in an empty state)
      */
-    private void readObject(java.io.ObjectInputStream stream) 
+	@SuppressWarnings("unchecked")
+	private void readObject(java.io.ObjectInputStream stream) 
         throws IOException, ClassNotFoundException {
 
         DefaultInstantiationBehavior.this.behaviours.clear();
-        this.behaviours.putAll((Map<BehaviorKey, BehviourValue>) stream.readObject());
+        this.behaviours.putAll((Map<BehaviorKey<?>, BehviourValue>) stream.readObject());
     }
 
 }

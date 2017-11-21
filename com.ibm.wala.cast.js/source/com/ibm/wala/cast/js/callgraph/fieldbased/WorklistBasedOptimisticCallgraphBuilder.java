@@ -21,15 +21,12 @@ import com.ibm.wala.cast.js.callgraph.fieldbased.flowgraph.vertices.VarVertex;
 import com.ibm.wala.cast.js.callgraph.fieldbased.flowgraph.vertices.Vertex;
 import com.ibm.wala.cast.js.callgraph.fieldbased.flowgraph.vertices.VertexFactory;
 import com.ibm.wala.cast.js.ipa.callgraph.JSAnalysisOptions;
-import com.ibm.wala.cast.js.ipa.summaries.JavaScriptConstructorFunctions;
 import com.ibm.wala.cast.js.ssa.JavaScriptInvoke;
 import com.ibm.wala.cast.js.types.JavaScriptMethods;
 import com.ibm.wala.cast.types.AstMethodReference;
-import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.ssa.IR;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.MonitorUtil;
 import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
@@ -57,7 +54,7 @@ public class WorklistBasedOptimisticCallgraphBuilder extends FieldBasedCallGraph
 	
 	private FlowGraphBuilder builder;
 	
-	public WorklistBasedOptimisticCallgraphBuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache, boolean supportFullPointerAnalysis) {
+	public WorklistBasedOptimisticCallgraphBuilder(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache, boolean supportFullPointerAnalysis) {
 		super(cha, options, cache, supportFullPointerAnalysis);
 		handleCallApply = options instanceof JSAnalysisOptions && ((JSAnalysisOptions)options).handleCallApply();
 	}
@@ -69,7 +66,7 @@ public class WorklistBasedOptimisticCallgraphBuilder extends FieldBasedCallGraph
 	}
 
 	@Override
-  protected Set<Pair<CallVertex,FuncVertex>> extractCallGraphEdges(FlowGraph flowgraph, IProgressMonitor monitor) throws CancelException {
+  public Set<Pair<CallVertex,FuncVertex>> extractCallGraphEdges(FlowGraph flowgraph, IProgressMonitor monitor) throws CancelException {
 	  VertexFactory factory = flowgraph.getVertexFactory();
 	  Set<Vertex> worklist = HashSetFactory.make();
 	  Map<Vertex, Set<FuncVertex>> reachingFunctions = HashMapFactory.make();
@@ -136,7 +133,7 @@ public class WorklistBasedOptimisticCallgraphBuilder extends FieldBasedCallGraph
 	}
 
 	// add flow corresponding to a new call edge
-	private void addCallEdge(FlowGraph flowgraph, CallVertex c, FuncVertex callee, Set<Vertex> worklist) throws CancelException {
+	private void addCallEdge(FlowGraph flowgraph, CallVertex c, FuncVertex callee, Set<Vertex> worklist) {
 		VertexFactory factory = flowgraph.getVertexFactory();
 		FuncVertex caller = c.getCaller();
 		JavaScriptInvoke invk = c.getInstruction();
@@ -164,7 +161,7 @@ public class WorklistBasedOptimisticCallgraphBuilder extends FieldBasedCallGraph
 	
 	// add data flow corresponding to a reflective invocation via Function.prototype.call
 	// NB: for f.call(...), f will _not_ appear as a call target, but the appropriate argument and return data flow will be set up
-  private void addReflectiveCallEdge(FlowGraph flowgraph, VarVertex reflectiveCallee, JavaScriptInvoke invk, FuncVertex realCallee, Set<Vertex> worklist) throws CancelException {
+  private void addReflectiveCallEdge(FlowGraph flowgraph, VarVertex reflectiveCallee, JavaScriptInvoke invk, FuncVertex realCallee, Set<Vertex> worklist) {
     VertexFactory factory = flowgraph.getVertexFactory();
     FuncVertex caller = reflectiveCallee.getFunction();
 

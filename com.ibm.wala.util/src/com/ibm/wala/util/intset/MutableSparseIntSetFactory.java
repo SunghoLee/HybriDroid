@@ -30,9 +30,9 @@ public class MutableSparseIntSetFactory implements MutableIntSetFactory<MutableS
       return MutableSparseIntSet.makeEmpty();
     } else {
       // XXX not very efficient.
-      TreeSet<Integer> T = new TreeSet<Integer>();
+      TreeSet<Integer> T = new TreeSet<>();
       for (int i = 0; i < set.length; i++) {
-        T.add(new Integer(set[i]));
+        T.add(set[i]);
       }
       int[] copy = new int[T.size()];
       int i = 0;

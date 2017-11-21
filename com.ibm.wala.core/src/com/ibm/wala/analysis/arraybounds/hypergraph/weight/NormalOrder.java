@@ -2,14 +2,13 @@ package com.ibm.wala.analysis.arraybounds.hypergraph.weight;
 
 import java.util.Comparator;
 
-import com.ibm.wala.analysis.arraybounds.hypergraph.weight.Weight;
 import com.ibm.wala.analysis.arraybounds.hypergraph.weight.Weight.Type;
 
 /**
  * Defines a normal Order on Weight: unlimited < ... < -1 < 0 < 1 < ... not_set
  * is not comparable
  *
- * @author Stephan Gocht <stephan@gobro.de>
+ * @author Stephan Gocht {@code <stephan@gobro.de>}
  *
  */
 public class NormalOrder implements Comparator<Weight> {

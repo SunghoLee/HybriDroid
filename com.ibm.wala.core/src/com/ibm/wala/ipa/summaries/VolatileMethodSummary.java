@@ -42,19 +42,19 @@
  */
 package com.ibm.wala.ipa.summaries;
 
-import com.ibm.wala.ipa.summaries.MethodSummary;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.ibm.wala.classLoader.ProgramCounter;
+import com.ibm.wala.ssa.ConstantValue;
 import com.ibm.wala.ssa.SSAGotoInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInstructionFactory;
 import com.ibm.wala.ssa.SymbolTable;
-import com.ibm.wala.ssa.ConstantValue;
 import com.ibm.wala.types.MemberReference;
 import com.ibm.wala.types.TypeReference;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 import com.ibm.wala.util.strings.Atom;
 
 /**
@@ -82,6 +82,7 @@ import com.ibm.wala.util.strings.Atom;
  *  @author     Tobias Blaschke <code@tobiasblaschke.de>
  *  @since      2013-09-08
  */
+@SuppressWarnings("javadoc")
 public class VolatileMethodSummary {
 
     private static final boolean DEBUG = false;
@@ -97,12 +98,17 @@ public class VolatileMethodSummary {
      */
     private static final class Reserved extends SSAInstruction {
         public Reserved () { super(SSAInstruction.NO_INDEX); }
+        @Override
         public SSAInstruction copyForSSA (SSAInstructionFactory insts, int[] defs, int[] uses) {
             throw new IllegalStateException();
         }
+        @Override
         public int hashCode () { return 12384; }
+        @Override
         public boolean isFallThrough() { return true; }
+        @Override
         public String toString (SymbolTable symbolTable) { return "Reserved Slot"; }
+        @Override
         public void visit (IVisitor v) { throw new IllegalStateException(); }
     }
     private static final Reserved RESERVED = new Reserved();
@@ -608,6 +614,7 @@ public class VolatileMethodSummary {
     /**
      *  Generates a String-Representation of an instance of the class.
      */
+    @Override
     public java.lang.String toString() {
         return "VolatileMethodSummary of " + this.summary.toString();
     }

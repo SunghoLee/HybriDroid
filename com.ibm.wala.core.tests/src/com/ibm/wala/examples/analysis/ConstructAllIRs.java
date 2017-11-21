@@ -14,12 +14,14 @@ import java.io.IOException;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 import com.ibm.wala.util.perf.Stopwatch;
 import com.ibm.wala.util.ref.ReferenceCleanser;
@@ -61,21 +63,21 @@ public class ConstructAllIRs {
 
     // build a type hierarchy
     System.out.print("building class hierarchy...");
-    ClassHierarchy cha = ClassHierarchy.make(scope);
+    ClassHierarchy cha = ClassHierarchyFactory.make(scope);
     System.out.println("done");
 
     // register class hierarchy and AnalysisCache with the reference cleanser, so that their soft references are appropriately wiped
     ReferenceCleanser.registerClassHierarchy(cha);
-    AnalysisCache cache = new AnalysisCache();
-    ReferenceCleanser.registerCache(cache);
     AnalysisOptions options = new AnalysisOptions();
+    IAnalysisCacheView cache = new AnalysisCacheImpl(options.getSSAOptions());
+    ReferenceCleanser.registerCache(cache);
 
     System.out.print("building IRs...");
     for (IClass klass : cha) {
       for (IMethod method : klass.getDeclaredMethods()) {
         wipeSoftCaches();
         // construct an IR; it will be cached
-        cache.getSSACache().findOrCreateIR(method, Everywhere.EVERYWHERE, options.getSSAOptions());
+        cache.getIR(method, Everywhere.EVERYWHERE);
       }
     }
     System.out.println("done");

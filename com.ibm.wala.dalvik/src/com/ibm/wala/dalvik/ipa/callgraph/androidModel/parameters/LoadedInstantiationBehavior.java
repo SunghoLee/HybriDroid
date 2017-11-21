@@ -60,9 +60,10 @@ import com.ibm.wala.util.strings.Atom;
  *  @author Tobias Blaschke <code@tobiasblaschke.de>
  *  @since  2013-10-25
  */
-public class LoadedInstantiationBehavior extends IInstantiationBehavior implements Serializable {
+public class LoadedInstantiationBehavior extends IInstantiationBehavior {
 
     private static final class BehviourValue implements Serializable {
+        private static final long serialVersionUID = -7558845015122601212L;
         public final InstanceBehavior behaviour;
         public final Exactness exactness;
         public final BehviourValue cacheFrom;
@@ -86,6 +87,8 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
     }
 
     private static final class BehaviorKey<T> implements Serializable {
+        private static final long serialVersionUID = 73530;
+
         // T is expected to be TypeName or Atom
         final T base;
 
@@ -94,18 +97,18 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
         }
 
         public static BehaviorKey<TypeName> mk(TypeName base) {
-            return new BehaviorKey<TypeName>(base);
+            return new BehaviorKey<>(base);
         }
 
         public static BehaviorKey<Atom> mk(Atom base) {
-            return new BehaviorKey<Atom>(base);
+            return new BehaviorKey<>(base);
         }
 
 
         @Override
         public boolean equals(Object o) {
             if (o instanceof BehaviorKey) {
-                BehaviorKey other = (BehaviorKey) o;
+                BehaviorKey<?> other = (BehaviorKey<?>) o;
                 return base.equals(other.base);
             } else {
                 return false;
@@ -124,7 +127,7 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
     }
 
     private InstanceBehavior defaultBehavior = null;
-    private final Map<BehaviorKey, BehviourValue> behaviours = new HashMap<BehaviorKey, BehviourValue>();
+    private final Map<BehaviorKey<?>, BehviourValue> behaviours = new HashMap<>();
     private final IClassHierarchy cha;
 
     public LoadedInstantiationBehavior(IClassHierarchy cha) {
@@ -258,8 +261,7 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
         }
     }
 
-    public void setBehavior(final TypeName type, final TypeName asParameterTo, final MethodReference inCall, 
-            final String withName, final InstanceBehavior beh, final Exactness exactness) {
+    public void setBehavior(final TypeName type, final InstanceBehavior beh, final Exactness exactness) {
 
 
         final BehaviorKey<TypeName> typeK= BehaviorKey.mk(type);
@@ -268,8 +270,7 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
         behaviours.put(typeK, val);
     }
 
-    public void setBehavior(final Atom pack, final TypeName asParameterTo, final MethodReference inCall, 
-            final String withName, final InstanceBehavior beh, final Exactness exactness) {
+    public void setBehavior(final Atom pack, final InstanceBehavior beh, final Exactness exactness) {
 
 
         final BehaviorKey<Atom> typeK= BehaviorKey.mk(pack);
@@ -304,8 +305,8 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
         if (this.serializationIncludesCache) {
             stream.writeObject(this.behaviours);
         } else {
-            final Map<BehaviorKey, BehviourValue> strippedBehaviours = new HashMap<BehaviorKey, BehviourValue>();
-            for (final BehaviorKey key : this.behaviours.keySet()) {
+            final Map<BehaviorKey<?>, BehviourValue> strippedBehaviours = new HashMap<>();
+            for (final BehaviorKey<?> key : this.behaviours.keySet()) {
                 final BehviourValue val = this.behaviours.get(key);
                 if (! val.isCached() ) {
                     strippedBehaviours.put(key, val);
@@ -315,11 +316,12 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void readObject(java.io.ObjectInputStream stream)
         throws IOException, ClassNotFoundException {
 
         this.behaviours.clear();
-        this.behaviours.putAll( (Map<BehaviorKey, BehviourValue>) stream.readObject());
+        this.behaviours.putAll((Map<BehaviorKey<?>, BehviourValue>) stream.readObject());
     }
 
 

@@ -82,7 +82,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
     private static final Logger logger = LoggerFactory.getLogger(AndroidEntryPointManager.class);
 
     public static AndroidEntryPointManager MANAGER = new AndroidEntryPointManager();
-    public static List<AndroidEntryPoint> ENTRIES = new ArrayList<AndroidEntryPoint>();
+    public static List<AndroidEntryPoint> ENTRIES = new ArrayList<>();
     /**
      * This is TRANSIENT!
      */
@@ -94,7 +94,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
     /**
      *  Determines if any EntryPoint extends the specified component.
      */
-    public boolean EPContainAny(AndroidComponent compo) {
+    public static boolean EPContainAny(AndroidComponent compo) {
         for (AndroidEntryPoint ep: ENTRIES) {
             if (ep.belongsTo(compo)) {
                 return true;
@@ -106,16 +106,16 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
     private AndroidEntryPointManager() {}
 
     public static void reset() {
-        ENTRIES = new ArrayList<AndroidEntryPoint>();
+        ENTRIES = new ArrayList<>();
         MANAGER = new AndroidEntryPointManager();
     }
 
-    public Set<TypeReference> getComponents() {
+    public static Set<TypeReference> getComponents() {
         if (ENTRIES.isEmpty()) {
             throw new IllegalStateException("No entrypoints loaded yet.");
         }
         
-        final Set<TypeReference> ret = new HashSet<TypeReference>();
+        final Set<TypeReference> ret = new HashSet<>();
         for (final AndroidEntryPoint ep : ENTRIES) {
             final TypeReference epClass = ep.getMethod().getDeclaringClass().getReference();
             if (AndroidComponent.isAndroidComponent(epClass , ep.getClassHierarchy())) {
@@ -222,7 +222,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
     /**
      *  Whether to generate a global android environment.
      *
-     *  See the {@link #setDoBootSequence()} documentation.
+     *  See the {@link #setDoBootSequence} documentation.
      *
      *  @return the setting, defaults to true
      */
@@ -252,7 +252,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
         return prev;
     }
 
-    private Class abstractAndroidModel = LoopAndroidModel.class;
+    private Class<? extends AbstractAndroidModel> abstractAndroidModel = LoopAndroidModel.class;
     /**
      *  What special handling to insert into the model.
      *
@@ -271,13 +271,13 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
             return new LoopAndroidModel(body, insts, paramManager, entryPoints);
         } else {
             try {
-                final Constructor<AbstractAndroidModel> ctor = this.abstractAndroidModel.getDeclaredConstructor(
+                final Constructor<? extends AbstractAndroidModel> ctor = this.abstractAndroidModel.getDeclaredConstructor(
                     VolatileMethodSummary.class, TypeSafeInstructionFactory.class, SSAValueManager.class,
                     Iterable.class);
                 if (ctor == null) {
                     throw new IllegalStateException("Canot find the constructor of " + this.abstractAndroidModel);
                 }
-                return (AbstractAndroidModel) ctor.newInstance(body, insts, paramManager, entryPoints);
+                return ctor.newInstance(body, insts, paramManager, entryPoints);
             } catch (java.lang.InstantiationException e) {
                 throw new IllegalStateException(e);
             } catch (java.lang.IllegalAccessException e) {
@@ -293,30 +293,26 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
     /**
      *  The behavior set using setModelBehavior(Class).
      *
-     *  Use {@link makeModelBehavior(VolatileMethodSummary, JavaInstructionFactory, AndroidModelParameterManager, Iterable<? extends Entrypoint>} 
+     *  Use {@link #makeModelBehavior}
      *  to retrieve an instance of this class.
      *
      *  If no class was set it returns null, makeModelBehavior will generate a LoopAndroidModel by default.
      *
      *  @return null or the class set using setModelBehavior
      */
-    public Class getModelBehavior() {
+    public Class<? extends AbstractAndroidModel> getModelBehavior() {
         return this.abstractAndroidModel;
     }
 
     /**
      *  Set the class instantiated by makeModelBehavior.
      *
-     *  @throws IllgealArgumentException if the abstractAndroidModel does not subclass AbstractAndroidModel
+     *  @throws IllegalArgumentException if the abstractAndroidModel is null
      */
-    public void setModelBehavior(Class abstractAndroidModel) {
+    public void setModelBehavior(Class<? extends AbstractAndroidModel> abstractAndroidModel) {
         if (abstractAndroidModel == null) {
             throw new IllegalArgumentException("abstractAndroidModel may not be null. Use SequentialAndroidModel " +
                     "if no special handling shall be inserted.");
-        }
-        if (! AbstractAndroidModel.class.isAssignableFrom(abstractAndroidModel)) {
-            throw new IllegalArgumentException("The given argument abstractAndroidModel does not subclass " +
-                    "AbtractAndroidModel");
         }
         this.abstractAndroidModel = abstractAndroidModel;
     }
@@ -366,7 +362,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
      *  See: {@link #setPackage(String)}
      *
      *  @return The package or null if it was indeterminable.
-     *  @see    guessPacakge()
+     *  @see    #guessPackage()
      */
     public String getPackage() {
         if (this.pack == null) {
@@ -384,7 +380,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
      *  the package based on the first entrypoint.
      *
      *  @return The package or null if it was indeterminable.
-     *  @see    getPackage()
+     *  @see    #getPackage()
      */
     public String guessPackage() {
         if (this.pack != null) {
@@ -422,7 +418,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
      *  @param  intent  An Intent with more or the same information as known to the system before.
      *  @throws IllegalArgumentException if you lower the information on an already registered Intent or the 
      *      information is incompatible.
-     *  @see    registerIntentForce()
+     *  @see    #registerIntentForce
      */
     public void registerIntent(Intent intent) {
         if (overrideIntents.containsKey(intent)) {
@@ -480,7 +476,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
      *
      *  @param  from    the Intent to override
      *  @param  to      the new Intent to resolve once 'from' is seen
-     *  @see    setOverrideForce()
+     *  @see    #setOverrideForce
      *  @throws IllegalArgumentException if you override an Intent with itself
      */
     public void setOverride(Intent from, Intent to) {
@@ -536,7 +532,7 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
         }
     }
 
-    public static final Map<Intent, Intent> DEFAULT_INTENT_OVERRIDES = new HashMap<Intent, Intent>();
+    public static final Map<Intent, Intent> DEFAULT_INTENT_OVERRIDES = new HashMap<>();
     static {
         DEFAULT_INTENT_OVERRIDES.put(
                 new AndroidSettingFactory.ExternalIntent("Landroid/intent/action/DIAL"),

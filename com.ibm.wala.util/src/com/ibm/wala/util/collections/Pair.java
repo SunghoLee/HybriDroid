@@ -18,6 +18,7 @@ import com.ibm.wala.util.debug.Assertions;
 
 public class Pair<T,U> implements Serializable {
 
+  private static final long serialVersionUID = 1861211857872739247L;
   public final T fst;
   public final U snd;
 
@@ -26,7 +27,7 @@ public class Pair<T,U> implements Serializable {
     this.snd = snd;
   }
 
-  private boolean check(Object x, Object y) {
+  private static boolean check(Object x, Object y) {
     return (x == null) ? (y == null) : x.equals(y);
   }
 
@@ -36,7 +37,7 @@ public class Pair<T,U> implements Serializable {
     return (o instanceof Pair) && check(fst, ((Pair) o).fst) && check(snd, ((Pair) o).snd);
   }
 
-  private int hc(Object o) {
+  private static int hc(Object o) {
     return (o == null) ? 0 : o.hashCode();
   }
 
@@ -47,21 +48,21 @@ public class Pair<T,U> implements Serializable {
 
   public Iterator<Object> iterator() {
     return new Iterator<Object>() {
-      byte next = 1;
+      byte nextFlag = 1;
 
       @Override
       public boolean hasNext() {
-        return next > 0;
+        return nextFlag > 0;
       }
 
       @Override
       public Object next() {
-        switch (next) {
+        switch (nextFlag) {
           case 1 :
-            next++;
+            nextFlag++;
             return fst;
           case 2 :
-            next = 0;
+            nextFlag = 0;
             return snd;
           default :
             throw new NoSuchElementException();
@@ -81,6 +82,6 @@ public class Pair<T,U> implements Serializable {
   }
 
   public static <T,U> Pair<T, U> make(T x, U y) {
-    return new Pair<T, U>(x,y);
+    return new Pair<>(x,y);
   }
 }

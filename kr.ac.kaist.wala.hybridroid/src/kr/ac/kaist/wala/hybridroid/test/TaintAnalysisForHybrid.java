@@ -150,7 +150,7 @@ public class TaintAnalysisForHybrid {
 		this.cg = cg;
 		pendingAssignForReturn = new HashMap<BasicBlockInContext<IExplodedBasicBlock>, Set<Pair<CGNode,Integer>>>();
 		System.out.println("#building super graph...");
-		this.supergraph = ICFGSupergraph.make(cg, new AnalysisCache());
+		this.supergraph = ICFGSupergraph.make(cg);
 		System.out.println("\tdone.");
 	}
 	

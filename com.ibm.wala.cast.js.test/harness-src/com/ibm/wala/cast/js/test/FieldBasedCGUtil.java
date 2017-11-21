@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.ibm.wala.cast.ipa.callgraph.CAstAnalysisScope;
 import com.ibm.wala.cast.ir.ssa.AstIRFactory;
@@ -25,25 +26,26 @@ import com.ibm.wala.cast.js.callgraph.fieldbased.WorklistBasedOptimisticCallgrap
 import com.ibm.wala.cast.js.callgraph.fieldbased.flowgraph.vertices.ObjectVertex;
 import com.ibm.wala.cast.js.html.JSSourceExtractor;
 import com.ibm.wala.cast.js.html.WebPageLoaderFactory;
+import com.ibm.wala.cast.js.ipa.callgraph.JSAnalysisOptions;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraph;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.loader.JavaScriptLoaderFactory;
 import com.ibm.wala.cast.js.translator.JavaScriptTranslatorFactory;
-import com.ibm.wala.cast.js.util.Util;
+import com.ibm.wala.classLoader.Module;
 import com.ibm.wala.classLoader.SourceModule;
 import com.ibm.wala.classLoader.SourceURLModule;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
 import com.ibm.wala.util.NullProgressMonitor;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.Pair;
-import com.ibm.wala.util.functions.Function;
 
 /**
  * Utility class for building call graphs.
@@ -52,7 +54,34 @@ import com.ibm.wala.util.functions.Function;
  *
  */
 public class FieldBasedCGUtil {
-	public static enum BuilderType { PESSIMISTIC, OPTIMISTIC, OPTIMISTIC_WORKLIST };
+	public static enum BuilderType {
+	  PESSIMISTIC {
+	    @Override
+      protected FieldBasedCallGraphBuilder fieldBasedCallGraphBuilderFactory(IClassHierarchy cha,
+          final JSAnalysisOptions makeOptions, IAnalysisCacheView cache, boolean supportFullPointerAnalysis) {
+	      return new PessimisticCallGraphBuilder(cha, makeOptions, cache, supportFullPointerAnalysis);
+	    }
+	  },
+
+	  OPTIMISTIC {
+      @Override
+      protected FieldBasedCallGraphBuilder fieldBasedCallGraphBuilderFactory(IClassHierarchy cha,
+          JSAnalysisOptions makeOptions, IAnalysisCacheView cache, boolean supportFullPointerAnalysis) {
+        return new OptimisticCallgraphBuilder(cha, makeOptions, cache, supportFullPointerAnalysis);
+      }
+    },
+
+	  OPTIMISTIC_WORKLIST {
+      @Override
+      protected FieldBasedCallGraphBuilder fieldBasedCallGraphBuilderFactory(IClassHierarchy cha,
+          JSAnalysisOptions makeOptions, IAnalysisCacheView cache, boolean supportFullPointerAnalysis) {
+        return new WorklistBasedOptimisticCallgraphBuilder(cha, makeOptions, cache, supportFullPointerAnalysis);
+      }
+    };
+
+    protected abstract FieldBasedCallGraphBuilder fieldBasedCallGraphBuilderFactory(IClassHierarchy cha,
+        JSAnalysisOptions makeOptions, IAnalysisCacheView cache, boolean supportFullPointerAnalysis);
+	}
 
 	private final JavaScriptTranslatorFactory translatorFactory;
 
@@ -60,11 +89,11 @@ public class FieldBasedCGUtil {
 		this.translatorFactory = translatorFactory;
 	}
 
-  public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildCG(URL url, BuilderType builderType, boolean supportFullPointerAnalysis, Function<Void, JSSourceExtractor> fExtractor) throws IOException, WalaException, CancelException  {
+  public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildCG(URL url, BuilderType builderType, boolean supportFullPointerAnalysis, Supplier<JSSourceExtractor> fExtractor) throws WalaException, CancelException  {
     return buildCG(url, builderType, new NullProgressMonitor(), supportFullPointerAnalysis, fExtractor);
   }
 
-  public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildCG(URL url, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis, Function<Void, JSSourceExtractor> fExtractor) throws IOException, WalaException, CancelException  {
+  public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildCG(URL url, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis, Supplier<JSSourceExtractor> fExtractor) throws WalaException, CancelException  {
     if (url.getFile().endsWith(".js")) {
       return buildScriptCG(url, builderType, monitor, supportFullPointerAnalysis);
     } else {
@@ -72,47 +101,35 @@ public class FieldBasedCGUtil {
     }
   }
   
-	public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildScriptCG(URL url, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis) throws IOException, WalaException, CancelException  {
+	public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildScriptCG(URL url, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis) throws WalaException, CancelException  {
     JavaScriptLoaderFactory loaders = new JavaScriptLoaderFactory(translatorFactory);
-    SourceModule[] scripts = new SourceModule[]{
+    Module[] scripts = new Module[]{
         new SourceURLModule(url),
-        JSCallGraphBuilderUtil.getPrologueFile("prologue.js")
+        JSCallGraphUtil.getPrologueFile("prologue.js")
     };
     return buildCG(loaders, scripts, builderType, monitor, supportFullPointerAnalysis);
 	}
 
 	 public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildTestCG(String dir, String name, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis) throws IOException, WalaException, CancelException  {
 	    JavaScriptLoaderFactory loaders = new JavaScriptLoaderFactory(translatorFactory);
-	    SourceModule[] scripts = JSCallGraphBuilderUtil.makeSourceModules(dir, name);
+	    Module[] scripts = JSCallGraphBuilderUtil.makeSourceModules(dir, name);
 	    return buildCG(loaders, scripts, builderType, monitor, supportFullPointerAnalysis);
 	  }
 
-	public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildPageCG(URL url, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis, Function<Void, JSSourceExtractor> fExtractor) throws IOException, WalaException, CancelException  {
+	public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildPageCG(URL url, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis, Supplier<JSSourceExtractor> fExtractor) throws WalaException, CancelException  {
 	  JavaScriptLoaderFactory loaders = new WebPageLoaderFactory(translatorFactory);
 	  SourceModule[] scripts = JSCallGraphBuilderUtil.makeHtmlScope(url, loaders, fExtractor);
 	  return buildCG(loaders, scripts, builderType, monitor, supportFullPointerAnalysis);
 	}
 
-	public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildCG(JavaScriptLoaderFactory loaders, SourceModule[] scripts, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis) throws IOException, WalaException, CancelException  {
+	public Pair<JSCallGraph, PointerAnalysis<ObjectVertex>> buildCG(JavaScriptLoaderFactory loaders, Module[] scripts, BuilderType builderType, IProgressMonitor monitor, boolean supportFullPointerAnalysis) throws WalaException, CancelException  {
 		CAstAnalysisScope scope = new CAstAnalysisScope(scripts, loaders, Collections.singleton(JavaScriptLoader.JS));
-		IClassHierarchy cha = ClassHierarchy.make(scope, loaders, JavaScriptLoader.JS);
-		Util.checkForFrontEndErrors(cha);
+		IClassHierarchy cha = ClassHierarchyFactory.make(scope, loaders, JavaScriptLoader.JS);
+		com.ibm.wala.cast.util.Util.checkForFrontEndErrors(cha);
 		Iterable<Entrypoint> roots = JSCallGraphUtil.makeScriptRoots(cha);
-		FieldBasedCallGraphBuilder builder = null;
-		
-		AnalysisCache cache = new AnalysisCache(AstIRFactory.makeDefaultFactory());
-		switch(builderType) {
-		case PESSIMISTIC:
-			builder = new PessimisticCallGraphBuilder(cha, JSCallGraphUtil.makeOptions(scope, cha, roots), cache, supportFullPointerAnalysis);
-			break;
-		case OPTIMISTIC:
-			builder = new OptimisticCallgraphBuilder(cha, JSCallGraphUtil.makeOptions(scope, cha, roots), cache, supportFullPointerAnalysis);
-			break;
-		case OPTIMISTIC_WORKLIST:
-		  builder = new WorklistBasedOptimisticCallgraphBuilder(cha, JSCallGraphUtil.makeOptions(scope, cha, roots), cache, supportFullPointerAnalysis);
-		  break;
-		}
-		
+		IAnalysisCacheView cache = new AnalysisCacheImpl(AstIRFactory.makeDefaultFactory());
+		final FieldBasedCallGraphBuilder builder = builderType.fieldBasedCallGraphBuilderFactory(cha,
+        JSCallGraphUtil.makeOptions(scope, cha, roots), cache, supportFullPointerAnalysis);
 		return builder.buildCallGraph(roots, monitor);
 	}
 

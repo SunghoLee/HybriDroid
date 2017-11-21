@@ -42,6 +42,11 @@ import java.util.Set;
 
 public class HashSetMultiMap<K, V> extends AbstractMultiMap<K, V> {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1699856257459175263L;
+
   public HashSetMultiMap() {
     super(false);
   }
@@ -56,7 +61,7 @@ public class HashSetMultiMap<K, V> extends AbstractMultiMap<K, V> {
   }
 
   public static <K, V> HashSetMultiMap<K, V> make() {
-    return new HashSetMultiMap<K, V>();
+    return new HashSetMultiMap<>();
   }
 
 }

@@ -14,9 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,7 +26,7 @@ import com.ibm.wala.core.tests.util.WalaTestCase;
 import com.ibm.wala.dataflow.IFDS.ISupergraph;
 import com.ibm.wala.dataflow.IFDS.TabulationResult;
 import com.ibm.wala.dataflow.graph.BitVectorSolver;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -35,12 +34,14 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.impl.Util;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.cfg.BasicBlockInContext;
 import com.ibm.wala.ipa.cfg.ExplodedInterproceduralCFG;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAOptions;
@@ -88,9 +89,9 @@ public class DataflowTest extends WalaTestCase {
 
     scope.setExclusions(new FileOfClasses(new ByteArrayInputStream(EXCLUSIONS.getBytes("UTF-8"))));
     try {
-      cha = ClassHierarchy.make(scope);
+      cha = ClassHierarchyFactory.make(scope);
     } catch (ClassHierarchyException e) {
-      throw new Exception();
+      throw new Exception(e);
     }
   }
 
@@ -107,7 +108,7 @@ public class DataflowTest extends WalaTestCase {
 
   @Test
   public void testIntraproc1() {
-    AnalysisCache cache = new AnalysisCache();
+    IAnalysisCacheView cache = new AnalysisCacheImpl();
     final MethodReference ref = MethodReference.findOrCreate(ClassLoaderReference.Application, "Ldataflow/StaticDataflow", "test1",
         "()V");
     IMethod method = cha.resolveMethod(ref);
@@ -126,7 +127,7 @@ public class DataflowTest extends WalaTestCase {
 
   @Test
   public void testIntraproc2() {
-    AnalysisCache cache = new AnalysisCache();
+    IAnalysisCacheView cache = new AnalysisCacheImpl();
     final MethodReference ref = MethodReference.findOrCreate(ClassLoaderReference.Application, "Ldataflow/StaticDataflow", "test2",
         "()V");
     IMethod method = cha.resolveMethod(ref);
@@ -150,7 +151,7 @@ public class DataflowTest extends WalaTestCase {
         "Ldataflow/StaticDataflow");
     AnalysisOptions options = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
 
-    CallGraphBuilder builder = Util.makeZeroOneCFABuilder(options, new AnalysisCache(), cha, scope);
+    CallGraphBuilder<InstanceKey> builder = Util.makeZeroOneCFABuilder(options, new AnalysisCacheImpl(), cha, scope);
     CallGraph cg = builder.makeCallGraph(options, null);
     ExplodedInterproceduralCFG icfg = ExplodedInterproceduralCFG.make(cg);
     ContextInsensitiveReachingDefs reachingDefs = new ContextInsensitiveReachingDefs(icfg, cha);
@@ -161,7 +162,7 @@ public class DataflowTest extends WalaTestCase {
         if (delegate.getNumber() == 4) {
           IntSet solution = solver.getOut(bb).getValue();
           IntIterator intIterator = solution.intIterator();
-          List<Pair<CGNode, Integer>> applicationDefs = new ArrayList<Pair<CGNode,Integer>>();
+          List<Pair<CGNode, Integer>> applicationDefs = new ArrayList<>();
           while (intIterator.hasNext()) {
             int next = intIterator.next();
             final Pair<CGNode, Integer> def = reachingDefs.getNodeAndInstrForNumber(next);
@@ -182,10 +183,9 @@ public class DataflowTest extends WalaTestCase {
         "Ldataflow/StaticDataflow");
     AnalysisOptions options = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
 
-    CallGraphBuilder builder = Util.makeZeroOneCFABuilder(options, new AnalysisCache(), cha, scope);
+    CallGraphBuilder<InstanceKey> builder = Util.makeZeroOneCFABuilder(options, new AnalysisCacheImpl(), cha, scope);
     CallGraph cg = builder.makeCallGraph(options, null);
-    AnalysisCache cache = new AnalysisCache();
-    ContextSensitiveReachingDefs reachingDefs = new ContextSensitiveReachingDefs(cg, cache);
+    ContextSensitiveReachingDefs reachingDefs = new ContextSensitiveReachingDefs(cg);
     TabulationResult<BasicBlockInContext<IExplodedBasicBlock>, CGNode, Pair<CGNode, Integer>> result = reachingDefs.analyze();
     ISupergraph<BasicBlockInContext<IExplodedBasicBlock>, CGNode> supergraph = reachingDefs.getSupergraph();
     for (BasicBlockInContext<IExplodedBasicBlock> bb : supergraph) {
@@ -194,7 +194,7 @@ public class DataflowTest extends WalaTestCase {
         if (delegate.getNumber() == 4) {
           IntSet solution = result.getResult(bb);
           IntIterator intIterator = solution.intIterator();
-          List<Pair<CGNode, Integer>> applicationDefs = new ArrayList<Pair<CGNode,Integer>>();
+          List<Pair<CGNode, Integer>> applicationDefs = new ArrayList<>();
           while (intIterator.hasNext()) {
             int next = intIterator.next();
             final Pair<CGNode, Integer> def = reachingDefs.getDomain().getMappedObject(next);

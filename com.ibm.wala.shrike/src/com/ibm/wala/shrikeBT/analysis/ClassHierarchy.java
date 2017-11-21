@@ -87,7 +87,7 @@ public final class ClassHierarchy {
     }
 
     if (hierarchy.isInterface(t2) != NO) {
-      HashSet<String> visited = new HashSet<String>();
+      HashSet<String> visited = new HashSet<>();
 
       for (c = t1; c != null; c = hierarchy.getSuperClass(c)) {
         int v = checkSuperinterfacesContain(hierarchy, c, t2, visited);
@@ -244,7 +244,7 @@ public final class ClassHierarchy {
   }
 
   private static boolean collectDominatingSuperInterfacesFromClass(ClassHierarchyProvider hierarchy, String t,
-      HashSet<String> matches, HashSet<String> supers) {
+      HashSet<String> supers) {
     String[] ifaces = hierarchy.getSuperInterfaces(t);
     if (ifaces == null) {
       return false;
@@ -263,12 +263,11 @@ public final class ClassHierarchy {
     }
   }
 
-  private static boolean collectDominatingSuperInterfaces(ClassHierarchyProvider hierarchy, String t, HashSet<String> matches,
-      HashSet<String> supers) {
+  private static boolean collectDominatingSuperInterfaces(ClassHierarchyProvider hierarchy, String t, HashSet<String> supers) {
     boolean r = true;
 
     for (String c = t; c != null && !supers.contains(c); c = hierarchy.getSuperClass(c)) {
-      if (!collectDominatingSuperInterfacesFromClass(hierarchy, c, matches, supers)) {
+      if (!collectDominatingSuperInterfacesFromClass(hierarchy, c, supers)) {
         r = false;
       }
     }
@@ -283,13 +282,13 @@ public final class ClassHierarchy {
       return t1;
     }
 
-    HashSet<String> t1Supers = new HashSet<String>();
+    HashSet<String> t1Supers = new HashSet<>();
     t1Supers.add(Constants.TYPE_Object);
     boolean t1ExactClasses = insertSuperClasses(hierarchy, t1, t1Supers);
     int t1ClassCount = t1Supers.size();
     boolean t1ExactInterfaces = insertSuperClassInterfaces(hierarchy, t1, t1Supers);
 
-    HashSet<String> t2Supers = new HashSet<String>();
+    HashSet<String> t2Supers = new HashSet<>();
     boolean t2ExactClasses = collectDominatingSuperClasses(hierarchy, t2, t1Supers, t2Supers);
 
     if (t2Supers.size() == 0) {
@@ -303,7 +302,7 @@ public final class ClassHierarchy {
       // interfaces
       t2ExactInterfaces = true;
     } else {
-      t2ExactInterfaces = collectDominatingSuperInterfaces(hierarchy, t2, t1Supers, t2Supers);
+      t2ExactInterfaces = collectDominatingSuperInterfaces(hierarchy, t2, t2Supers);
       if (!t1ExactInterfaces && t2Supers.size() != 1) {
         // we found an interface; it might also apply to t1; must bail
         return Constants.TYPE_unknown;

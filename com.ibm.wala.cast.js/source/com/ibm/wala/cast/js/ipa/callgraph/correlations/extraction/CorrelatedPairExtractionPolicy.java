@@ -151,7 +151,7 @@ public class CorrelatedPairExtractionPolicy extends ExtractionPolicy {
     
     List<ExtractionRegion> regions = region_map.get(region_info.fst);
     if(regions == null)
-      region_map.put(region_info.fst, regions = new LinkedList<ExtractionRegion>());
+      region_map.put(region_info.fst, regions = new LinkedList<>());
     for(int i=0;i<regions.size();++i) {
       ExtractionRegion region2 = regions.get(i);
       if(region2.getEnd() <= region_info.snd.getStart())
@@ -179,7 +179,7 @@ public class CorrelatedPairExtractionPolicy extends ExtractionPolicy {
     return true;
   }
   
-  private void filterNames(Set<ChildPos> nodes, String indexName) {
+  private static void filterNames(Set<ChildPos> nodes, String indexName) {
     for(Iterator<ChildPos> iter=nodes.iterator();iter.hasNext();) {
       CAstNode node = iter.next().getChild();
       if(node.getKind() == CAstNode.OBJECT_REF) {
@@ -191,7 +191,7 @@ public class CorrelatedPairExtractionPolicy extends ExtractionPolicy {
     }
   }
 
-  private Pair<CAstNode, ? extends ExtractionRegion> findClosestContainingBlock(CAstEntity entity, ChildPos startNode, ChildPos endNode, String parmName, List<String> locals) {
+  private static Pair<CAstNode, ? extends ExtractionRegion> findClosestContainingBlock(CAstEntity entity, ChildPos startNode, ChildPos endNode, String parmName, List<String> locals) {
     ChildPos pos = startNode;
     CAstNode block = null;
     int start = -1, end = 0;

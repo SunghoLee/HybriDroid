@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.MethodReference;
@@ -62,7 +61,6 @@ import com.ibm.wala.util.ssa.SSAValue;
  *  However it does no allocations or Phi-Statements on its own. It just juggles with the numbers.
  *
  *  @see com.ibm.wala.dalvik.ipa.callgraph.androidModel.structure.AbstractAndroidModel
- *  @see com.ibm.wala.dalvik.ipa.callgraph.impl.DexFakeRootMethod
  *
  *  @author  Tobias Blaschke <code@toiasblaschke.de>
  *  @since   2013-09-19
@@ -108,7 +106,7 @@ public class AndroidModelParameterManager {
     }
 
     /** The main data-structure of the management  */
-    private Map<TypeReference, List<ManagedParameter>> seenTypes = new HashMap<TypeReference, List<ManagedParameter>>();
+    private Map<TypeReference, List<ManagedParameter>> seenTypes = new HashMap<>();
 
     /**
      *  Setting the behaviour may be handy in the later model.
@@ -205,7 +203,7 @@ public class AndroidModelParameterManager {
             }
             param.setInScope = currentScope;
 
-            List<ManagedParameter> aParam = new ArrayList<ManagedParameter>();
+            List<ManagedParameter> aParam = new ArrayList<>();
             aParam.add(param);
 
             
@@ -297,7 +295,7 @@ public class AndroidModelParameterManager {
             }
 
             
-            List<ManagedParameter> aParam = new ArrayList<ManagedParameter>();
+            List<ManagedParameter> aParam = new ArrayList<>();
             aParam.add(param);
 
             seenTypes.put(type, aParam);
@@ -331,7 +329,7 @@ public class AndroidModelParameterManager {
         if (seenTypes.containsKey(type)) {
             seenTypes.get(type).add(param);
         } else {
-            List<ManagedParameter> aParam = new ArrayList<ManagedParameter>();
+            List<ManagedParameter> aParam = new ArrayList<>();
             aParam.add(param);
 
             seenTypes.put(type, aParam);
@@ -373,7 +371,7 @@ public class AndroidModelParameterManager {
         if (seenTypes.containsKey(type)) {
             seenTypes.get(type).add(param);
         } else {
-            List<ManagedParameter> aParam = new ArrayList<ManagedParameter>();
+            List<ManagedParameter> aParam = new ArrayList<>();
             aParam.add(param);
 
             seenTypes.put(type, aParam);
@@ -476,7 +474,7 @@ public class AndroidModelParameterManager {
             throw new IllegalArgumentException("The argument type may not be null");
         }
 
-        List<Integer> ret = new ArrayList<Integer>();
+        List<Integer> ret = new ArrayList<>();
 
         if (seenTypes.containsKey(type)) {
             for (ManagedParameter param : seenTypes.get(type)) {
@@ -663,7 +661,7 @@ public class AndroidModelParameterManager {
      *  Handed through to an IInstantiationBehavior if set in the constructor.
      *
      *  @return true if Type is a REUSE type
-     *  @throws IllegalStateExcpetion if AndroidModelParameterManager was constructed without an IInstanciationBehavior
+     *  @throws IllegalStateException if AndroidModelParameterManager was constructed without an IInstanciationBehavior
      */
     public boolean isReuse(TypeReference type) {
         if (this.behaviour == null) {
@@ -678,7 +676,7 @@ public class AndroidModelParameterManager {
      *  Shorthand for not({@link #isReuse(TypeReference)}.
      *
      *  @return true if type is a CREATE-Type
-     *  @throws IllegalStateExcpetion if AndroidModelParameterManager was constructed without an IInstanciationBehavior
+     *  @throws IllegalStateException if AndroidModelParameterManager was constructed without an IInstanciationBehavior
      */
     public boolean isCreate(TypeReference type) {
         return (! isReuse(type));

@@ -56,20 +56,21 @@ import com.ibm.wala.demandpa.alg.statemachine.StateMachineFactory;
 import com.ibm.wala.demandpa.flowgraph.IFlowLabel;
 import com.ibm.wala.demandpa.util.MemoryAccessMap;
 import com.ibm.wala.demandpa.util.PABasedMemoryAccessMap;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.HeapModel;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAInstruction;
@@ -234,8 +235,8 @@ public abstract class AbstractPtrTest {
     Iterable<Entrypoint> entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha, mainClass);
     AnalysisOptions options = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
 
-    final AnalysisCache analysisCache = new AnalysisCache();
-    CallGraphBuilder cgBuilder = Util.makeZeroCFABuilder(options, analysisCache, cha, scope);
+    final IAnalysisCacheView analysisCache = new AnalysisCacheImpl();
+    CallGraphBuilder<InstanceKey> cgBuilder = Util.makeZeroCFABuilder(options, analysisCache, cha, scope);
     final CallGraph cg = cgBuilder.makeCallGraph(options, null);
     // System.err.println(cg.toString());
 
@@ -257,9 +258,9 @@ public abstract class AbstractPtrTest {
    * @return
    * @throws ClassHierarchyException
    */
-  private IClassHierarchy findOrCreateCHA(AnalysisScope scope) throws ClassHierarchyException {
+  private static IClassHierarchy findOrCreateCHA(AnalysisScope scope) throws ClassHierarchyException {
     if (cachedCHA == null) {
-      cachedCHA = ClassHierarchy.make(scope);
+      cachedCHA = ClassHierarchyFactory.make(scope);
     }
     return cachedCHA;
   }
@@ -283,7 +284,7 @@ public abstract class AbstractPtrTest {
   }
 
   protected StateMachineFactory<IFlowLabel> getStateMachineFactory() {
-    return new DummyStateMachine.Factory<IFlowLabel>();
+    return new DummyStateMachine.Factory<>();
   }
 
 }

@@ -28,7 +28,7 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.IR;
@@ -53,6 +53,8 @@ import kr.ac.kaist.wala.hybridroid.callgraph.AndroidMethodTargetSelector;
 import kr.ac.kaist.wala.hybridroid.callgraph.ResourceCallGraphBuilder;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.util.data.Pair;
+import com.ibm.wala.ssa.SSACache;
+import com.ibm.wala.ssa.AuxiliaryCache;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -276,7 +278,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 	
 	@SuppressWarnings("unchecked")
 	private Pair<CallGraph, PointerAnalysis<InstanceKey>> buildCG() throws ClassHierarchyException, IllegalArgumentException, CallGraphBuilderCancelException{
-		IClassHierarchy cha = ClassHierarchy.make(scope);
+		IClassHierarchy cha = ClassHierarchyFactory.make(scope);
 		//test
 //		IClass klass = cha.lookupClass(TypeReference.find(ClassLoaderReference.Primordial, "Landroid/util/Log"));
 //		for(IMethod m : klass.getAllMethods())
@@ -285,7 +287,7 @@ public class AndroidStringAnalysis implements StringAnalysis{
 		//test-end
 		AnalysisOptions options = new AnalysisOptions();
 		IRFactory<IMethod> irFactory = new DexIRFactory();
-		AnalysisCache cache = new AnalysisCache(irFactory);
+		AnalysisCache cache = new AnalysisCache(irFactory, options.getSSAOptions(), new SSACache(irFactory, new AuxiliaryCache(), new AuxiliaryCache()));
 		options.setReflectionOptions(ReflectionOptions.NONE);
 		options.setAnalysisScope(scope);
 		options.setEntrypoints(getEntrypoints(cha, scope, options, cache));

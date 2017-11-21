@@ -61,11 +61,11 @@ public class RecursionCheckContextSelector implements ContextSelector {
     return baseContext;
   }
 
-  private boolean recursiveContext(Context baseContext, IMethod callee) {
+  private static boolean recursiveContext(Context baseContext, IMethod callee) {
     if (!recursionPossible(callee)) {
       return false;
     }
-    LinkedList<Pair<Context,Collection<IMethod>>> worklist = new LinkedList<Pair<Context,Collection<IMethod>>>();
+    LinkedList<Pair<Context,Collection<IMethod>>> worklist = new LinkedList<>();
     worklist.push(Pair.make(baseContext, (Collection<IMethod>)Collections.singleton(callee)));
     while (!worklist.isEmpty()) {
       Pair<Context, Collection<IMethod>> p = worklist.removeFirst();
@@ -100,7 +100,7 @@ public class RecursionCheckContextSelector implements ContextSelector {
     return false;
   }
 
-  private boolean updateForNode(Context baseContext, Collection<IMethod> curEncountered, LinkedList<Pair<Context, Collection<IMethod>>> worklist, CGNode callerNode) {
+  private static boolean updateForNode(Context baseContext, Collection<IMethod> curEncountered, LinkedList<Pair<Context, Collection<IMethod>>> worklist, CGNode callerNode) {
     final IMethod method = callerNode.getMethod();
     if (!recursionPossible(method)) {
       assert !curEncountered.contains(method);
@@ -115,7 +115,7 @@ public class RecursionCheckContextSelector implements ContextSelector {
       System.err.println("context " + baseContext);
       return false;
     }    
-    Collection<IMethod> newEncountered = new ArrayList<IMethod>(curEncountered);
+    Collection<IMethod> newEncountered = new ArrayList<>(curEncountered);
     newEncountered.add(method);
     worklist.add(Pair.make(callerNode.getContext(),newEncountered));
     return true;
@@ -132,7 +132,7 @@ public class RecursionCheckContextSelector implements ContextSelector {
    * @param m
    * @return
    */
-  private boolean recursionPossible(IMethod m) {
+  private static boolean recursionPossible(IMethod m) {
     // object or array constructors cannot be involved
     if (m.getReference().getName().equals(JavaScriptMethods.ctorAtom)) {
       TypeReference declaringClass = m.getReference().getDeclaringClass();

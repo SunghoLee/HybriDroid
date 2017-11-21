@@ -42,9 +42,9 @@
  */
 package com.ibm.wala.util.ssa;
 
-import com.ibm.wala.types.TypeReference;
-import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.MethodReference;
+import com.ibm.wala.types.TypeName;
+import com.ibm.wala.types.TypeReference;
 
 /**
  *  A number representating an SSA-Value and its type.
@@ -55,7 +55,7 @@ import com.ibm.wala.types.MethodReference;
  *  Use ParameterAccessor to get the parameters of a function as SSAValues.
  *
  *  @see    com.ibm.wala.util.ssa.TypeSafeInstructionFactory
- *  @see    com.ibm.wala.util.ParameterAccessor
+ *  @see    com.ibm.wala.util.ssa.ParameterAccessor
  *
  *  @author Tobias Blaschke <code@tobiasblaschke.de>
  *  @since  2013-10-20
@@ -188,7 +188,6 @@ public class SSAValue {
      *
      *  @param  number  access the value using this number
      *  @param  validIn optionally assign this value to a method
-     *  @param  variableName    optional name of the variable
      *  @throws IllegalArgumentException on negative parameter number
      */
     public SSAValue(final int number, final TypeReference type, final MethodReference validIn, final VariableKey key) {

@@ -14,7 +14,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -60,6 +59,8 @@ public class CAstPattern {
 
   public static class Segments extends TreeMap<String,Object> {
 
+    private static final long serialVersionUID = 4119719848336209576L;
+
     public CAstNode getSingle(String name) {
       assert containsKey(name) : name;
       return (CAstNode) get(name);
@@ -81,14 +82,15 @@ public class CAstPattern {
     }
 
     private void addAll(Segments other) {
-      for (Iterator xs = other.entrySet().iterator(); xs.hasNext();) {
-        Map.Entry e = (Map.Entry) xs.next();
-        String name = (String) e.getKey();
+      for (Map.Entry<String, Object> e : other.entrySet()) {
+        String name = e.getKey();
         if (e.getValue() instanceof CAstNode) {
           add(name, (CAstNode) e.getValue());
         } else {
-          for (Iterator vs = ((List) e.getValue()).iterator(); vs.hasNext();) {
-            add(name, (CAstNode) vs.next());
+          @SuppressWarnings("unchecked")
+          final List<CAstNode> nodes = (List<CAstNode>) e.getValue();
+          for (CAstNode v : nodes) {
+            add(name, v);
           }
         }
       }
@@ -102,7 +104,7 @@ public class CAstPattern {
           ((List<CAstNode>) o).add(result);
         } else {
           assert o instanceof CAstNode;
-          List<Object> x = new ArrayList<Object>();
+          List<Object> x = new ArrayList<>();
           x.add(o);
           x.add(result);
           put(name, x);
@@ -395,7 +397,7 @@ public class CAstPattern {
     private final Collection<Segments> result = HashSetFactory.make();
     
     @Override
-    public void leaveNode(CAstNode n, Context c, CAstVisitor visitor) {
+    public void leaveNode(CAstNode n, Context c, CAstVisitor<Context> visitor) {
       Segments s = match(CAstPattern.this, n);
       if (s != null) {
         result.add(s);
@@ -472,7 +474,7 @@ public class CAstPattern {
         result = new CAstPattern(name, CHILD_KIND, null);
 
       } else if (patternString.startsWith("|(", start)) {
-        List<CAstPattern> alternatives = new ArrayList<CAstPattern>();
+        List<CAstPattern> alternatives = new ArrayList<>();
         start += 2;
         do {
           alternatives.add(parse());
@@ -517,7 +519,7 @@ public class CAstPattern {
           result = new CAstPattern(name, kind, null);
 
         } else {
-          List<CAstPattern> children = new ArrayList<CAstPattern>();
+          List<CAstPattern> children = new ArrayList<>();
           start = patternString.indexOf('(', start) + 1;
           do {
             children.add(parse());

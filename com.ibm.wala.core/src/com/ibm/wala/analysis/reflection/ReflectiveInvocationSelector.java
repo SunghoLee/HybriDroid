@@ -49,7 +49,7 @@ class ReflectiveInvocationSelector implements ContextSelector {
    */
   @Override
   public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey[] receiver) {
-    if (receiver == null || receiver.length == 0 || !mayUnderstand(caller, site, callee, receiver[0])) {
+    if (receiver == null || receiver.length == 0 || !mayUnderstand(callee, receiver[0])) {
       return null;
     }
     IR ir = caller.getIR();
@@ -105,9 +105,10 @@ class ReflectiveInvocationSelector implements ContextSelector {
   /**
    * This object may understand a dispatch to Constructor.newInstance().
    */
-  private boolean mayUnderstand(CGNode caller, CallSiteReference site, IMethod targetMethod, InstanceKey instance) {
+  private static boolean mayUnderstand(IMethod targetMethod, InstanceKey instance) {
     if (instance instanceof ConstantKey) {
-      if (targetMethod.getReference().equals(ReflectiveInvocationInterpreter.METHOD_INVOKE) || isConstructorConstant(instance)
+      if (targetMethod.getReference().equals(ReflectiveInvocationInterpreter.METHOD_INVOKE) || 
+          isConstructorConstant(instance)
           && targetMethod.getReference().equals(ReflectiveInvocationInterpreter.CTOR_NEW_INSTANCE)) {
         return true;
       }
@@ -115,7 +116,7 @@ class ReflectiveInvocationSelector implements ContextSelector {
     return false;
   }
 
-  private boolean isConstructorConstant(InstanceKey instance) {
+  private static boolean isConstructorConstant(InstanceKey instance) {
     if (instance instanceof ConstantKey) {
       ConstantKey c = (ConstantKey) instance;
       if (c.getConcreteType().getReference().equals(TypeReference.JavaLangReflectConstructor)) {
@@ -129,7 +130,8 @@ class ReflectiveInvocationSelector implements ContextSelector {
 
   @Override
   public IntSet getRelevantParameters(CGNode caller, CallSiteReference site) {
-    if (site.isDispatch() || site.getDeclaredTarget().getNumberOfParameters() > 0) {
+    if (site.getDeclaredTarget().equals(ReflectiveInvocationInterpreter.METHOD_INVOKE) || 
+        site.getDeclaredTarget().equals(ReflectiveInvocationInterpreter.CTOR_NEW_INSTANCE)) {
       return thisParameter;
     } else {
       return EmptyIntSet.instance;

@@ -10,22 +10,29 @@
  *****************************************************************************/
 package com.ibm.wala.cast.js.html;
 
-import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
-import com.ibm.wala.cast.js.html.jericho.JerichoHtmlParser;
-import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
-import com.ibm.wala.util.collections.Pair;
-import com.ibm.wala.util.functions.Function;
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.input.BOMInputStream;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
+
+import com.ibm.wala.cast.ir.translator.TranslatorToCAst.Error;
+import com.ibm.wala.cast.js.html.jericho.JerichoHtmlParser;
+import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
+import com.ibm.wala.util.collections.Pair;
 
 /**
  * extracts JavaScript source code from HTML, with no model of the actual
@@ -35,9 +42,9 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
   private static final Pattern LEGAL_JS_IDENTIFIER_REGEXP = Pattern.compile("^[a-zA-Z$_][a-zA-Z\\d$_]*$");
   private static final Pattern LEGAL_JS_KEYWORD_REGEXP = Pattern.compile("^((break)|(case)|(catch)|(continue)|(debugger)|(default)|(delete)|(do)|(else)|(finally)|(for)|(function)|(if)|(in)|(instanceof)|(new)|(return)|(switch)|(this)|(throw)|(try)|(typeof)|(var)|(void)|(while)|(with))$");
 
-  public static Function<Void,JSSourceExtractor> factory = new Function<Void,JSSourceExtractor>() {
+  public static Supplier<JSSourceExtractor> factory = new Supplier<JSSourceExtractor>() {
     @Override
-    public JSSourceExtractor apply(Void object) {
+    public JSSourceExtractor get() {
       return new DomLessSourceExtractor();
     }
   };
@@ -81,11 +88,7 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
       writeEntrypoint("window.onload();");
     }
 
-    protected Position makePos(int lineNumber, ITag governingTag) {
-      return makePos(entrypointUrl, lineNumber, governingTag);
-    }
-     
-    protected Position makePos(final URL url, final int lineNumber, ITag governingTag) {
+    protected Position makePos(ITag governingTag) {
       return governingTag.getElementPosition();
      }
     
@@ -133,7 +136,7 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
       handleDOM(tag);
     }
 
-    private boolean isUsableIdentifier(String x) {
+    private static boolean isUsableIdentifier(String x) {
       return x != null &&
           LEGAL_JS_IDENTIFIER_REGEXP.matcher(x).matches() &&
           !LEGAL_JS_KEYWORD_REGEXP.matcher(x).matches();
@@ -210,7 +213,7 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
       return Pair.make(value, quote);
     }
     
-    private String extructJS(String attValue) {
+    private static String extructJS(String attValue) {
       if (attValue == null){
         return "";
       }
@@ -244,17 +247,15 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
 
     private void getScriptFromUrl(String urlAsString, ITag scriptTag) throws IOException, MalformedURLException {
       URL scriptSrc = new URL(entrypointUrl, urlAsString);
-      Reader scriptInputStream;
+      BOMInputStream bs;
       try {
-        BOMInputStream bs = new BOMInputStream(scriptSrc.openConnection().getInputStream(), false,
-            ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
+        bs = new BOMInputStream(scriptSrc.openConnection().getInputStream(), false,
+            ByteOrderMark.UTF_8, 
+            ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
             ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE);
         if (bs.hasBOM()) {
           System.err.println("removing BOM " + bs.getBOM());
-          scriptInputStream = new InputStreamReader(bs, bs.getBOMCharsetName());
-        }else
-          scriptInputStream = new InputStreamReader(bs);
-//        scriptInputStream = new InputStreamReader(scriptSrc.openConnection().getInputStream());
+        }
       } catch (Exception e) {
         //it looks like this happens when we can't resolve the url?
         if (DEBUG) {
@@ -264,24 +265,21 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
         }
         return;
       }
-      
-      BufferedReader scriptReader = null;
-      try {
+      try (
+        final Reader scriptInputStream = new InputStreamReader(bs);
+        final BufferedReader scriptReader = new BufferedReader(scriptInputStream);
+        ) {
         String line;
-        scriptReader = new BufferedReader(scriptInputStream);
         StringBuffer x = new StringBuffer();
         while ((line = scriptReader.readLine()) != null) {
           x.append(line).append("\n");
         }
+
         scriptRegion.println(x.toString(), scriptTag.getElementPosition(), scriptSrc, false);
-      } finally {
-        if (scriptReader != null) {
-          scriptReader.close();
-        }
       }
     }
 
-    protected String getScriptName(URL url) throws MalformedURLException {
+    protected String getScriptName(URL url) {
       String file = url.getFile();
       int lastIdxOfSlash = file.lastIndexOf('/');
       file = (lastIdxOfSlash == (-1)) ? file : file.substring(lastIdxOfSlash + 1);
@@ -321,9 +319,11 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
   public Set<MappedSourceModule> extractSources(URL entrypointUrl, IHtmlParser htmlParser, IUrlResolver urlResolver)
   throws IOException, Error {
 
-    Reader inputStreamReader = WebUtil.getStream(entrypointUrl);
-    IGeneratorCallback htmlCallback = createHtmlCallback(entrypointUrl, urlResolver); 
-    htmlParser.parse(entrypointUrl, inputStreamReader, htmlCallback, entrypointUrl.getFile());
+    IGeneratorCallback htmlCallback;
+    try (Reader inputStreamReader = WebUtil.getStream(entrypointUrl)) {
+      htmlCallback = createHtmlCallback(entrypointUrl, urlResolver);
+      htmlParser.parse(entrypointUrl, inputStreamReader, htmlCallback, entrypointUrl.getFile());
+    }
 
     SourceRegion finalRegion = new SourceRegion();
     htmlCallback.writeToFinalRegion(finalRegion);
@@ -331,7 +331,10 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
     // writing the final region into one SourceFileModule.
     File outputFile = createOutputFile(entrypointUrl, DELETE_UPON_EXIT, USE_TEMP_NAME);
     tempFile = outputFile;
-    FileMapping fileMapping = finalRegion.writeToFile(new PrintWriter(new FileWriter(outputFile)));
+    FileMapping fileMapping;
+    try (final PrintWriter printer = new PrintWriter(new FileWriter(outputFile))) {
+      fileMapping = finalRegion.writeToFile(printer);
+    }
     if (fileMapping == null) {
       fileMapping = new EmptyFileMapping();
     }
@@ -343,7 +346,7 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
     return new HtmlCallback(entrypointUrl, urlResolver);
   }
 
-  private File createOutputFile(URL url, boolean delete, boolean useTempName) throws IOException {
+  private static File createOutputFile(URL url, boolean delete, boolean useTempName) throws IOException {
     File outputFile;
     String fileName = new File(url.getFile()).getName();
     if (fileName.length() < 5) {
@@ -375,7 +378,7 @@ public class DomLessSourceExtractor extends JSSourceExtractor {
     MappedSourceModule entry = res.iterator().next();
     System.out.println(entry);
     System.out.println(entry.getMapping());
-
+    
   }
 
   @Override

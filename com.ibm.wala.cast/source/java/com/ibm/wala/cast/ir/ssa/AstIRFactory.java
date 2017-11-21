@@ -11,6 +11,7 @@
 package com.ibm.wala.cast.ir.ssa;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.loader.AstMethod.LexicalInformation;
@@ -35,18 +36,18 @@ import com.ibm.wala.types.TypeReference;
 
 public class AstIRFactory<T extends IMethod> implements IRFactory<T> {
 
-  public ControlFlowGraph makeCFG(final IMethod method, final Context context) {
+  public ControlFlowGraph<?, ?> makeCFG(final IMethod method) {
     return ((AstMethod) method).getControlFlowGraph();
   }
 
-  public static class AstDefaultIRFactory extends DefaultIRFactory {
-    private final AstIRFactory astFactory;
+  public static class AstDefaultIRFactory<T extends IMethod> extends DefaultIRFactory {
+    private final AstIRFactory<T> astFactory;
 
     public AstDefaultIRFactory() {
-      this(new AstIRFactory());
+      this(new AstIRFactory<T>());
     }
     
-    public AstDefaultIRFactory(AstIRFactory astFactory) {
+    public AstDefaultIRFactory(AstIRFactory<T> astFactory) {
       this.astFactory = astFactory;
     }
 
@@ -62,14 +63,14 @@ public class AstIRFactory<T extends IMethod> implements IRFactory<T> {
     @Override
     public ControlFlowGraph makeCFG(IMethod method, Context context) {
       if (method instanceof AstMethod) {
-        return astFactory.makeCFG(method, context);
+        return astFactory.makeCFG(method);
       } else {
         return super.makeCFG(method, context);
       }
     }
   }
 
-  public class AstIR extends IR {
+  public static class AstIR extends IR {
     private final LexicalInformation lexicalInfo;
     
     private final SSA2LocalMap localMap;
@@ -78,7 +79,7 @@ public class AstIRFactory<T extends IMethod> implements IRFactory<T> {
       return lexicalInfo;
     }
     
-    private void setCatchInstructions(SSACFG ssacfg, AbstractCFG oldcfg) {
+    private void setCatchInstructions(SSACFG ssacfg, AbstractCFG<?, ?> oldcfg) {
       for (int i = 0; i < oldcfg.getNumberOfNodes(); i++)
         if (oldcfg.isCatchBlock(i)) {
           ExceptionHandlerBasicBlock B = (ExceptionHandlerBasicBlock) ssacfg.getNode(i);
@@ -87,8 +88,8 @@ public class AstIRFactory<T extends IMethod> implements IRFactory<T> {
         }
     }
 
-    private void setupCatchTypes(SSACFG cfg, Map<IBasicBlock, TypeReference[]> map) {
-      for(Map.Entry<IBasicBlock,TypeReference[]> e : map.entrySet()) {
+    private static void setupCatchTypes(SSACFG cfg, Map<IBasicBlock<SSAInstruction>, TypeReference[]> map) {
+      for(Entry<IBasicBlock<SSAInstruction>, TypeReference[]> e : map.entrySet()) {
         if (e.getKey().getNumber() != -1) {
           ExceptionHandlerBasicBlock bb = (ExceptionHandlerBasicBlock) cfg.getNode(e.getKey().getNumber());
           for (int j = 0; j < e.getValue().length; j++) {
@@ -143,7 +144,7 @@ public class AstIRFactory<T extends IMethod> implements IRFactory<T> {
   public IR makeIR(final IMethod method, final Context context, final SSAOptions options) {
     assert method instanceof AstMethod : method.toString();
   
-    AbstractCFG oldCfg = ((AstMethod) method).cfg();
+    AbstractCFG<?, ?> oldCfg = ((AstMethod) method).cfg();
     SSAInstruction[] oldInstrs = (SSAInstruction[]) oldCfg.getInstructions();
     SSAInstruction[] instrs = new SSAInstruction[ oldInstrs.length ];
     System.arraycopy(oldInstrs, 0, instrs, 0, instrs.length);
@@ -155,7 +156,7 @@ public class AstIRFactory<T extends IMethod> implements IRFactory<T> {
   }
 
   public static IRFactory<IMethod> makeDefaultFactory() {
-    return new AstDefaultIRFactory();
+    return new AstDefaultIRFactory<>();
   }
 
   @Override

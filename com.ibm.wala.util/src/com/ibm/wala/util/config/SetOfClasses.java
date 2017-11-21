@@ -14,11 +14,13 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- * Logically, a set of {@link IClass}.
+ * Logically, a set of {@link Class}.
  * 
  * TODO: why does this not extend {@link Set}? Is there a good reason anymore?
  */
 public abstract class SetOfClasses implements Serializable {
+
+  private static final long serialVersionUID = -3048222852073799533L;
 
   public abstract boolean contains(String klassName);
 

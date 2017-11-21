@@ -22,8 +22,8 @@ import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.FieldReference;
@@ -101,8 +101,8 @@ public class CrossLanguageClassHierarchy implements IClassHierarchy {
   @Override
   public IClassLoader[] getLoaders() {
     Set<IClassLoader> loaders = HashSetFactory.make();
-    for (Iterator ldrs = analysisScope.getLoaders().iterator(); ldrs.hasNext();) {
-      loaders.add(getLoader((ClassLoaderReference) ldrs.next()));
+    for (ClassLoaderReference loaderReference : analysisScope.getLoaders()) {
+      loaders.add(getLoader(loaderReference));
     }
 
     return loaders.toArray(new IClassLoader[loaders.size()]);
@@ -121,8 +121,8 @@ public class CrossLanguageClassHierarchy implements IClassHierarchy {
   @Override
   public int getNumberOfClasses() {
     int total = 0;
-    for (Iterator ldrs = analysisScope.getLoaders().iterator(); ldrs.hasNext();) {
-      total += getLoader((ClassLoaderReference) ldrs.next()).getNumberOfClasses();
+    for (ClassLoaderReference loaderReference : analysisScope.getLoaders()) {
+      total += getLoader(loaderReference).getNumberOfClasses();
     }
 
     return total;
@@ -264,17 +264,17 @@ public class CrossLanguageClassHierarchy implements IClassHierarchy {
       throws ClassHierarchyException {
     Set<Language> languages = scope.getBaseLanguages();
     Map<Atom, IClassHierarchy> hierarchies = HashMapFactory.make();
-    for (Iterator ls = languages.iterator(); ls.hasNext();) {
-      Language L = (Language) ls.next();
+    for (Language L : languages) {
       Set<Language> ll = HashSetFactory.make(L.getDerivedLanguages());
       ll.add(L);
-      hierarchies.put(L.getName(), ClassHierarchy.make(scope, factory, ll));
+      hierarchies.put(L.getName(), ClassHierarchyFactory.make(scope, factory, ll));
     }
 
     return new CrossLanguageClassHierarchy(scope, factory, hierarchies);
   }
 
 /** BEGIN Custom change: unresolved classes */
+  @Override
   public Set<TypeReference> getUnresolvedClasses() {
     return HashSetFactory.make();
   }

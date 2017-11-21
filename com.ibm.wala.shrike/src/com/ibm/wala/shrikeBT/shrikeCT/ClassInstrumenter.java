@@ -16,7 +16,6 @@ import java.util.List;
 
 import com.ibm.wala.shrikeBT.Compiler;
 import com.ibm.wala.shrikeBT.ConstantPoolReader;
-import com.ibm.wala.shrikeBT.Constants;
 import com.ibm.wala.shrikeBT.Decoder.InvalidBytecodeException;
 import com.ibm.wala.shrikeBT.ExceptionHandler;
 import com.ibm.wala.shrikeBT.Instruction;
@@ -63,13 +62,11 @@ final public class ClassInstrumenter {
   
   private final ClassHierarchyProvider cha;
   
-  private final boolean reuseStackMaps;
-  
   /**
    * Create a class instrumenter from raw bytes.
    */
-  public ClassInstrumenter(String inputName, byte[] bytes, ClassHierarchyProvider cha, boolean reuseStackMaps) throws InvalidClassFileException {
-    this(inputName, new ClassReader(bytes), cha, reuseStackMaps);
+  public ClassInstrumenter(String inputName, byte[] bytes, ClassHierarchyProvider cha) throws InvalidClassFileException {
+    this(inputName, new ClassReader(bytes), cha);
   }
 
   /**
@@ -93,13 +90,12 @@ final public class ClassInstrumenter {
    * 
    * @throws IllegalArgumentException if cr is null
    */
-  public ClassInstrumenter(String inputName, ClassReader cr, ClassHierarchyProvider cha, boolean reuseStackMaps) throws InvalidClassFileException {
+  public ClassInstrumenter(String inputName, ClassReader cr, ClassHierarchyProvider cha) {
     if (cr == null) {
       throw new IllegalArgumentException("cr is null");
     }
     this.cr = cr;
     this.cha = cha;
-    this.reuseStackMaps = reuseStackMaps;
     methods = new MethodData[cr.getMethodCount()];
     oldCode = new CodeReader[methods.length];
     cpr = CTDecoder.makeConstantPoolReader(cr);
@@ -165,7 +161,11 @@ final public class ClassInstrumenter {
   public MethodData createEmptyMethodData(String name, String sig, int access) {
     // Instruction[] instructions=new Instruction[0];
     Instruction[] instructions = new Instruction[1];
-    instructions[0] = ReturnInstruction.make(Constants.TYPE_void);
+    String type = Util.getReturnType(sig);
+    if ("C".equals(type) || "B".equals(type) || "Z".equals(type) || "S".equals(type)) {
+      type = "I";
+    }
+    instructions[0] = ReturnInstruction.make(type);
     ExceptionHandler[][] handlers = new ExceptionHandler[instructions.length][];
     Arrays.fill(handlers, noHandlers);
     int[] i2b = new int[instructions.length];

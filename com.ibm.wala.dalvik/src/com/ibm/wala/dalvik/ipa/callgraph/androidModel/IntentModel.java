@@ -40,12 +40,10 @@
  */
 package com.ibm.wala.dalvik.ipa.callgraph.androidModel;
 
-import java.util.logging.Logger;
-
 import com.ibm.wala.dalvik.ipa.callgraph.impl.AndroidEntryPoint;
 import com.ibm.wala.dalvik.util.AndroidComponent;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ipa.summaries.SummarizedMethod;
 import com.ibm.wala.util.CancelException;
@@ -66,12 +64,13 @@ public class IntentModel extends AndroidModel {
      *  
      *  {@inheritDoc}
      */
+    @Override
     protected boolean selectEntryPoint(AndroidEntryPoint ep) {
         return ep.isMemberOf(this.target) || ep.belongsTo(AndroidComponent.APPLICATION) ||
             ep.belongsTo(AndroidComponent.PROVIDER);
     }
 
-    public IntentModel(final IClassHierarchy cha, final AnalysisOptions options, final AnalysisCache cache, Atom target) {
+    public IntentModel(final IClassHierarchy cha, final AnalysisOptions options, final IAnalysisCacheView cache, Atom target) {
         super(cha, options, cache);
 
         this.target = target;

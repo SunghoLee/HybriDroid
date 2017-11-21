@@ -25,6 +25,7 @@ import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
 import com.ibm.wala.ipa.summaries.SyntheticIR;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.IRView;
 import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInstructionFactory;
@@ -74,6 +75,11 @@ public class GetClassContextInterpeter implements SSAContextInterpreter {
   }
 
   @Override
+  public IRView getIRView(CGNode node) {
+    return getIR(node);
+  }
+
+  @Override
   public int getNumberOfStatements(CGNode node) {
     assert understands(node);
     return getIR(node).getInstructions().length;
@@ -100,7 +106,7 @@ public class GetClassContextInterpeter implements SSAContextInterpreter {
     return EmptyIterator.instance();
   }
 
-  private SSAInstruction[] makeStatements(JavaTypeContext context) {
+  private static SSAInstruction[] makeStatements(JavaTypeContext context) {
     ArrayList<SSAInstruction> statements = new ArrayList<SSAInstruction>();
     int nextLocal = 2;
     int retValue = nextLocal++;
@@ -120,7 +126,7 @@ public class GetClassContextInterpeter implements SSAContextInterpreter {
     return result;
   }
 
-  private IR makeIR(IMethod method, JavaTypeContext context) {
+  private static IR makeIR(IMethod method, JavaTypeContext context) {
     SSAInstruction instrs[] = makeStatements(context);
     return new SyntheticIR(method, context, new InducedCFG(instrs, method, context), instrs, SSAOptions.defaultOptions(), null);
   }

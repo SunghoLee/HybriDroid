@@ -18,6 +18,8 @@ import java.io.Serializable;
 @SuppressWarnings("rawtypes")
 abstract public class BitVectorBase<T extends BitVectorBase> implements Cloneable, Serializable {
 
+  private static final long serialVersionUID = 1151811022797406841L;
+
   protected final static boolean DEBUG = false;
 
   protected final static int LOG_BITS_PER_UNIT = 5;
@@ -176,7 +178,7 @@ abstract public class BitVectorBase<T extends BitVectorBase> implements Cloneabl
   }
 
   /**
-   * @return min j >= start s.t get(j)
+   * @return min j &gt;= start s.t get(j)
    */
   public int nextSetBit(int start) {
     if (start < 0) {

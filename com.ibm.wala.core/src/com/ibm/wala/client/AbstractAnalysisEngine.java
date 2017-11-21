@@ -21,18 +21,22 @@ import com.ibm.wala.classLoader.ClassLoaderFactory;
 import com.ibm.wala.classLoader.ClassLoaderFactoryImpl;
 import com.ibm.wala.classLoader.JarFileModule;
 import com.ibm.wala.classLoader.Module;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.ipa.slicer.SDG;
+import com.ibm.wala.ipa.slicer.Slicer.ControlDependenceOptions;
+import com.ibm.wala.ipa.slicer.Slicer.DataDependenceOptions;
 import com.ibm.wala.ssa.DefaultIRFactory;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.CancelException;
@@ -48,7 +52,7 @@ import com.ibm.wala.util.io.FileProvider;
  * Some clients choose to build on this, but many don't. I usually don't in new code; I usually don't find the re-use enabled by
  * this class compelling. I would probably nuke this except for some legacy code that uses it.
  */
-public abstract class AbstractAnalysisEngine implements AnalysisEngine {
+public abstract class AbstractAnalysisEngine<I extends InstanceKey> implements AnalysisEngine {
 
   public interface EntrypointBuilder {
     Iterable<Entrypoint> createEntrypoints(AnalysisScope scope, IClassHierarchy cha);
@@ -74,7 +78,7 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
   /**
    * The modules to analyze
    */
-  protected Collection<Module> moduleFiles;
+  protected Collection<? extends Module> moduleFiles;
 
   /**
    * A representation of the analysis scope
@@ -89,7 +93,7 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
   /**
    * A cache of IRs and stuff
    */
-  private AnalysisCache cache = makeDefaultCache();
+  private IAnalysisCacheView cache = makeDefaultCache();
 
   /**
    * The standard J2SE libraries to analyze
@@ -114,7 +118,7 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
   /**
    * Results of pointer analysis
    */
-  protected PointerAnalysis<InstanceKey> pointerAnalysis;
+  protected PointerAnalysis<I> pointerAnalysis;
 
   /**
    * Graph view of flow of pointers between heap abstractions
@@ -128,11 +132,11 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
     }
   };
 
-  protected abstract CallGraphBuilder getCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache);
+  protected abstract CallGraphBuilder<I> getCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache2);
 
   protected CallGraphBuilder buildCallGraph(IClassHierarchy cha, AnalysisOptions options, boolean savePointerAnalysis,
       IProgressMonitor monitor) throws IllegalArgumentException, CancelException {
-    CallGraphBuilder builder = getCallGraphBuilder(cha, options, cache);
+    CallGraphBuilder<I> builder = getCallGraphBuilder(cha, options, cache);
 
     cg = builder.makeCallGraph(options, monitor);
 
@@ -144,7 +148,7 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
   }
 
   @Override
-  public void setModuleFiles(Collection moduleFiles) {
+  public void setModuleFiles(Collection<? extends Module> moduleFiles) {
     this.moduleFiles = moduleFiles;
   }
 
@@ -178,7 +182,7 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
     IClassHierarchy cha = null;
     ClassLoaderFactory factory = makeClassLoaderFactory(getScope().getExclusions());
     try {
-      cha = ClassHierarchy.make(getScope(), factory);
+      cha = ClassHierarchyFactory.make(getScope(), factory);
     } catch (ClassHierarchyException e) {
       System.err.println("Class Hierarchy construction failed");
       System.err.println(e.toString());
@@ -195,8 +199,8 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
     return cha;
   }
 
-  protected void setClassHierarchy(IClassHierarchy cha) {
-    this.cha = cha;
+  protected IClassHierarchy setClassHierarchy(IClassHierarchy cha) {
+    return this.cha = cha;
   }
 
   /**
@@ -256,17 +260,21 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
     return scope;
   }
 
-  public PointerAnalysis<InstanceKey> getPointerAnalysis() {
+  public PointerAnalysis<I> getPointerAnalysis() {
     return pointerAnalysis;
   }
 
   public HeapGraph getHeapGraph() {
     if (heapGraph == null) {
-      heapGraph = new BasicHeapGraph(getPointerAnalysis(), cg);
+      heapGraph = new BasicHeapGraph<>(getPointerAnalysis(), cg);
     }
     return heapGraph;
   }
 
+  public SDG<I> getSDG(DataDependenceOptions data, ControlDependenceOptions ctrl) {
+    return new SDG<I>(getCallGraph(), getPointerAnalysis(), data, ctrl);
+  }
+  
   public String getExclusionsFile() {
     return exclusionsFile;
   }
@@ -280,8 +288,8 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
     return new AnalysisOptions(getScope(), entrypoints);
   }
 
-  public AnalysisCache makeDefaultCache() {
-    return new AnalysisCache(new DefaultIRFactory());
+  public IAnalysisCacheView makeDefaultCache() {
+    return new AnalysisCacheImpl(new DefaultIRFactory());
   }
 
   protected Iterable<Entrypoint> makeDefaultEntrypoints(AnalysisScope scope, IClassHierarchy cha) {
@@ -313,7 +321,7 @@ public abstract class AbstractAnalysisEngine implements AnalysisEngine {
     return defaultCallGraphBuilder().makeCallGraph(options, null);
   }
 
-  public AnalysisCache getCache() {
+  public IAnalysisCacheView getCache() {
     return cache;
   }
 

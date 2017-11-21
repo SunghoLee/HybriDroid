@@ -48,7 +48,7 @@
 
 package com.ibm.wala.dalvik.dex.instructions;
 
-import org.jf.dexlib.Code.Opcode;
+import org.jf.dexlib2.Opcode;
 
 import com.ibm.wala.cast.ir.ssa.CAstUnaryOp;
 import com.ibm.wala.dalvik.classLoader.DexIMethod;
@@ -58,7 +58,7 @@ import com.ibm.wala.util.debug.Assertions;
 
 public class UnaryOperation extends Instruction {
 
-    public static enum OpID {MOVE, MOVE_WIDE, MOVE_EXCEPTION, NOT, NEGINT, NOTINT, NEGLONG, NOTLONG, NEGFLOAT, NEGDOUBLE, DOUBLETOLONG, DOUBLETOFLOAT, INTTOBYTE, INTTOCHAR, INTTOSHORT, DOUBLETOINT, FLOATTODOUBLE, FLOATTOLONG, FLOATTOINT, LONGTODOUBLE, LONGTOFLOAT, LONGTOINT, INTTODOUBLE, INTTOFLOAT, INTTOLONG};
+    public static enum OpID {MOVE, MOVE_WIDE, MOVE_EXCEPTION, NOT, NEGINT, NOTINT, NEGLONG, NOTLONG, NEGFLOAT, NEGDOUBLE, DOUBLETOLONG, DOUBLETOFLOAT, INTTOBYTE, INTTOCHAR, INTTOSHORT, DOUBLETOINT, FLOATTODOUBLE, FLOATTOLONG, FLOATTOINT, LONGTODOUBLE, LONGTOFLOAT, LONGTOINT, INTTODOUBLE, INTTOFLOAT, INTTOLONG}
 
     public final OpID op;
     public final int source;

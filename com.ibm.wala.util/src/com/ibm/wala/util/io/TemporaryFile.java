@@ -15,25 +15,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class TemporaryFile {
 
-  private final static String outputDir;
-
-  static {
-    String dir = System.getProperty("java.io.tmpdir");
-
-    while (dir.endsWith(File.separator))
-      dir = dir.substring(0, dir.length()-1);
-      
-    dir = dir + File.separator;
-    
-    outputDir = dir;
-  }
+  private static Path outputDir;
 
   public static File urlToFile(String fileName, URL input) throws IOException {
-    File F = new File(outputDir + File.separator + fileName);
-    return urlToFile(F , input);
+    if (input == null) {
+      throw new NullPointerException("input == null");
+    }
+    if (outputDir == null) {
+      outputDir = Files.createTempDirectory("wala");      
+    }
+    Path filePath = outputDir.resolve(fileName);
+    return urlToFile(filePath.toFile(), input);
   }
 
   public static File urlToFile(File F, URL input) throws IOException {
@@ -41,29 +39,28 @@ public class TemporaryFile {
   }
   
   public static File streamToFile(File F, InputStream... inputs) throws IOException {
-    FileOutputStream output = new FileOutputStream(F);
-    
-    int read;
-    byte[] buffer = new byte[ 1024 ];
-    for(InputStream input : inputs) {
-      while ( (read = input.read(buffer)) != -1 ) {
-        output.write(buffer, 0, read);
+    try (final FileOutputStream output = new FileOutputStream(F)) {
+      
+      int read;
+      byte[] buffer = new byte[ 1024 ];
+      for(InputStream input : inputs) {
+        while ( (read = input.read(buffer)) != -1 ) {
+          output.write(buffer, 0, read);
+        }
+        input.close();
       }
-      input.close();
     }
-    
-    output.close();
     return F;
   }
   
   public static File stringToFile(File F, String... inputs) throws IOException {
-    FileOutputStream output = new FileOutputStream(F);
-    
-    for(String input : inputs) {
-      output.write(input.getBytes());
+    try (final FileOutputStream output = new FileOutputStream(F)) {
+
+      for(String input : inputs) {
+        output.write(input.getBytes(StandardCharsets.UTF_8));
+      }
     }
-    
-    output.close();
+
     return F;
   }
 }

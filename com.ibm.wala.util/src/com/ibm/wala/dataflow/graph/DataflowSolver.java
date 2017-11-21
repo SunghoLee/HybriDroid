@@ -25,7 +25,7 @@ import com.ibm.wala.util.intset.IntegerUnionFind;
 /**
  * Iterative solver for a Killdall dataflow framework
  */
-public abstract class DataflowSolver<T, V extends IVariable<?>> extends DefaultFixedPointSolver<V> {
+public abstract class DataflowSolver<T, V extends IVariable<V>> extends DefaultFixedPointSolver<V> {
 
   /**
    * the dataflow problem to solve
@@ -146,7 +146,7 @@ public abstract class DataflowSolver<T, V extends IVariable<?>> extends DefaultF
       mapIt(i, allVars, edge2Var);
 
       uf = new IntegerUnionFind(allVars.length);
-      map = new ObjectArrayMapping<Object>(allVars);
+      map = new ObjectArrayMapping<>(allVars);
     }
 
     /**

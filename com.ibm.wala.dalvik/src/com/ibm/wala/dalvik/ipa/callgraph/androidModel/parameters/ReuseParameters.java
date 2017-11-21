@@ -42,7 +42,6 @@ package com.ibm.wala.dalvik.ipa.callgraph.androidModel.parameters;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.dalvik.ipa.callgraph.androidModel.AndroidModel;
@@ -115,7 +114,7 @@ public class ReuseParameters {
      */
     public void collectParameters(final Iterable<? extends Entrypoint> entrypoints) {
 //        int paramsToModel = firstParamSSA();
-        this.reuseParameters = new ArrayList<TypeName>();
+        this.reuseParameters = new ArrayList<>();
 
         for (final Entrypoint ep : entrypoints) {
             final int paramCount = ep.getNumberOfParameters();
@@ -148,7 +147,7 @@ public class ReuseParameters {
      *
      *  @see    com.ibm.wala.util.ssa.ParameterAccessor
      */
-    private int ssaFor(IMethod inCallTo, int paramNo) {
+    private static int ssaFor(IMethod inCallTo, int paramNo) {
         assert (paramNo >= 0);
         assert (paramNo < inCallTo.getNumberOfParameters());
 
@@ -164,7 +163,7 @@ public class ReuseParameters {
      *
      *  @see    com.ibm.wala.util.ssa.ParameterAccessor
      */
-    private int firstOf(TypeName type, IMethod inCallTo) {
+    private static int firstOf(TypeName type, IMethod inCallTo) {
         for (int i = 0; i < inCallTo.getNumberOfParameters(); ++i) {
             if (inCallTo.getParameterType(i).getName().equals(type)) {
                 return i;

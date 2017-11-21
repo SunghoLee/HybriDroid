@@ -27,7 +27,7 @@ public class AnnotationsReader extends AttributeReader {
   /**
    * offset in class file where this attribute begins
    */
-  private final int beginOffset;
+  protected final int beginOffset;
 
   public AnnotationsReader(ClassReader.AttrIterator iter, String label) throws InvalidClassFileException {
     super(iter, label);
@@ -45,7 +45,7 @@ public class AnnotationsReader extends AttributeReader {
   }
 
   /**
-   * @return total length of this attribute in bytes, <bf>including</bf> the
+   * @return total length of this attribute in bytes, <b>including</b> the
    *         first 6 bytes
    * @throws InvalidClassFileException
    */
@@ -63,7 +63,7 @@ public class AnnotationsReader extends AttributeReader {
    *          offset in the class file at which the constant pool offset is
    *          given
    */
-  private String getUtf8ConstantPoolValue(int offset) throws InvalidClassFileException {
+  protected String getUtf8ConstantPoolValue(int offset) throws InvalidClassFileException {
     checkSize(offset, 2);
     int cpOffset = cr.getUShort(offset);
     return cr.getCP().getCPUtf8(cpOffset);
@@ -100,6 +100,30 @@ public class AnnotationsReader extends AttributeReader {
       return String.valueOf(val);
     }
 
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((val == null) ? 0 : val.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      ConstantElementValue other = (ConstantElementValue) obj;
+      if (val == null) {
+        if (other.val != null)
+          return false;
+      } else if (!val.equals(other.val))
+        return false;
+      return true;
+    }
   }
 
   /**
@@ -154,8 +178,17 @@ public class AnnotationsReader extends AttributeReader {
 
   /**
    * get all the annotations declared in this attribute.
+   * <pre>
+   * RuntimeVisibleAnnotations_attribute {
+   *   u2         attribute_name_index;
+   *   u4         attribute_length;
+   *   u2         num_annotations;
+   *   annotation annotations[num_annotations];
+   * }
+   * </pre>
    * 
    * @throws InvalidClassFileException
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.16"> JLS (SE8), 4.7.16</a>
    */
   public AnnotationAttribute[] getAllAnnotations() throws InvalidClassFileException {
     AnnotationAttribute[] result = new AnnotationAttribute[getAnnotationCount()];
@@ -168,7 +201,7 @@ public class AnnotationsReader extends AttributeReader {
     }
     return result;
   }
-
+  
   /**
    * <pre>
    * param_annotations {
@@ -200,6 +233,9 @@ public class AnnotationsReader extends AttributeReader {
     }
     return result;
   }
+  
+  
+  
   /**
    * <pre>
    * annotation { 
@@ -212,7 +248,7 @@ public class AnnotationsReader extends AttributeReader {
    * 
    * @throws InvalidClassFileException
    */
-  private Pair<AnnotationAttribute, Integer> getAttributeAndSize(int begin) throws InvalidClassFileException {
+  protected Pair<AnnotationAttribute, Integer> getAttributeAndSize(int begin) throws InvalidClassFileException {
     String type = getUtf8ConstantPoolValue(begin);
     int numElementValuePairs = cr.getUShort(begin + 2);
     int size = 4;
@@ -297,7 +333,7 @@ public class AnnotationsReader extends AttributeReader {
    * @throws InvalidClassFileException
    * @throws IllegalArgumentException
    */
-  private Pair<ElementValue, Integer> readElementValueAndSize(int offset) throws IllegalArgumentException,
+  protected Pair<ElementValue, Integer> readElementValueAndSize(int offset) throws IllegalArgumentException,
       InvalidClassFileException {
     char tag = (char) cr.getByte(offset);
     // meaning of this short depends on the tag
@@ -351,6 +387,7 @@ public class AnnotationsReader extends AttributeReader {
   public static enum AnnotationType {
     RuntimeVisibleAnnotations, RuntimeInvisibleAnnotations,RuntimeVisibleParameterAnnotations, RuntimeInvisibleParameterAnnotations
   }
+
   
   public static boolean isKnownAnnotation(String name) {
     for (AnnotationType t : AnnotationType.values()) {

@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.cast.ipa.callgraph.AstHeapModel;
@@ -39,9 +40,9 @@ import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.classLoader.ProgramCounter;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey.TypeFilter;
@@ -57,7 +58,6 @@ import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.CompoundIterator;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.HashSetFactory;
@@ -92,7 +92,7 @@ public class FlowGraph implements Iterable<Vertex> {
 	private GraphReachability<Vertex,FuncVertex> optimistic_closure;
 	
 	public FlowGraph() {
-		this.graph = new SlowSparseNumberedGraph<Vertex>(1);
+		this.graph = new SlowSparseNumberedGraph<>(1);
 		this.factory = new VertexFactory();
 	}
 	
@@ -104,14 +104,14 @@ public class FlowGraph implements Iterable<Vertex> {
 		optimistic_closure = computeClosure(graph, monitor, FuncVertex.class);
 	}
 	
-	private <T> GraphReachability<Vertex, T> computeClosure(NumberedGraph<Vertex> graph, IProgressMonitor monitor, final Class<?> type) throws CancelException {
+	private static <T> GraphReachability<Vertex, T> computeClosure(NumberedGraph<Vertex> graph, IProgressMonitor monitor, final Class<?> type) throws CancelException {
 		// prune flowgraph by taking out 'unknown' vertex
 		Graph<Vertex> pruned_flowgraph = GraphSlicer.prune(graph, new Predicate<Vertex>() {
 			@Override
 			public boolean test(Vertex t) {
 				return t.accept(new AbstractVertexVisitor<Boolean>() {
 					@Override
-					public Boolean visitVertex(Vertex vertex) {
+					public Boolean visitVertex() {
 						return true;
 					}
 					
@@ -125,8 +125,8 @@ public class FlowGraph implements Iterable<Vertex> {
 		
 		// compute transitive closure
 		GraphReachability<Vertex, T> optimistic_closure = 
-		    new GraphReachability<Vertex,T>(
-		      new InvertedGraph<Vertex>(pruned_flowgraph),
+		    new GraphReachability<>(
+		      new InvertedGraph<>(pruned_flowgraph),
 		      new Predicate<Vertex>() {
 		        @Override public boolean test(Vertex o) {
 		          return type.isInstance(o);
@@ -180,16 +180,16 @@ public class FlowGraph implements Iterable<Vertex> {
     return graph.iterator();
   }
   
-  public PointerAnalysis<ObjectVertex> getPointerAnalysis(final CallGraph cg, final AnalysisCache cache, final IProgressMonitor monitor) throws CancelException {
+  public PointerAnalysis<ObjectVertex> getPointerAnalysis(final CallGraph cg, final IAnalysisCacheView cache, final IProgressMonitor monitor) throws CancelException {
     return new PointerAnalysis<ObjectVertex>() {
       
       private final Map<Pair<PrototypeField,ObjectVertex>,PrototypeFieldVertex> proto = HashMapFactory.make();
       
       private GraphReachability<Vertex,ObjectVertex> pointerAnalysis = computeClosure(graph, monitor, ObjectVertex.class);
 
-      private final ExtensionGraph<Vertex> dataflow = new ExtensionGraph<Vertex>(graph);
+      private final ExtensionGraph<Vertex> dataflow = new ExtensionGraph<>(graph);
 
-      protected IR getIR(final AnalysisCache cache, FuncVertex func) {
+      protected IR getIR(final IAnalysisCacheView cache, FuncVertex func) {
         return cache.getIR(func.getConcreteType().getMethod(AstMethodReference.fnSelector));
       }
 
@@ -288,8 +288,8 @@ public class FlowGraph implements Iterable<Vertex> {
         return new Iterable<PointerKey> () {
           @Override
           public Iterator<PointerKey> iterator() {
-            return new CompoundIterator<PointerKey>(factory.getArgVertices().iterator(),
-                new CompoundIterator<PointerKey>(factory.getRetVertices().iterator(), 
+            return new CompoundIterator<>(factory.getArgVertices().iterator(),
+                new CompoundIterator<>(factory.getRetVertices().iterator(), 
                     new CompoundIterator<PointerKey>(factory.getVarVertices().iterator(),
                         factory.getPropVertices().iterator())));
           }
@@ -432,6 +432,8 @@ public class FlowGraph implements Iterable<Vertex> {
 
           final PointerAnalysis<ObjectVertex> pa = this;
           class FieldBasedHeapGraph extends SlowSparseNumberedGraph<Object> implements HeapGraph<ObjectVertex> {
+
+            private static final long serialVersionUID = -3544629644808422215L;
 
             private <X> X ensureNode(X n) {
               if (!containsNode(n)) {

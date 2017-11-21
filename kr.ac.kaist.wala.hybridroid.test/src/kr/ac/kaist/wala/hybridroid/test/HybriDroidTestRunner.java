@@ -45,20 +45,20 @@ public class HybriDroidTestRunner {
 	}
 	
 	private static void runTest(Class c, String test){
-	    PrintStream tmpOutStream = System.out;
-	    PrintStream tmpErrStream = System.err;
-   	    PrintStream privPrintStream = new PrintStream(new ByteArrayOutputStream()){
-		   @Override
-		   public void println(String x){
-		   }
-		};
+	     PrintStream tmpOutStream = System.out;
+	     PrintStream tmpErrStream = System.err;
+   	     PrintStream privPrintStream = new PrintStream(new ByteArrayOutputStream()){
+	     	   @Override
+	     	   public void println(String x){
+	     	   }
+	     	};
 
-	    System.out.println(test + " test...");
-	    System.setOut(privPrintStream);
-	    System.setErr(privPrintStream);
-		Result result = JUnitCore.runClasses(c);
-		System.setOut(tmpOutStream);
-		System.setErr(tmpErrStream);
+	       System.out.println(test + " test...");
+	     System.setOut(privPrintStream);
+	     System.setErr(privPrintStream);
+	     	Result result = JUnitCore.runClasses(c);
+		 System.setOut(tmpOutStream);
+		 System.setErr(tmpErrStream);
 		if(result.getFailures().isEmpty()){
 			System.out.println("Pass all " + test + " tests.");
 		}else{
@@ -76,6 +76,6 @@ public class HybriDroidTestRunner {
 		runTest(DynamicJSExectionTest.class, "dynamic js execution");
 		runTest(MultipleWebViewTest.class, "multiple webview execution");
 		runTest(SubClassWebViewTest.class, "sub WebView class");
-		runTest(BridgeFieldTest.class, "bridge field access");
+		//		runTest(BridgeFieldTest.class, "bridge field access");
 	}
 }

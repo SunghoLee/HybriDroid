@@ -40,9 +40,9 @@ public class CodeScraper implements ClassFileTransformer {
       if (className == null || sourceFile == null || !sourceFile.endsWith("java") || true) try {
         String log = prefix + File.separator + reader.getName() + ".class";
         (new File(log)).getParentFile().mkdirs();
-        FileOutputStream f = new FileOutputStream(log);
-        f.write(classfileBuffer);
-        f.close();
+        try (final FileOutputStream f = new FileOutputStream(log)) {
+          f.write(classfileBuffer);
+        }
       } catch (IOException e) {
         assert false : e;
       }
@@ -54,7 +54,7 @@ public class CodeScraper implements ClassFileTransformer {
     }
   }
 
-  public static void premain(String agentArgs, Instrumentation inst) {
+  public static void premain(Instrumentation inst) {
     inst.addTransformer(new CodeScraper());
   }
 }

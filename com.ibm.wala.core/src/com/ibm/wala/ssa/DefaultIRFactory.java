@@ -18,6 +18,7 @@ import com.ibm.wala.classLoader.ShrikeIRFactory;
 import com.ibm.wala.classLoader.SyntheticMethod;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.summaries.SyntheticIRFactory;
+import com.ibm.wala.shrikeBT.IInstruction;
 import com.ibm.wala.util.debug.Assertions;
 
 /**
@@ -35,14 +36,16 @@ public class DefaultIRFactory implements IRFactory<IMethod> {
    * @see com.ibm.wala.ssa.IRFactory#makeCFG(com.ibm.wala.classLoader.IMethod, com.ibm.wala.ipa.callgraph.Context,
    * com.ibm.wala.ipa.cha.IClassHierarchy, com.ibm.wala.util.warnings.WarningSet)
    */
-  public ControlFlowGraph makeCFG(IMethod method, Context c) throws IllegalArgumentException {
+  public ControlFlowGraph makeCFG(IMethod method, @SuppressWarnings("unused") Context c) throws IllegalArgumentException {
     if (method == null) {
       throw new IllegalArgumentException("method cannot be null");
     }
     if (method.isSynthetic()) {
-      return syntheticFactory.makeCFG((SyntheticMethod) method, c);
+      return syntheticFactory.makeCFG((SyntheticMethod) method);
     } else if (method instanceof IBytecodeMethod) {
-      return shrikeFactory.makeCFG((IBytecodeMethod) method, c);
+      @SuppressWarnings("unchecked")
+      final IBytecodeMethod<IInstruction> castMethod = (IBytecodeMethod) method;
+      return shrikeFactory.makeCFG(castMethod);
     } else {
       Assertions.UNREACHABLE();
       return null;
@@ -61,7 +64,9 @@ public class DefaultIRFactory implements IRFactory<IMethod> {
     if (method.isSynthetic()) {
       return syntheticFactory.makeIR((SyntheticMethod) method, c, options);
     } else if (method instanceof IBytecodeMethod) {
-      return shrikeFactory.makeIR((IBytecodeMethod) method, c, options);
+      @SuppressWarnings("unchecked")
+      final IBytecodeMethod<IInstruction> castMethod = (IBytecodeMethod<IInstruction>) method;
+      return shrikeFactory.makeIR(castMethod, c, options);
     } else {
       Assertions.UNREACHABLE();
       return null;

@@ -53,6 +53,7 @@ public class CallFlowEdges {
    * @param d1 source fact at the call edge
    * @param d2 result fact (result of the call flow function)
    */
+  @SuppressWarnings("unused")
   public void addCallEdge(int c, int d1, int d2) {
     if (TabulationSolver.DEBUG_LEVEL > 0) {
       System.err.println("addCallEdge " + c + " " + d1 + " " + d2);
@@ -78,8 +79,9 @@ public class CallFlowEdges {
   /**
    * @param c
    * @param d2
-   * @return set of d1 s.t. <c, d1> -> <s_p, d2> was recorded as call flow, or null if none found.
+   * @return set of d1 s.t. {@literal <c, d1> -> <s_p, d2>} was recorded as call flow, or null if none found.
    */
+  @SuppressWarnings("unused")
   public IntSet getCallFlowSources(int c, int d2) {
     if (c < 0) {
       throw new IllegalArgumentException("invalid c : " + c);
@@ -119,8 +121,9 @@ public class CallFlowEdges {
   /**
    * 
    * @param d2
-   * @return set of c s.t. <c, d1> -> <s_p, d2> was recorded as call flow (for some d1), or null if none found.
+   * @return set of c s.t. {@literal <c, d1> -> <s_p, d2>} was recorded as call flow (for some d1), or null if none found.
    */
+  @SuppressWarnings("unused")
   public IntSet getCallFlowSourceNodes(int d2) {
     IntSet s = identityEdges.get(d2);
     IBinaryNaturalRelation R = edges.get(d2);
@@ -145,7 +148,7 @@ public class CallFlowEdges {
   }
 
   // TODO optimize
-  private IntSet getDomain(IBinaryNaturalRelation r) {
+  private static IntSet getDomain(IBinaryNaturalRelation r) {
     MutableIntSet result = MutableSparseIntSet.makeEmpty();
     int maxKeyValue = r.maxKeyValue();
     for (int i = 0; i <= maxKeyValue; i++) {

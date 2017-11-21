@@ -16,6 +16,7 @@ import java.io.Writer;
 
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
+import com.ibm.wala.shrikeCT.ClassConstants;
 import com.ibm.wala.shrikeCT.ClassReader;
 import com.ibm.wala.shrikeCT.ConstantPoolParser;
 
@@ -36,18 +37,18 @@ public class ClassSearcher {
   private static int scanned = 0;
 
   public static void main(String[] args) throws Exception {
-    instrumenter = new OfflineInstrumenter(true);
+    instrumenter = new OfflineInstrumenter();
 
-    Writer w = new BufferedWriter(new FileWriter("report", true));
+    try (final Writer w = new BufferedWriter(new FileWriter("report", true))) {
 
-    instrumenter.parseStandardArgs(args);
-    instrumenter.beginTraversal();
-    ClassInstrumenter ci;
-    while ((ci = instrumenter.nextClass()) != null) {
-      doClass(ci, w, instrumenter.getLastClassResourceName());
+      instrumenter.parseStandardArgs(args);
+      instrumenter.beginTraversal();
+      ClassInstrumenter ci;
+      while ((ci = instrumenter.nextClass()) != null) {
+        doClass(ci, w, instrumenter.getLastClassResourceName());
+      }
+      instrumenter.close();
     }
-    instrumenter.close();
-    w.close();
 
     System.out.println("Classes scanned: " + scanned);
   }
@@ -60,7 +61,7 @@ public class ClassSearcher {
     ClassReader r = ci.getReader();
     ConstantPoolParser cp = r.getCP();
     for (int i = 1; i < cp.getItemCount(); i++) {
-      if (cp.getItemType(i) == ConstantPoolParser.CONSTANT_Class && (cp.getCPClass(i).equals(cl1) || cp.getCPClass(i).equals(cl2))) {
+      if (cp.getItemType(i) == ClassConstants.CONSTANT_Class && (cp.getCPClass(i).equals(cl1) || cp.getCPClass(i).equals(cl2))) {
         w.write(cp.getCPClass(i) + " " + resource + " " + r.getName() + "\n");
       }
     }

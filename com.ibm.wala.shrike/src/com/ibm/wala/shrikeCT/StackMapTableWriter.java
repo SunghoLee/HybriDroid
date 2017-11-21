@@ -1,6 +1,10 @@
 package com.ibm.wala.shrikeCT;
 
-import static com.ibm.wala.shrikeBT.Constants.*;
+import static com.ibm.wala.shrikeBT.Constants.TYPE_double;
+import static com.ibm.wala.shrikeBT.Constants.TYPE_float;
+import static com.ibm.wala.shrikeBT.Constants.TYPE_int;
+import static com.ibm.wala.shrikeBT.Constants.TYPE_long;
+import static com.ibm.wala.shrikeBT.Constants.TYPE_null;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,7 +38,7 @@ public class StackMapTableWriter extends Element {
     this.data = serialize(writer, frames);
   }
   
-  private byte[] serialize(ClassWriter writer, List<StackMapFrame> frames) throws IOException {
+  private static byte[] serialize(ClassWriter writer, List<StackMapFrame> frames) throws IOException {
     ByteArrayOutputStream data = new ByteArrayOutputStream();
     
     for(StackMapFrame frame : frames) {
@@ -52,11 +56,11 @@ public class StackMapTableWriter extends Element {
   }
   
   public StackMapTableWriter(ClassWriter writer, MethodData method, Output output, ClassHierarchyProvider cha, String[][] vars) throws FailureException, IOException {
-    this(writer, stackMapTable(writer, method, output, cha, vars, null));
+    this(writer, stackMapTable(method, output, cha, vars, null));
   }
 
   public StackMapTableWriter(ClassWriter writer, MethodData method, Output output, ClassHierarchyProvider cha, String[][] vars, List<StackMapFrame> reuseFrames) throws FailureException, IOException {
-    this(writer, stackMapTable(writer, method, output, cha, vars, reuseFrames));
+    this(writer, stackMapTable(method, output, cha, vars, reuseFrames));
   }
 
   private static List<StackMapFrame> remapStackFrames(List<StackMapFrame> sm, int[] newBytecodesToOldBytecodes) {
@@ -83,7 +87,7 @@ public class StackMapTableWriter extends Element {
     }
     
     // frames with new offsets
-    List<StackMapFrame> newFrames = new ArrayList<StackMapFrame>(sm.size());
+    List<StackMapFrame> newFrames = new ArrayList<>(sm.size());
     for(i = 0; i < sm.size(); i++) {
       newFrames.add(new StackMapFrame(sm.get(i), positions[i]));
     }
@@ -193,10 +197,10 @@ public class StackMapTableWriter extends Element {
     return false;
   }
   
-  public static List<StackMapFrame> stackMapTable(ClassWriter writer, MethodData method, Output output, ClassHierarchyProvider cha, String[][] vars, List<StackMapFrame> reuseFrames) throws FailureException, IOException {
+  public static List<StackMapFrame> stackMapTable(MethodData method, Output output, ClassHierarchyProvider cha, String[][] vars, List<StackMapFrame> reuseFrames) throws FailureException {
     int idx = 0;
     
-    List<StackMapFrame> frames = new ArrayList<StackMapFrame>();
+    List<StackMapFrame> frames = new ArrayList<>();
     
     int[] instructionToBytecode = output.getInstructionOffsets();
     IInstruction[] insts = method.getInstructions();

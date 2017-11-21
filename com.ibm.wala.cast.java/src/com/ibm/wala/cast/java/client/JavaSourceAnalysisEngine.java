@@ -22,14 +22,16 @@ import com.ibm.wala.cast.java.ipa.callgraph.JavaSourceAnalysisScope;
 import com.ibm.wala.classLoader.ClassLoaderFactory;
 import com.ibm.wala.classLoader.Module;
 import com.ibm.wala.client.AbstractAnalysisEngine;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.Util;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.SSAOptions;
 import com.ibm.wala.ssa.SymbolTable;
@@ -41,7 +43,7 @@ import com.ibm.wala.util.io.FileProvider;
 
 /**
  */
-public abstract class JavaSourceAnalysisEngine extends AbstractAnalysisEngine {
+public abstract class JavaSourceAnalysisEngine<I extends InstanceKey> extends AbstractAnalysisEngine<I> {
 
   /**
    * Modules which are user-space code
@@ -108,8 +110,9 @@ public abstract class JavaSourceAnalysisEngine extends AbstractAnalysisEngine {
     scope = makeSourceAnalysisScope();
 
     if (getExclusionsFile() != null) {
-      InputStream is = new File(getExclusionsFile()).exists()? new FileInputStream(getExclusionsFile()): FileProvider.class.getClassLoader().getResourceAsStream(getExclusionsFile());
-      scope.setExclusions(new FileOfClasses(is));
+      try (final InputStream is = new File(getExclusionsFile()).exists()? new FileInputStream(getExclusionsFile()): FileProvider.class.getClassLoader().getResourceAsStream(getExclusionsFile())) {
+        scope.setExclusions(new FileOfClasses(is));
+      }
     }
 
     for (Module M : this.systemEntries) {
@@ -132,7 +135,7 @@ public abstract class JavaSourceAnalysisEngine extends AbstractAnalysisEngine {
     ClassLoaderFactory factory = getClassLoaderFactory(scope.getExclusions());
 
     try {
-      cha = ClassHierarchy.make(getScope(), factory);
+      cha = ClassHierarchyFactory.make(getScope(), factory);
     } catch (ClassHierarchyException e) {
       System.err.println("Class Hierarchy construction failed");
       System.err.println(e.toString());
@@ -147,8 +150,8 @@ public abstract class JavaSourceAnalysisEngine extends AbstractAnalysisEngine {
   }
 
   @Override
-  public AnalysisCache makeDefaultCache() {
-    return new AnalysisCache(AstIRFactory.makeDefaultFactory());
+  public IAnalysisCacheView makeDefaultCache() {
+    return new AnalysisCacheImpl(AstIRFactory.makeDefaultFactory());
   }
 
   @Override
@@ -169,7 +172,7 @@ public abstract class JavaSourceAnalysisEngine extends AbstractAnalysisEngine {
   }
 
   @Override
-  protected CallGraphBuilder getCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
-    return new ZeroCFABuilderFactory().make(options, cache, cha, scope, false);
+  protected CallGraphBuilder<I> getCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache) {
+    return new ZeroCFABuilderFactory().make(options, cache, cha, scope);
   }
 }

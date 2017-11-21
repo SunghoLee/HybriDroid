@@ -14,18 +14,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
 import com.ibm.wala.examples.properties.WalaExamplesProperties;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.properties.WalaProperties;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.CollectionFilter;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.graph.Graph;
@@ -74,7 +75,7 @@ public class PDFTypeHierarchy {
       AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(classpath, (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
 
       // invoke WALA to build a class hierarchy
-      ClassHierarchy cha = ClassHierarchy.make(scope);
+      ClassHierarchy cha = ClassHierarchyFactory.make(scope);
 
       Graph<IClass> g = typeHierarchy2Graph(cha);
 
@@ -93,15 +94,15 @@ public class PDFTypeHierarchy {
     }
   }
 
-  public static <T> Graph<T> pruneGraph(Graph<T> g, Predicate<T> f) throws WalaException {
+  public static <T> Graph<T> pruneGraph(Graph<T> g, Predicate<T> f) {
     Collection<T> slice = GraphSlicer.slice(g, f);
-    return GraphSlicer.prune(g, new CollectionFilter<T>(slice));
+    return GraphSlicer.prune(g, new CollectionFilter<>(slice));
   }
   
   /**
    * Restrict g to nodes from the Application loader
    */
-  public static Graph<IClass> pruneForAppLoader(Graph<IClass> g) throws WalaException {
+  public static Graph<IClass> pruneForAppLoader(Graph<IClass> g) {
     Predicate<IClass> f = new Predicate<IClass>() {
       @Override public boolean test(IClass c) {
         return (c.getClassLoader().getReference().equals(ClassLoaderReference.Application));
@@ -129,7 +130,7 @@ public class PDFTypeHierarchy {
   /**
    * Return a view of an {@link IClassHierarchy} as a {@link Graph}, with edges from classes to immediate subtypes
    */
-  public static Graph<IClass> typeHierarchy2Graph(IClassHierarchy cha) throws WalaException {
+  public static Graph<IClass> typeHierarchy2Graph(IClassHierarchy cha) {
     Graph<IClass> result = SlowSparseNumberedGraph.make();
     for (IClass c : cha) {
       result.addNode(c);

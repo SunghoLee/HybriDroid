@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.ibm.wala.shrikeBT.IInvokeInstruction.Dispatch;
-import com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod;
 import com.ibm.wala.util.collections.Pair;
 
 /**
@@ -169,8 +168,8 @@ public final class Util {
   }
 
   static {
-    typeAliases = new HashMap<String, String>();
-    classAliases = new HashMap<String, String>();
+    typeAliases = new HashMap<>();
+    classAliases = new HashMap<>();
     addAlias("void", "V");
     addAlias("int", "I");
     addAlias("long", "J");
@@ -206,7 +205,7 @@ public final class Util {
    * 
    * @throws IllegalArgumentException if type == null
    */
-  static int getParamsCount(String type) throws IllegalArgumentException {
+  public static int getParamsCount(String type) throws IllegalArgumentException {
     if (type == null || type.length() < 2) {
       throw new IllegalArgumentException("invalid type: " + type);
     }
@@ -220,7 +219,7 @@ public final class Util {
       }
       return count;
     } catch (StringIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("invalid type: " + type);
+      throw new IllegalArgumentException("invalid type: " + type, e);
     }
   }
 
