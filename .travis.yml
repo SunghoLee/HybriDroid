@@ -9,3 +9,4 @@ install:
 
 script:
 - bash ./build.sh
+- java -jar kr.ac.kaist.wala.hybridroid.test/build/libs/kr.ac.kaist.wala.hybridroid.test.jar
