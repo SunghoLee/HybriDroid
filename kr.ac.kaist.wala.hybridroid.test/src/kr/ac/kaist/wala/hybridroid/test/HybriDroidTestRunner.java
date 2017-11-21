@@ -28,7 +28,9 @@ public class HybriDroidTestRunner {
 			testProperties.load(new FileInputStream(new File("test.config")));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
+		    System.out.println("Working Dir: " + new File(".").getAbsolutePath());
 			e.printStackTrace();
+			System.exit(-1);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
