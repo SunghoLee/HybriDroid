@@ -43,8 +43,10 @@ public class HybriDroidTestRunner {
 	public static String getLibPath(){
 		return testProperties.getProperty(LIB_JAR);
 	}
-	
+
+        private boolean isSucceeded = true;
 	private static void runTest(Class c, String test){
+	    
 	     PrintStream tmpOutStream = System.out;
 	     PrintStream tmpErrStream = System.err;
    	     PrintStream privPrintStream = new PrintStream(new ByteArrayOutputStream()){
@@ -62,6 +64,7 @@ public class HybriDroidTestRunner {
 		if(result.getFailures().isEmpty()){
 			System.out.println("Pass all " + test + " tests.");
 		}else{
+		    isSucceeded = false;
 			System.out.println("Failed in " + test + " tests: ");
 		    for (Failure failure : result.getFailures()) {
 		      System.out.println(failure.toString());
@@ -77,5 +80,7 @@ public class HybriDroidTestRunner {
 		runTest(MultipleWebViewTest.class, "multiple webview execution");
 		runTest(SubClassWebViewTest.class, "sub WebView class");
 		//		runTest(BridgeFieldTest.class, "bridge field access");
+		if(!isSucceeded)
+		    System.exit(-1);
 	}
 }
