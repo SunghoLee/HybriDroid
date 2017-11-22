@@ -49,11 +49,11 @@ import com.ibm.wala.util.collections.Pair;
  * <li>array length nodes (see {@link ArrayBoundsGraph#arrayLength})
  * </ul>
  *
- * [1] , Rastislav, Rajiv Gupta, and Vivek Sarkar.
+ * [1] Bodk, Rastislav, Rajiv Gupta, and Vivek Sarkar.
  * "ABCD: eliminating array bounds checks on demand." ACM SIGPLAN Notices. Vol.
  * 35. No. 5. ACM, 2000.
  * 
- * @author Stephan Gocht <stephan@gobro.de>
+ * @author Stephan Gocht {@code <stephan@gobro.de>}
  */
 public class ArrayBoundsGraph extends DirectedHyperGraph<Integer> {
 	/**
@@ -118,7 +118,7 @@ public class ArrayBoundsGraph extends DirectedHyperGraph<Integer> {
 		  
 		  for (DirectedHyperEdge<Integer> edge:constantNode.getOutEdges()) {
 		    if (!edge.getDestination().contains(helper2)) {
-		      edge.getSource().remove(constant);
+		      edge.getSource().remove(constantNode);
 		      edge.getSource().add(helper1);
 		    }
 		  }

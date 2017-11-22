@@ -28,7 +28,7 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -54,6 +54,8 @@ import kr.ac.kaist.wala.hybridroid.callgraph.AndroidMethodTargetSelector;
 import kr.ac.kaist.wala.hybridroid.callgraph.ResourceCallGraphBuilder;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.util.data.Pair;
+import com.ibm.wala.ssa.SSACache;
+import com.ibm.wala.ssa.AuxiliaryCache;
 
 import java.io.File;
 import java.io.FileInputStream;

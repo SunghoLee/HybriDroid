@@ -14,7 +14,7 @@ import com.ibm.wala.types.TypeReference;
 /**
  * This class converts an exception filter to an edge filter.
  *
- * @author Stephan Gocht <stephan@gobro.de>
+ * @author Stephan Gocht {@code <stephan@gobro.de>}
  *
  * @param <Block>
  */
@@ -38,7 +38,7 @@ implements EdgeFilter<Block> {
 				.contains(dst);
 		final SSAInstruction relevantInstruction = src.getLastInstruction();
 		if (hasExceptionalEdge && relevantInstruction != null) {
-			if (this.weKnowAllExceptions(relevantInstruction)) {
+			if (weKnowAllExceptions(relevantInstruction)) {
 
 				final Collection<TypeReference> thrownExceptions = relevantInstruction
 						.getExceptionTypes();
@@ -79,7 +79,7 @@ implements EdgeFilter<Block> {
 	 * @return if we know all exceptions, that can occur at this address from
 	 *         getExceptionTypes()
 	 */
-	private boolean weKnowAllExceptions(SSAInstruction instruction) {
+	private static boolean weKnowAllExceptions(SSAInstruction instruction) {
 		return !((instruction instanceof SSAAbstractInvokeInstruction) || (instruction instanceof SSAAbstractThrowInstruction));
 	}
 }

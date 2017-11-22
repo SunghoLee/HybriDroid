@@ -1,15 +1,11 @@
 package com.ibm.wala.analysis.arraybounds.hypergraph.weight;
 
-import com.ibm.wala.analysis.arraybounds.hypergraph.weight.NormalOrder;
-import com.ibm.wala.analysis.arraybounds.hypergraph.weight.ReverseOrder;
-import com.ibm.wala.analysis.arraybounds.hypergraph.weight.Weight;
-
 /**
  * A weight may be not set, a number or unlimited, note that the meaning of
  * unlimited is given by the chosen order (see {@link NormalOrder} and
  * {@link ReverseOrder}).
  *
- * @author Stephan Gocht <stephan@gobro.de>
+ * @author Stephan Gocht {@code <stephan@gobro.de>}
  */
 public class Weight {
 	public enum Type {

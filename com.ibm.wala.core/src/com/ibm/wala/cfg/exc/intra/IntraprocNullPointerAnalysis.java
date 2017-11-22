@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.cfg.ControlFlowGraph;
-import com.ibm.wala.dataflow.graph.DataflowSolver;
 import com.ibm.wala.ipa.cfg.PrunedCFG;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.ISSABasicBlock;
@@ -136,13 +135,12 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
       } else {
         final List<T> catched = searchNodesWithPathToCatchAll(cfg);
         final NullPointerFrameWork<T> problem = new NullPointerFrameWork<T>(cfg, ir);
-        final int[] paramValNum = ir.getParameterValueNumbers();
       
-        solver = new NullPointerSolver<T>(problem, maxVarNum, paramValNum, initialState, ir);
+        solver = new NullPointerSolver<T>(problem, maxVarNum, cfg.entry(), ir, initialState);
         
         solver.solve(progress);
         
-        final Graph<T> deleted = createDeletedGraph(solver);
+        final Graph<T> deleted = createDeletedGraph();
         
         for (final T ch : catched) {
           deleted.addNode(ch);
@@ -162,8 +160,8 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
     }
   }
   
-  private Graph<T> createDeletedGraph(NullPointerSolver<T> solver) {
-    NegativeCFGBuilderVisitor nCFGbuilder = new NegativeCFGBuilderVisitor(solver);
+  private Graph<T> createDeletedGraph() {
+    NegativeCFGBuilderVisitor nCFGbuilder = new NegativeCFGBuilderVisitor();
     for (T bb : cfg) {
       nCFGbuilder.work(bb);
     }
@@ -195,17 +193,14 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
       // empty IR ... so states have not changed and we can return the initial state as a save approximation 
       return new NullPointerState(maxVarNum, ir.getSymbolTable(), initialState);
     } else {
-      return solver.getIn(block);
+      return solver.getOut(block);
     }
   }
   
   private class NegativeCFGBuilderVisitor implements IVisitor {
 
     private final Graph<T> deleted;
-    private final NullPointerSolver<T> solver;
-    
-    private NegativeCFGBuilderVisitor(NullPointerSolver<T> solver) {
-      this.solver = solver;
+    private NegativeCFGBuilderVisitor() {
       this.deleted = new SparseNumberedGraph<T>(2);
       for (T bb : cfg) {
         deleted.addNode(bb);
@@ -225,7 +220,7 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
       SSAInstruction instr = NullPointerTransferFunctionProvider.getRelevantInstruction(bb);
       
       if (instr != null) {
-        currentState = solver.getIn(bb);
+        currentState = getState(bb);
         currentBlock = bb;
         instr.visit(this);
         currentState = null;
@@ -260,6 +255,7 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
       assert instr.isPEI();
       
       if (instr instanceof SSAAbstractInvokeInstruction) {
+        assert ((SSAAbstractInvokeInstruction) instr).isStatic();
         return mState != null && !mState.throwsException((SSAAbstractInvokeInstruction) instr); 
       } else {
         Collection<TypeReference> exc = instr.getExceptionTypes();

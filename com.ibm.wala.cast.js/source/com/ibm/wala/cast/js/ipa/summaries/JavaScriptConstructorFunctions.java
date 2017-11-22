@@ -11,9 +11,13 @@
 
 package com.ibm.wala.cast.js.ipa.summaries;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,10 +31,12 @@ import com.ibm.wala.cast.types.AstMethodReference;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.classLoader.Module;
+import com.ibm.wala.classLoader.ModuleEntry;
 import com.ibm.wala.classLoader.NewSiteReference;
+import com.ibm.wala.classLoader.SourceModule;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ipa.summaries.MethodSummary;
-import com.ibm.wala.shrikeBT.IConditionalBranchInstruction.IOperator;
 import com.ibm.wala.shrikeBT.IConditionalBranchInstruction.Operator;
 import com.ibm.wala.ssa.ConstantValue;
 import com.ibm.wala.ssa.IR;
@@ -40,6 +46,7 @@ import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.collections.HashMapFactory;
+import com.ibm.wala.util.collections.NonNullSingletonIterator;
 import com.ibm.wala.util.collections.Pair;
 
 public class JavaScriptConstructorFunctions {
@@ -81,7 +88,7 @@ public class JavaScriptConstructorFunctions {
     return m;
   }
 
-  private IMethod makeNullaryValueConstructor(IClass cls, Object value) {
+  private static IMethod makeNullaryValueConstructor(IClass cls, Object value) {
     JSInstructionFactory insts = (JSInstructionFactory)cls.getClassLoader().getInstructionFactory();
     MethodReference ref = JavaScriptMethods.makeCtorReference(cls.getReference());
     JavaScriptSummary S = new JavaScriptSummary(ref, 1);
@@ -97,6 +104,10 @@ public class JavaScriptConstructorFunctions {
     
     S.addConstant(new Integer(8), new ConstantValue(value));
     S.addStatement(insts.PutInstruction(S.getNumberOfStatements(), 5, 8, "$value"));
+    if (value instanceof String) {
+      S.addConstant(9, new ConstantValue(0));
+      S.addStatement(insts.PutInstruction(S.getNumberOfStatements(), 5, 9, "length"));
+    }
     S.getNextProgramCounter();
     
     S.addStatement(insts.ReturnInstruction(S.getNumberOfStatements(), 5, false));
@@ -107,7 +118,7 @@ public class JavaScriptConstructorFunctions {
     return new JavaScriptConstructor(ref, S, cls, cls);
   }
 
-  private IMethod makeUnaryValueConstructor(IClass cls) {
+  private static IMethod makeUnaryValueConstructor(IClass cls) {
     JSInstructionFactory insts = (JSInstructionFactory)cls.getClassLoader().getInstructionFactory();
    MethodReference ref = JavaScriptMethods.makeCtorReference(cls.getReference());
     JavaScriptSummary S = new JavaScriptSummary(ref, 2);
@@ -286,6 +297,11 @@ public class JavaScriptConstructorFunctions {
     JavaScriptSummary S = new JavaScriptSummary(ref, 1);
 
     S.addConstant(new Integer(2), new ConstantValue(""));
+
+    S.addConstant(new Integer(3), new ConstantValue(0));
+    S.addStatement(insts.PutInstruction(S.getNumberOfStatements(), 2, 3, "length"));
+    S.getNextProgramCounter();
+
     S.addStatement(insts.ReturnInstruction(S.getNumberOfStatements(), 2, false));
     S.getNextProgramCounter();
     
@@ -425,7 +441,7 @@ public class JavaScriptConstructorFunctions {
         if (!ST.isStringConstant(callStmt.getUse(i)))
           return makeFunctionConstructor(cls, cls);
 
-      StringBuffer fun = new StringBuffer("function _fromctor (");
+      final StringBuffer fun = new StringBuffer("function _fromctor (");
       for (int j = 1; j < callStmt.getNumberOfUses() - 1; j++) {
         if (j != 1)
           fun.append(",");
@@ -437,13 +453,83 @@ public class JavaScriptConstructorFunctions {
       fun.append("}");
 
       try {
-        String fileName = "ctor$" + ++ctorCount;
-        File f = new File(System.getProperty("java.io.tmpdir") + File.separator + fileName);
-        FileWriter FO = new FileWriter(f);
-        FO.write(fun.toString());
-        FO.close();
-        
-        Set<String> fnNames = JSCallGraphUtil.loadAdditionalFile(cha, cl, fileName, f.toURI().toURL());
+        final String fileName = "ctor$" + ++ctorCount;
+        ModuleEntry ME = new SourceModule() {
+
+          @Override
+          public String getName() {
+            return fileName;
+          }
+
+          @Override
+          public boolean isClassFile() {
+            return false;
+          }
+
+          @Override
+          public boolean isSourceFile() {
+            return true;
+          }
+
+          @Override
+          public InputStream getInputStream() {
+            return new InputStream() {
+              private int i = 0;
+              @Override
+              public int read() throws IOException {
+                if (i >= fun.length()) {
+                  return -1;
+                } else {
+                  return fun.codePointAt(i++);
+                }
+              }
+              
+            };
+          }
+
+          @Override
+          public boolean isModuleFile() {
+            return false;
+          }
+
+          @Override
+          public Module asModule() {
+            return null;
+          }
+
+          @Override
+          public String getClassName() {
+            return fileName;
+          }
+
+          @Override
+          public Module getContainer() {
+             return null;
+          }
+
+          @Override
+          public Iterator<? extends ModuleEntry> getEntries() {
+            return new NonNullSingletonIterator<ModuleEntry>(this);
+          }
+
+          @Override
+          public Reader getInputReader() {
+             return new StringReader(fun.toString());
+          }
+
+          @Override
+          public URL getURL() {
+            try {
+              return new URL("file://" + fileName);
+            } catch (MalformedURLException e) {
+              assert false;
+              return null;
+            }
+          }
+          
+        };
+         
+        Set<String> fnNames = JSCallGraphUtil.loadAdditionalFile(cha, cl, ME);
         IClass fcls = null;
         for(String nm : fnNames) {
           if (nm.endsWith("_fromctor")) {
@@ -451,12 +537,9 @@ public class JavaScriptConstructorFunctions {
           }
         }
 
-        assert fcls != null : "cannot find class for " + fileName + " in " + f;
+        assert fcls != null : "cannot find class for " + fileName;
         
-        f.delete();
-
-        if (fcls != null)
-          return makeFunctionConstructor(cls, fcls);
+        return makeFunctionConstructor(cls, fcls);
 
       } catch (IOException e) {
 

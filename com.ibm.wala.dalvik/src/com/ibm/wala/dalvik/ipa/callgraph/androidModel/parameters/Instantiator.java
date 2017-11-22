@@ -134,7 +134,7 @@ public class Instantiator implements IInstantiator {
         }
         if (seen == null) {
             logger.debug("Empty seen");
-            seen = new HashSet<SSAValue>();
+            seen = new HashSet<>();
         }
 
         { // Special type?
@@ -252,7 +252,7 @@ public class Instantiator implements IInstantiator {
                 this.body.addConstant(arrayLength.getNumber(), new ConstantValue(1));
                 arrayLength.setAssigned();
 
-                final ArrayList<SSAValue> params = new ArrayList<SSAValue>(1);
+                final ArrayList<SSAValue> params = new ArrayList<>(1);
                 params.add(arrayLength);
 
                 newInst = this.instructionFactory.NewInstruction(pc, instance, nRef, params);
@@ -272,7 +272,7 @@ public class Instantiator implements IInstantiator {
         } else {
             // Abstract, Interface or array
             logger.debug("Not a regular class {}", T);
-            final Set<SSAValue> subInstances = new HashSet<SSAValue>();
+            final Set<SSAValue> subInstances = new HashSet<>();
             for (final TypeReference type : types) {
                 final IClass subKlass = this.cha.lookupClass(type);
 
@@ -287,7 +287,7 @@ public class Instantiator implements IInstantiator {
                     selectAndCallCtor(subInstance, seen);
                     assert (subInstance.getNumber() == newInst.getDef()) : "Unexpected: number and def differ: " + subInstance.getNumber() + ", " +
                                     newInst.getDef();
-                    final Set<SSAValue> newSeen = new HashSet<SSAValue>();  // Narf
+                    final Set<SSAValue> newSeen = new HashSet<>();  // Narf
                     newSeen.addAll(seen);
                     newSeen.add(subInstance);
                     seen = newSeen;
@@ -344,10 +344,7 @@ public class Instantiator implements IInstantiator {
         return instance; 
     }
 
-    /**
-     *  @return an unallocated SSAVariable
-     */
-    private void createPrimitive(SSAValue instance) {
+    private static void createPrimitive(SSAValue instance) {
         // XXX; something else?
         instance.setAssigned();
     }
@@ -386,13 +383,13 @@ public class Instantiator implements IInstantiator {
      *
      *  @param  self the "this" to call the constructor on
      *  @param  ctor the constructor to call
-     *  @param  params parameters to the ctor _without_ implicit this
+     *  @param  ctorParams parameters to the ctor _without_ implicit this
      */
     private void addCallCtor(SSAValue self, MethodReference ctor, List<SSAValue> ctorParams) {
         final int pc = this.body.getNextProgramCounter();
         final SSAValue exception = pm.getException();
         final CallSiteReference site = CallSiteReference.make(pc, ctor, IInvokeInstruction.Dispatch.SPECIAL);
-        final List<SSAValue> params = new ArrayList<SSAValue>(1 + ctorParams.size());
+        final List<SSAValue> params = new ArrayList<>(1 + ctorParams.size());
         params.add(self);
         params.addAll(ctorParams);
         final SSAInstruction ctorCall = instructionFactory.InvokeInstruction(pc, params, exception, site);
@@ -412,7 +409,7 @@ public class Instantiator implements IInstantiator {
             this.body.addConstant(nullSelf.getNumber(), new ConstantValue(null));
             nullSelf.setAssigned();
         //}
-        final Set<SSAValue> seen = new HashSet<SSAValue>(1 + overrides.size());
+        final Set<SSAValue> seen = new HashSet<>(1 + overrides.size());
         seen.add(nullSelf);
         seen.addAll(overrides);
         
@@ -434,9 +431,9 @@ public class Instantiator implements IInstantiator {
     private Set<TypeReference> getTypes(final TypeReference T) {
         final IClass cls = this.cha.lookupClass(T);
         if (isExcluded(cls)) {
-            return new HashSet<TypeReference>();
+            return new HashSet<>();
         }
-        return getTypes(T, Collections.EMPTY_SET);
+        return getTypes(T, Collections.<TypeReference>emptySet());
     }
 
     /**
@@ -444,7 +441,7 @@ public class Instantiator implements IInstantiator {
      */
     private Set<TypeReference> getTypes(final TypeReference T, final Set<TypeReference> seen) {
         logger.debug("getTypes({}, {})", T, seen);
-        final Set<TypeReference> ret = new HashSet<TypeReference>();
+        final Set<TypeReference> ret = new HashSet<>();
         ret.add(T);
        
         if (T.isPrimitiveType()) {
@@ -516,7 +513,7 @@ public class Instantiator implements IInstantiator {
                 }
 
                 if ((inner.isInterface()) || (inner.isAbstract())) {
-                    final Set<TypeReference> innerTypes = getTypes(inner.getReference(), Collections.EMPTY_SET);
+                    final Set<TypeReference> innerTypes = getTypes(inner.getReference(), Collections.<TypeReference>emptySet());
                     for (TypeReference iT : innerTypes) {
                         TypeReference aT = TypeReference.findOrCreateArrayOf(iT);
                         for (int i = 1; i < dim; ++i) {
@@ -536,11 +533,12 @@ public class Instantiator implements IInstantiator {
     /**
      *  Path back to Object (including T itself).
      */
+    @SuppressWarnings("unused")
     private List<TypeReference> getAllSuper(final TypeReference T) {
         if (T.isPrimitiveType()) {
             throw new IllegalArgumentException("Not you that call primitive type on :P");
         }
-        final List<TypeReference> ret = new ArrayList<TypeReference>();
+        final List<TypeReference> ret = new ArrayList<>();
 
         IClass cls = this.cha.lookupClass(T);
         if (cls == null) {
@@ -663,6 +661,8 @@ public class Instantiator implements IInstantiator {
     /**
      *  Satisfy the interface.
      */
+    @Override
+    @SuppressWarnings("unchecked")
     public int createInstance(TypeReference type, Object... instantiatorArgs) {
         // public SSAValue createInstance(final TypeReference T, final boolean asManaged, VariableKey key, Set<SSAValue> seen) {
         if (! (instantiatorArgs[0] instanceof Boolean)) {
@@ -676,7 +676,7 @@ public class Instantiator implements IInstantiator {
                     "got: " + instantiatorArgs[2].getClass()); 
         }
         if (instantiatorArgs[2] != null) {
-            final Set seen = (Set) instantiatorArgs[2];
+            final Set<?> seen = (Set<?>) instantiatorArgs[2];
             if (! seen.isEmpty()) {
                 final Object o = seen.iterator().next();
                 if (! (o instanceof SSAValue)) {

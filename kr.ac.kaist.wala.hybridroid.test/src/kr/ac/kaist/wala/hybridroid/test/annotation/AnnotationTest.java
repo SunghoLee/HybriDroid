@@ -21,11 +21,11 @@ public class AnnotationTest {
 	public void missingAnnotationMethodShouldInvisible() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
 		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
 		boolean AnnotationTest_apk = false;
-		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
 			cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
+								System.out.println("name: DONE??");
 			for(String s: cfgAnalysis.getWarnings()){
 				switch(testName){
 				case "AnnotationTest.apk":
@@ -42,7 +42,5 @@ public class AnnotationTest {
 	@Test
 	public void ignoreAnnotationInfoBeforeKitkat(){
 		//TODO: implement test apps
-	}
-	
-	
+	}	
 }

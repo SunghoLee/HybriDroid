@@ -29,7 +29,6 @@ public class OrdinalSet<T> implements Iterable<T> {
   @SuppressWarnings("rawtypes")
   private final static OrdinalSet EMPTY = new OrdinalSet();
 
-  @SuppressWarnings("unchecked")
   public static <T> OrdinalSet<T> empty() {
     return EMPTY;
   }
@@ -97,10 +96,10 @@ public class OrdinalSet<T> implements Iterable<T> {
       assert A.mapping.equals(B.mapping);
     }
     if (A.S == null || B.S == null) {
-      return new OrdinalSet<T>(null, A.mapping);
+      return new OrdinalSet<>(null, A.mapping);
     }
     IntSet isect = A.S.intersection(B.S);
-    return new OrdinalSet<T>(isect, A.mapping);
+    return new OrdinalSet<>(isect, A.mapping);
   }
 
   /**
@@ -110,8 +109,9 @@ public class OrdinalSet<T> implements Iterable<T> {
     if ((a == null && b == null) || a == b || (a.mapping == b.mapping && a.S == b.S)) {
       return true;
     }
-    
-    if (a != null && b != null && a.size() == b.size()) {
+
+    assert a != null && b != null;
+    if (a.size() == b.size()) {
       if (a.mapping == b.mapping || (a.mapping != null && b.mapping != null && a.mapping.equals(b.mapping))) {
         return a.S == b.S || (a.S != null && b.S != null && a.S.sameValue(b.S));
       }
@@ -140,13 +140,13 @@ public class OrdinalSet<T> implements Iterable<T> {
     }
 
     if (A.S == null) {
-      return (B.S == null) ? OrdinalSet.<T> empty() : new OrdinalSet<T>(B.S, B.mapping);
+      return (B.S == null) ? OrdinalSet.<T> empty() : new OrdinalSet<>(B.S, B.mapping);
     } else if (B.S == null) {
-      return new OrdinalSet<T>(A.S, A.mapping);
+      return new OrdinalSet<>(A.S, A.mapping);
     }
 
     IntSet union = A.S.union(B.S);
-    return new OrdinalSet<T>(union, A.mapping);
+    return new OrdinalSet<>(union, A.mapping);
   }
 
   @Override
@@ -208,7 +208,7 @@ public class OrdinalSet<T> implements Iterable<T> {
       assert index >= 0;
       s.add(index);
     }
-    return new OrdinalSet<T>(s, m);
+    return new OrdinalSet<>(s, m);
   }
 
   public OrdinalSetMapping<T> getMapping() {

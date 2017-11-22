@@ -17,10 +17,10 @@ import com.ibm.wala.cast.js.loader.JSCallSiteReference;
 import com.ibm.wala.cast.js.ssa.JSInstructionFactory;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.ContextItem;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ssa.ConstantValue;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
@@ -38,7 +38,7 @@ public class JavaScriptFunctionApplyContextInterpreter extends AstContextInsensi
 
   private static final TypeName APPLY_TYPE_NAME = TypeName.findOrCreate("Lprologue.js/Function_prototype_apply");
 
-  public JavaScriptFunctionApplyContextInterpreter(AnalysisOptions options, AnalysisCache cache) {
+  public JavaScriptFunctionApplyContextInterpreter(AnalysisOptions options, IAnalysisCacheView cache) {
     super(options, cache);
   }
 
@@ -61,7 +61,7 @@ public class JavaScriptFunctionApplyContextInterpreter extends AstContextInsensi
     }
   }
 
-  private IR makeIRForArgList(CGNode node) {
+  private static IR makeIRForArgList(CGNode node) {
     // we have: v1 is dummy apply method
     // v2 is function to be invoked
     // v3 is argument to be passed as 'this'
@@ -121,7 +121,7 @@ public class JavaScriptFunctionApplyContextInterpreter extends AstContextInsensi
   }
 
   @SuppressWarnings("unused")
-  private int passArbitraryPropertyValAsParams(JSInstructionFactory insts, int nargs, JavaScriptSummary S, int[] paramsToPassToInvoked) {
+  private static int passArbitraryPropertyValAsParams(JSInstructionFactory insts, int nargs, JavaScriptSummary S, int[] paramsToPassToInvoked) {
     // read an arbitrary property name via EachElementGet
     int curValNum = nargs + 2;
     int eachElementGetResult = curValNum++;
@@ -139,27 +139,33 @@ public class JavaScriptFunctionApplyContextInterpreter extends AstContextInsensi
     return curValNum;
   }
   
-  private int passActualPropertyValsAsParams(JSInstructionFactory insts, int nargs, JavaScriptSummary S, int[] paramsToPassToInvoked) {
+  private static int passActualPropertyValsAsParams(JSInstructionFactory insts, int nargs, JavaScriptSummary S, int[] paramsToPassToInvoked) {
     // read an arbitrary property name via EachElementGet
-    int curValNum = nargs + 2;
+    int nullVn = nargs + 2;
+    S.addConstant(nullVn, new ConstantValue(null));
+    int curValNum = nargs + 3;
     for (int i = 1; i < paramsToPassToInvoked.length; i++) {
       // create a String constant for i-1
       final int constVN = curValNum++;
       // the commented line is correct, but it doesn't work because
       // of our broken handling of int constants as properties.
       // TODO fix property handling, and then fix this
-//      S.addConstant(constVN, new ConstantValue(Integer.toString(i-1)));
-      S.addConstant(constVN, new ConstantValue(i-1));
+      S.addConstant(constVN, new ConstantValue(Integer.toString(i-1)));
+      //S.addConstant(constVN, new ConstantValue(i-1));
       int propertyReadResult = curValNum++;
       // 4 is position of arguments array
+      S.addStatement(insts.PropertyWrite(S.getNumberOfStatements(), 4, constVN, nullVn));
+      S.getNextProgramCounter();
+      
       S.addStatement(insts.PropertyRead(S.getNumberOfStatements(), propertyReadResult, 4, constVN));
       S.getNextProgramCounter();
+     
       paramsToPassToInvoked[i] = propertyReadResult;
     }
     return curValNum;
   }
 
-  private IR makeIRForNoArgList(CGNode node) {
+  private static IR makeIRForNoArgList(CGNode node) {
     // kind of a hack; re-use the summarized function infrastructure
     MethodReference ref = node.getMethod().getReference();
     IClass declaringClass = node.getMethod().getDeclaringClass();

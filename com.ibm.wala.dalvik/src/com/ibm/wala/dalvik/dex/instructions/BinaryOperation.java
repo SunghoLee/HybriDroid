@@ -48,7 +48,7 @@
 
 package com.ibm.wala.dalvik.dex.instructions;
 
-import org.jf.dexlib.Code.Opcode;
+import org.jf.dexlib2.Opcode;
 
 import com.ibm.wala.cast.ir.ssa.CAstBinaryOp;
 import com.ibm.wala.dalvik.classLoader.DexIMethod;
@@ -64,7 +64,7 @@ public class BinaryOperation extends Instruction {
         ADD_INT,SUB_INT,MUL_INT,DIV_INT,REM_INT,AND_INT,OR_INT,XOR_INT,SHL_INT,SHR_INT,USHR_INT,
         ADD_LONG,SUB_LONG,MUL_LONG,DIV_LONG,REM_LONG,AND_LONG,OR_LONG,XOR_LONG,SHL_LONG,SHR_LONG,USHR_LONG,
         ADD_FLOAT,SUB_FLOAT,MUL_FLOAT,DIV_FLOAT,REM_FLOAT,
-        ADD_DOUBLE,SUB_DOUBLE,MUL_DOUBLE,DIV_DOUBLE,REM_DOUBLE};
+        ADD_DOUBLE,SUB_DOUBLE,MUL_DOUBLE,DIV_DOUBLE,REM_DOUBLE}
 
     public final OpID op;
     public final int oper1;
@@ -84,10 +84,8 @@ public class BinaryOperation extends Instruction {
         visitor.visitBinaryOperation(this);
     }
 
-    public IBinaryOpInstruction.IOperator getOperator()
-    {
-        switch(op)
-        {
+    public IBinaryOpInstruction.IOperator getOperator() {
+        switch(op) {
         case CMPL_FLOAT:
             return CAstBinaryOp.LT;
         case CMPG_FLOAT:
@@ -168,8 +166,9 @@ public class BinaryOperation extends Instruction {
             return IBinaryOpInstruction.Operator.DIV;
         case REM_DOUBLE:
             return IBinaryOpInstruction.Operator.REM;
+		default:
+	        return null;
         }
-        return null;
     }
     public boolean isFloat()
     {
@@ -196,28 +195,20 @@ public class BinaryOperation extends Instruction {
     }
 
     public boolean isUnsigned() {
-    	
-    	/**
-    	 * At the moment, WALA asserts that false is returned here. Maybe WALA will support unsigned
-    	 * arithmetic in its IR some time in the future - then the commented code will make sense.
-    	 */
-    	return false;
-//        switch(op)
-//        {
-//        case AND_INT:
-//        case OR_INT:
-//        case XOR_INT:
-//        case SHL_INT:
-//        case USHR_INT:
-//        case AND_LONG:
-//        case OR_LONG:
-//        case XOR_LONG:
-//        case SHL_LONG:
-//        case USHR_LONG:
-//            return true;
-//        default:
-//            return false;
-//        }
+    	  switch(op)  {
+        case AND_INT:
+        case OR_INT:
+        case XOR_INT:
+        case SHL_INT:
+        case USHR_INT:
+        case AND_LONG:
+        case OR_LONG:
+        case XOR_LONG:
+        case SHL_LONG:
+        case USHR_LONG:
+            return true;
+        default:
+            return false;
+        }
     }
-
 }

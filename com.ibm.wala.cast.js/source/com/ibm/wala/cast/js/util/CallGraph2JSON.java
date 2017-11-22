@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.types.JavaScriptMethods;
@@ -26,7 +27,6 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.MapUtil;
 import com.ibm.wala.util.collections.Util;
-import com.ibm.wala.util.functions.Function;
 
 /**
  * Utility class to serialize call graphs as JSON objects.
@@ -89,12 +89,12 @@ public class CallGraph2JSON {
 	
   public static void serializeCallSite(AstMethod method, CallSiteReference callsite, Set<IMethod> targets,
       Map<String, Set<String>> edges) {
-    Set<String> targetNames = MapUtil.findOrCreateSet(edges, ppPos(method, method.getSourcePosition(callsite.getProgramCounter())));
+    Set<String> targetNames = MapUtil.findOrCreateSet(edges, ppPos(method.getSourcePosition(callsite.getProgramCounter())));
     for(IMethod target : targets) {
       target = getCallTargetMethod(target);
     	if(!isRealFunction(target))
     		continue;
-    	targetNames.add(ppPos((AstMethod)target, ((AstMethod)target).getSourcePosition()));
+    	targetNames.add(ppPos(((AstMethod)target).getSourcePosition()));
     }
   }
 	
@@ -126,7 +126,7 @@ public class CallGraph2JSON {
 		return false;
 	}
 	
-	private static String ppPos(AstMethod method, Position pos) {
+	private static String ppPos(Position pos) {
 		String file = pos.getURL().getFile();
 		file = file.substring(file.lastIndexOf('/')+1);
 		
@@ -160,7 +160,7 @@ public class CallGraph2JSON {
 	
 	private static String joinWith(Iterable<String> lst, String sep) {
 	  StringBuffer res = new StringBuffer();
-	  ArrayList<String> strings = new ArrayList<String>();
+	  ArrayList<String> strings = new ArrayList<>();
 	  for(String s : lst)
 	    if(s != null)
 	      strings.add(s);

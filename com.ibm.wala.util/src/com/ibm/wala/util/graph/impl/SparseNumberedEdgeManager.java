@@ -28,6 +28,8 @@ import com.ibm.wala.util.intset.IntSetAction;
  */
 public final class SparseNumberedEdgeManager<T> implements NumberedEdgeManager<T>, Serializable {
 
+  private static final long serialVersionUID = 6751048618312429623L;
+
   private final NumberedNodeManager<T> nodeManager;
 
   /**
@@ -51,7 +53,7 @@ public final class SparseNumberedEdgeManager<T> implements NumberedEdgeManager<T
    *          an object to track nodes
    * @param normalCase
    *          what is the "normal" number of out edges for a node?
-   * @throws IllegalArgumentException  if normalCase < 0
+   * @throws IllegalArgumentException  if normalCase &lt; 0
    */
   public SparseNumberedEdgeManager(NumberedNodeManager<T> nodeManager, int normalCase, byte delegateImpl) throws IllegalArgumentException {
     if (nodeManager == null) {

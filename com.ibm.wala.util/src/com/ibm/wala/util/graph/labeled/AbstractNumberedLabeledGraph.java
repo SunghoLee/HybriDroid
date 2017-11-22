@@ -16,7 +16,7 @@ import java.util.Set;
 import com.ibm.wala.util.graph.AbstractNumberedGraph;
 import com.ibm.wala.util.intset.IntSet;
 
-public abstract class AbstractNumberedLabeledGraph<T, U> extends AbstractNumberedGraph<T> implements LabeledGraph<T, U> {
+public abstract class AbstractNumberedLabeledGraph<T, U> extends AbstractNumberedGraph<T> implements LabeledGraph<T, U>, NumberedLabeledGraph<T, U> {
 
   /**
    * @return the object which manages edges in the graph
@@ -59,10 +59,12 @@ public abstract class AbstractNumberedLabeledGraph<T, U> extends AbstractNumbere
     return getEdgeManager().getSuccNodes(N, label);
   }
 
+  @Override
   public IntSet getPredNodeNumbers(T node, U label) throws IllegalArgumentException {
     return getEdgeManager().getPredNodeNumbers(node, label);
   }
 
+  @Override
   public IntSet getSuccNodeNumbers(T node, U label) throws IllegalArgumentException {
     return getEdgeManager().getSuccNodeNumbers(node, label);
   }
@@ -85,5 +87,15 @@ public abstract class AbstractNumberedLabeledGraph<T, U> extends AbstractNumbere
   @Override
   public U getDefaultLabel() {
     return getEdgeManager().getDefaultLabel();
+  }
+  
+  @Override
+  protected String edgeString(T from, T to) {
+      Set<? extends U> labels = getEdgeLabels(from, to);
+      if (labels != null && !labels.isEmpty()) {
+        return "-" + labels + "->";
+      } else {
+        return super.edgeString(from, to);
+      }
   }
 }

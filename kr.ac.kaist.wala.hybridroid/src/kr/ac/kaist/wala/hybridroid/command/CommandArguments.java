@@ -10,7 +10,14 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.command;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+//import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 public class CommandArguments {
 	static private Options options;
@@ -31,22 +38,28 @@ public class CommandArguments {
 	static{
 		options = new Options();
 
-		Option targetOp = new Option(TARGET_ARG, TARGET_LONG_ARG,true, "target apk file of analysis");
-		targetOp.setRequired(true);
+		Option targetOp = Option.builder(TARGET_ARG).longOpt(TARGET_LONG_ARG).hasArg(true).desc("target apk file of analysis").build();
+		//		targetOp.setRequired(true);
 		options.addOption(targetOp);
 
-		Option propOp = new Option(PROP_ARG, PROP_LONG_ARG, true, "set the wala property file");
-		propOp.setRequired(true);
+		Option propOp = Option.builder(PROP_ARG).longOpt(PROP_LONG_ARG).hasArg(true).desc("set the wala property file").build();
+//		propOp.setRequired(true);
 		options.addOption(propOp);
 
-		Option modelOp = new Option(MODEL_ARG, MODEL_LONG_ARG, true, "set the wala property file");
-		options.addOption(modelOp);
+		// Option modelOp = OptionBuilder.withArgName(MODEL_ARG).withLongOpt(MODEL_LONG_ARG).withDescription("set the wala property file").create();
 
-		Option jsOp = new Option(ONLY_JS_ARG, ONLY_JS_LONG_ARG, false, "set the wala property file");
-		options.addOption(jsOp);
+		// //     new Option(MODEL_ARG, MODEL_LONG_ARG, true, "set the wala property file");
+		// options.addOption(modelOp);
+
+		// Option jsOp = OptionBuilder.withArgName(ONLY_JS_ARG).withLongOpt(ONLY_JS_LONG_ARG).withDescription("set the wala property file").create();
+
+		// //    new Option(ONLY_JS_ARG, ONLY_JS_LONG_ARG, false, "set the wala property file");
+		// options.addOption(jsOp);
 
 //		OptionGroup functions = new OptionGroup();
-		Option cfgOp = new Option(CFG_ARG, CFG_LONG_ARG, false, "construct cfg for the android application");
+		Option cfgOp = Option.builder(CFG_ARG).longOpt(CFG_LONG_ARG).hasArg(false).desc("construct cfg for the android application").build();
+
+		
 		options.addOption(cfgOp);
 //		options.addOptionGroup(functions);
 ////		options.addOption(new Option(PRE_STRING_ARG, false, "pre-analysis for "), hasArg, description)
@@ -62,21 +75,20 @@ public class CommandArguments {
 	}
 	
 	public CommandArguments(String[] args){
-		CommandLineParser parser = new BasicParser();
-		try {
-			cmd = parser.parse(options, args, false);
+		 CommandLineParser parser = new DefaultParser();
+		 try {
+		 	cmd = parser.parse(options, args, false);
 			
-			if(!computeDependency()){
-				System.out.println("124555");
-				usage();
-				System.exit(-1);
-			}
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			System.out.println("124");
-			usage();
-			System.exit(-1);
-		}
+		 	if(!computeDependency()){
+		 		usage();
+		 		System.exit(-1);
+		 	}
+		 } catch (ParseException e) {
+		 	// TODO Auto-generated catch block
+		     System.out.println("parsing error: " + e);
+		 	usage();
+		 	System.exit(-1);
+		 }
 	}
 	
 	private boolean computeDependency(){

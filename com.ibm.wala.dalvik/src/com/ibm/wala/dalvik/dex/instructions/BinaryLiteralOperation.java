@@ -48,7 +48,7 @@
 
 package com.ibm.wala.dalvik.dex.instructions;
 
-import org.jf.dexlib.Code.Opcode;
+import org.jf.dexlib2.Opcode;
 
 import com.ibm.wala.cast.ir.ssa.CAstBinaryOp;
 import com.ibm.wala.dalvik.classLoader.DexIMethod;
@@ -65,7 +65,7 @@ public class BinaryLiteralOperation extends Instruction {
         ADD_INT,RSUB_INT,MUL_INT,DIV_INT,REM_INT,AND_INT,OR_INT,XOR_INT,SHL_INT,SHR_INT,USHR_INT,
         ADD_LONG,RSUB_LONG,MUL_LONG,DIV_LONG,REM_LONG,AND_LONG,OR_LONG,XOR_LONG,SHL_LONG,SHR_LONG,USHR_LONG,
         ADD_FLOAT,RSUB_FLOAT,MUL_FLOAT,DIV_FLOAT,REM_FLOAT,
-        ADD_DOUBLE,RSUB_DOUBLE,MUL_DOUBLE,DIV_DOUBLE,REM_DOUBLE};
+        ADD_DOUBLE,RSUB_DOUBLE,MUL_DOUBLE,DIV_DOUBLE,REM_DOUBLE}
 
     public final OpID op;
     public final int oper1;
@@ -169,8 +169,9 @@ public class BinaryLiteralOperation extends Instruction {
             return IBinaryOpInstruction.Operator.DIV;
         case REM_DOUBLE:
             return IBinaryOpInstruction.Operator.REM;
+		default:
+			return null;
         }
-        return null;
     }
 
     public boolean isFloat()

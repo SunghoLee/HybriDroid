@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
-import com.ibm.wala.cast.js.types.JavaScriptMethods;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.cast.types.AstMethodReference;
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -53,14 +52,14 @@ public class LoadFileTargetSelector implements MethodTargetSelector {
     IMethod target = base.getCalleeTarget(caller, site, receiver);
     if (target != null && target.getReference().equals(loadFileFunRef)) {
 
-      Set<String> names = new HashSet<String>();
+      Set<String> names = new HashSet<>();
       SSAInstruction call = caller.getIR().getInstructions()[caller.getIR().getCallInstructionIndices(site).intIterator().next()];
       if (call.getNumberOfUses() > 1) {
         LocalPointerKey fileNameV = new LocalPointerKey(caller, call.getUse(1));
         OrdinalSet<InstanceKey> ptrs = builder.getPointerAnalysis().getPointsToSet(fileNameV);
         for(InstanceKey k : ptrs) {
           if (k instanceof ConstantKey) {
-            Object v = ((ConstantKey)k).getValue();
+            Object v = ((ConstantKey<?>)k).getValue();
             if (v instanceof String) {
               names.add((String)v);
             }
@@ -74,12 +73,12 @@ public class LoadFileTargetSelector implements MethodTargetSelector {
             URL url = new URL(builder.getBaseURL(), str);
             if(!loadedFiles.contains(url)) {
               // try to open the input stream for the URL.  if it fails, we'll get an IOException and fall through to default case
-              InputStream inputStream = url.openConnection().getInputStream();
-              inputStream.close();
-              JSCallGraphUtil.loadAdditionalFile(builder.getClassHierarchy() , cl, str, url);
+              try (InputStream inputStream = url.openConnection().getInputStream()) {
+              }
+              JSCallGraphUtil.loadAdditionalFile(builder.getClassHierarchy() , cl, url);
               loadedFiles.add(url);
               IClass script = builder.getClassHierarchy().lookupClass(TypeReference.findOrCreate(cl.getReference(), "L" + url.getFile()));
-              return script.getMethod(JavaScriptMethods.fnSelector);
+              return script.getMethod(AstMethodReference.fnSelector);
             }
           } catch (MalformedURLException e1) {
             // do nothing, fall through and return 'target'

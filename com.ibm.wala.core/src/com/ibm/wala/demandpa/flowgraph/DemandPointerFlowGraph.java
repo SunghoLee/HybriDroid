@@ -37,6 +37,11 @@
  */
 package com.ibm.wala.demandpa.flowgraph;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import com.ibm.wala.classLoader.ArrayClass;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
@@ -46,18 +51,37 @@ import com.ibm.wala.demandpa.util.MemoryAccessMap;
 import com.ibm.wala.demandpa.util.PointerParamValueNumIterator;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.propagation.*;
+import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
+import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.HeapModel;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
+import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.ssa.*;
+import com.ibm.wala.ssa.DefUse;
+import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.ISSABasicBlock;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAAbstractThrowInstruction;
+import com.ibm.wala.ssa.SSAArrayLoadInstruction;
+import com.ibm.wala.ssa.SSAArrayStoreInstruction;
+import com.ibm.wala.ssa.SSACheckCastInstruction;
+import com.ibm.wala.ssa.SSAGetCaughtExceptionInstruction;
+import com.ibm.wala.ssa.SSAGetInstruction;
+import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSAInvokeInstruction;
+import com.ibm.wala.ssa.SSALoadMetadataInstruction;
+import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSAPiInstruction;
+import com.ibm.wala.ssa.SSAPutInstruction;
+import com.ibm.wala.ssa.SSAReturnInstruction;
+import com.ibm.wala.ssa.SSAThrowInstruction;
+import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Pair;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A graph representation of statements flowing pointer values, but <em>not</em> primitive values. Nodes are variables, and edges

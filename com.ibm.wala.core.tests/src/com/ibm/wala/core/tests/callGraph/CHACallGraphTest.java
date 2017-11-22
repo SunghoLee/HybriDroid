@@ -11,6 +11,7 @@
 package com.ibm.wala.core.tests.callGraph;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 import org.junit.Test;
 
@@ -20,11 +21,10 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.cha.CHACallGraph;
 import com.ibm.wala.ipa.callgraph.impl.Util;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.functions.Function;
 
 public class CHACallGraphTest {
   
@@ -47,7 +47,7 @@ public class CHACallGraphTest {
     throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException
   {
     AnalysisScope scope = CallGraphTestUtil.makeJ2SEAnalysisScope(scopeFile, exclusionsFile);
-    IClassHierarchy cha = ClassHierarchy.make(scope);
+    IClassHierarchy cha = ClassHierarchyFactory.make(scope);
     
     CHACallGraph CG = new CHACallGraph(cha);
     CG.init(makeEntrypoints.apply(cha));

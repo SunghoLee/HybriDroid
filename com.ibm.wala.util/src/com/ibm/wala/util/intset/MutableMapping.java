@@ -23,12 +23,14 @@ import com.ibm.wala.util.collections.HashMapFactory;
  */
 public class MutableMapping<T> implements OrdinalSetMapping<T>, Serializable {
 
+  private static final long serialVersionUID = 4011751404163534418L;
+
   private static final int INITIAL_CAPACITY = 20;
   
   private final static int MAX_SIZE = Integer.MAX_VALUE / 4;
   
   public static <T> MutableMapping<T> make() {
-    return new MutableMapping<T>();
+    return new MutableMapping<>();
   }
 
   private Object[] array;
@@ -67,7 +69,7 @@ public class MutableMapping<T> implements OrdinalSetMapping<T>, Serializable {
     try {
       return (T) array[n];
     } catch (ArrayIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("n out of range " + n);
+      throw new IllegalArgumentException("n out of range " + n, e);
     }
   }
 
@@ -98,7 +100,7 @@ public class MutableMapping<T> implements OrdinalSetMapping<T>, Serializable {
     if (I != null) {
       return I.intValue();
     }
-    map.put(o, new Integer(nextIndex));
+    map.put(o, nextIndex);
     if (nextIndex >= array.length) {
       Object[] old = array;
       array = new Object[2 * array.length];
@@ -130,7 +132,7 @@ public class MutableMapping<T> implements OrdinalSetMapping<T>, Serializable {
    * @see com.ibm.wala.util.intset.OrdinalSetMapping#makeSingleton(int)
    */
   public OrdinalSet<T> makeSingleton(int i) {
-    return new OrdinalSet<T>(SparseIntSet.singleton(i), this);
+    return new OrdinalSet<>(SparseIntSet.singleton(i), this);
   }
 
   /**
@@ -157,7 +159,7 @@ public class MutableMapping<T> implements OrdinalSetMapping<T>, Serializable {
       throw new IllegalArgumentException("first element does not exist in map");
     }
     map.remove(a);
-    map.put(b, new Integer(i));
+    map.put(b, i);
     array[i] = b;
   }
 

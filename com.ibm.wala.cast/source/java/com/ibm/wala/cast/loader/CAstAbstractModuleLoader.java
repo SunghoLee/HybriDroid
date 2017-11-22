@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -59,7 +58,7 @@ public abstract class CAstAbstractModuleLoader extends CAstAbstractLoader {
   /**
    * create the appropriate CAst translator for the language and source module
    */
-  protected abstract TranslatorToCAst getTranslatorToCAst(CAst ast, SourceModule M) throws IOException;
+  protected abstract TranslatorToCAst getTranslatorToCAst(CAst ast, ModuleEntry M) throws IOException;
 
   /**
    * should IR be generated for entity?
@@ -96,7 +95,7 @@ public abstract class CAstAbstractModuleLoader extends CAstAbstractLoader {
     final CAst ast = new CAstImpl();
 
     // convert everything to CAst
-    final Set<Pair<CAstEntity, ModuleEntry>> topLevelEntities = new LinkedHashSet<Pair<CAstEntity, ModuleEntry>>();
+    final Set<Pair<CAstEntity, ModuleEntry>> topLevelEntities = new LinkedHashSet<>();
     for (Iterator<Module> mes = modules.iterator(); mes.hasNext();) {
       translateModuleToCAst(mes.next(), ast, topLevelEntities);
     }
@@ -112,8 +111,7 @@ public abstract class CAstAbstractModuleLoader extends CAstAbstractLoader {
     }
 
     if (DEBUG) {
-      for (Iterator ts = types.keySet().iterator(); ts.hasNext();) {
-        TypeName tn = (TypeName) ts.next();
+      for (TypeName tn : types.keySet()) {
         try {
           System.err.println(("found type " + tn + " : " + types.get(tn) + " < " + types.get(tn).getSuperclass()));
         } catch (Exception e) {
@@ -136,8 +134,8 @@ public abstract class CAstAbstractModuleLoader extends CAstAbstractLoader {
       if (moduleEntry.isModuleFile()) {
         // nested module
         translateModuleToCAst(moduleEntry.asModule(), ast, topLevelEntities);
-      } else if (moduleEntry instanceof SourceModule) {
-        TranslatorToCAst xlatorToCAst = getTranslatorToCAst(ast, (SourceModule) moduleEntry);
+      } else {
+        TranslatorToCAst xlatorToCAst = getTranslatorToCAst(ast, moduleEntry);
 
         CAstEntity fileEntity = null;
         try {
@@ -152,13 +150,6 @@ public abstract class CAstAbstractModuleLoader extends CAstAbstractLoader {
           addMessage(moduleEntry, e.warning);
         }
       }
-    } catch (final MalformedURLException e) {
-      addMessage(moduleEntry, new Warning(Warning.SEVERE) {
-        @Override
-        public String getMsg() {
-          return "Malformed URL issue: " + e.getMessage();
-        }
-      });
     } catch (final IOException e) {
       addMessage(moduleEntry, new Warning(Warning.SEVERE) {
         @Override

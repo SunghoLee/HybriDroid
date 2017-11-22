@@ -16,9 +16,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.StringTokenizer;
 import java.util.jar.JarFile;
-import java.net.URI;
 
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
 import com.ibm.wala.classLoader.Module;
@@ -50,12 +50,11 @@ public class AnalysisScopeReader {
    */
   public static AnalysisScope readJavaScope(String scopeFileName, File exclusionsFile, ClassLoader javaLoader) throws IOException {
     AnalysisScope scope = AnalysisScope.createJavaAnalysisScope();
-    return read(scope, scopeFileName, exclusionsFile, javaLoader, new FileProvider());
+    return read(scope, scopeFileName, exclusionsFile, javaLoader);
   }
 
 
-  public static AnalysisScope read(AnalysisScope scope, String scopeFileName, File exclusionsFile, ClassLoader javaLoader,
-      FileProvider fp) throws IOException {
+  public static AnalysisScope read(AnalysisScope scope, String scopeFileName, File exclusionsFile, ClassLoader javaLoader) throws IOException {
     BufferedReader r = null;
     try {
       // Now reading from jar is included in WALA, but we can't use their version, because they load from
@@ -82,8 +81,9 @@ public class AnalysisScopeReader {
       }
 
       if (exclusionsFile != null) {
-        InputStream fs = exclusionsFile.exists()? new FileInputStream(exclusionsFile): FileProvider.class.getClassLoader().getResourceAsStream(exclusionsFile.getName());
-        scope.setExclusions(new FileOfClasses(fs));
+        try (InputStream fs = exclusionsFile.exists()? new FileInputStream(exclusionsFile): FileProvider.class.getClassLoader().getResourceAsStream(exclusionsFile.getName())) {
+          scope.setExclusions(new FileOfClasses(fs));
+        }
       }
 
     } finally {
@@ -99,8 +99,7 @@ public class AnalysisScopeReader {
     return scope;
   }
 
-  protected static AnalysisScope read(AnalysisScope scope, final URI scopeFileURI, final File exclusionsFile, ClassLoader javaLoader,
-      FileProvider fp) throws IOException {
+  protected static AnalysisScope read(AnalysisScope scope, final URI scopeFileURI, final File exclusionsFile, ClassLoader javaLoader) throws IOException {
     BufferedReader r = null;
     try {
       String line;
@@ -115,11 +114,11 @@ public class AnalysisScopeReader {
       }
 
       if (exclusionsFile != null) {
-        final InputStream fs = exclusionsFile.exists()
+        try (final InputStream fs = exclusionsFile.exists()
             ? new FileInputStream(exclusionsFile)
-            : FileProvider.class.getClassLoader().getResourceAsStream(exclusionsFile.getName());
-
-        scope.setExclusions(new FileOfClasses(fs));
+            : FileProvider.class.getClassLoader().getResourceAsStream(exclusionsFile.getName())) {
+          scope.setExclusions(new FileOfClasses(fs));
+        }
       }
 
     } finally {

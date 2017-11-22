@@ -54,7 +54,7 @@ public class JSAstTranslator extends AstTranslator {
     super(loader);
   }
 
-  private boolean isPrologueScript(WalkContext context) {
+  private static boolean isPrologueScript(WalkContext context) {
     return JavaScriptLoader.bootstrapFileNames.contains( context.getModule().getName() );
   }
 
@@ -168,8 +168,8 @@ public class JSAstTranslator extends AstTranslator {
   }
 
   @Override
-  protected void defineFunction(CAstEntity N, WalkContext definingContext, AbstractCFG cfg, SymbolTable symtab,
-      boolean hasCatchBlock, Map<IBasicBlock,TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation LI,
+  protected void defineFunction(CAstEntity N, WalkContext definingContext, AbstractCFG<SSAInstruction, ? extends IBasicBlock<SSAInstruction>> cfg, SymbolTable symtab,
+      boolean hasCatchBlock, Map<IBasicBlock<SSAInstruction>,TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation LI,
       DebuggingInformation debugInfo) {
     if (DEBUG)
       System.err.println(("\n\nAdding code for " + N));
@@ -377,7 +377,7 @@ public class JSAstTranslator extends AstTranslator {
             resultVal, context.currentScope().getConstantValue( null )));
       }
     } catch (ClassCastException e) {
-      throw new RuntimeException("Cannot translate primitive " + primitiveCall.getChild(0).getValue());
+      throw new RuntimeException("Cannot translate primitive " + primitiveCall.getChild(0).getValue(), e);
     }
   }
 
@@ -470,7 +470,7 @@ public class JSAstTranslator extends AstTranslator {
     }
 
     @Override
-    public Collection getSupertypes() {
+    public Collection<CAstType> getSupertypes() {
       return Collections.EMPTY_SET;
     }
   };

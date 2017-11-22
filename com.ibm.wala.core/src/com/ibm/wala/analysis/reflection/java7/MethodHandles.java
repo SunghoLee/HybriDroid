@@ -13,6 +13,8 @@ package com.ibm.wala.analysis.reflection.java7;
 import java.lang.ref.SoftReference;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.ibm.wala.cfg.ControlFlowGraph;
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -33,6 +35,7 @@ import com.ibm.wala.shrikeBT.IInvokeInstruction.Dispatch;
 import com.ibm.wala.ssa.ConstantValue;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.IRView;
 import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAFieldAccessInstruction;
 import com.ibm.wala.ssa.SSAGetInstruction;
@@ -43,11 +46,9 @@ import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.FilterIterator;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.MapIterator;
-import com.ibm.wala.util.functions.Function;
 import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.IntSetUtil;
 
@@ -275,7 +276,7 @@ public class MethodHandles {
             code.addStatement(insts.InvokeInstruction(code.getNextProgramCounter(), 2*nargs+3, params, 2*nargs+4, site, null));
             code.addStatement(insts.ReturnInstruction(code.getNextProgramCounter(), 2*nargs+3, false));
           } else {
-            int nargs = node.getMethod().getNumberOfParameters();
+            // int nargs = node.getMethod().getNumberOfParameters();
           }
         } else {
           assert isType(node);
@@ -286,6 +287,11 @@ public class MethodHandles {
       }
 
       return irs.get(node).get();
+    }
+
+    @Override
+    public IRView getIRView(CGNode node) {
+      return getIR(node);
     }
 
     @Override

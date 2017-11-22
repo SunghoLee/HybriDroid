@@ -38,30 +38,30 @@ public class InterfaceAnalyzer {
     int lastMUID;
   }
 
-  final static HashMap<String, TypeStats> typeStats = new HashMap<String, TypeStats>();
+  final static HashMap<String, TypeStats> typeStats = new HashMap<>();
 
   public static void main(String[] args) throws Exception {
-    OfflineInstrumenter instrumenter = new OfflineInstrumenter(true);
+    OfflineInstrumenter instrumenter = new OfflineInstrumenter();
 
-    Writer w = new BufferedWriter(new OutputStreamWriter(System.out));
+    try (final Writer w = new BufferedWriter(new OutputStreamWriter(System.out))) {
 
-    args = instrumenter.parseStandardArgs(args);
+      args = instrumenter.parseStandardArgs(args);
 
-    instrumenter.beginTraversal();
-    ClassInstrumenter ci;
-    while ((ci = instrumenter.nextClass()) != null) {
-      doClass(ci.getReader());
+      instrumenter.beginTraversal();
+      ClassInstrumenter ci;
+      while ((ci = instrumenter.nextClass()) != null) {
+        doClass(ci.getReader());
+      }
+      instrumenter.close();
+
+      w.write("Type\t# Total\t# Method\t# Public Method\t# Public Method as Foreign\n");
+      for (Iterator<String> i = typeStats.keySet().iterator(); i.hasNext();) {
+        String k = i.next();
+        TypeStats t = typeStats.get(k);
+        w.write(k + "\t" + t.totalOccurrences + "\t" + t.methodOccurrences + "\t" + t.publicMethodOccurrences + "\t"
+            + t.foreignPublicMethodOccurrences + "\n");
+      }
     }
-    instrumenter.close();
-
-    w.write("Type\t# Total\t# Method\t# Public Method\t# Public Method as Foreign\n");
-    for (Iterator<String> i = typeStats.keySet().iterator(); i.hasNext();) {
-      String k = i.next();
-      TypeStats t = typeStats.get(k);
-      w.write(k + "\t" + t.totalOccurrences + "\t" + t.methodOccurrences + "\t" + t.publicMethodOccurrences + "\t"
-          + t.foreignPublicMethodOccurrences + "\n");
-    }
-    w.close();
   }
 
   static int methodUID = 0;

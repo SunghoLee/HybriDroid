@@ -19,17 +19,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
-import com.ibm.wala.util.functions.Function;
 
 public class DefaultSourceExtractor extends DomLessSourceExtractor{
 
-  public static Function<Void,JSSourceExtractor> factory = new Function<Void,JSSourceExtractor>() {
+  public static Supplier<JSSourceExtractor> factory = new Supplier<JSSourceExtractor>() {
     @Override
-    public JSSourceExtractor apply(Void object) {
+    public JSSourceExtractor get() {
       return new DefaultSourceExtractor();
     }
   };
@@ -38,10 +38,10 @@ public class DefaultSourceExtractor extends DomLessSourceExtractor{
 
     private final HashMap<String, String> constructors = HashMapFactory.make();
  
-    private final Stack<String> stack = new Stack<String>();
+    private final Stack<String> stack = new Stack<>();
 
-    private final Stack<ITag> forms = new Stack<ITag>();
-    private final Set<Pair<ITag,String>> sets = new HashSet<Pair<ITag,String>>();
+    private final Stack<ITag> forms = new Stack<>();
+    private final Set<Pair<ITag,String>> sets = new HashSet<>();
 
     public HtmlCallBack(URL entrypointUrl, IUrlResolver urlResolver) {
       super(entrypointUrl, urlResolver);
@@ -100,7 +100,7 @@ public class DefaultSourceExtractor extends DomLessSourceExtractor{
       domRegion.println("");
     }
 
-    private String makeRef(String object, String property) {
+    private static String makeRef(String object, String property) {
       assert object != null && property != null;
       return object + "[\"" + property + "\"]";
     }
@@ -116,7 +116,7 @@ public class DefaultSourceExtractor extends DomLessSourceExtractor{
       for (Map.Entry<String, Pair<String, Position>> e : attrs.entrySet()){
         String attr = e.getKey();
         String value = e.getValue().fst;
-        writeAttribute(tag, e.getValue().snd, attr, value, "this", varName);
+        writeAttribute(tag, attr, value, "this", varName);
       }
 
       if (tag.getName().equalsIgnoreCase("FORM")) {
@@ -143,7 +143,7 @@ public class DefaultSourceExtractor extends DomLessSourceExtractor{
           }
         }
         
-        inputElementCallback(tag);
+        inputElementCallback();
       }
 
       assert varName != null && !"".equals(varName);
@@ -152,16 +152,16 @@ public class DefaultSourceExtractor extends DomLessSourceExtractor{
       printlnIndented("parent.appendChild(this);", tag);
     }
 
-    protected void inputElementCallback(ITag tag) {
+    protected void inputElementCallback() {
       // this space intentionally left blank 
     }
 
-    protected void writeAttribute(ITag tag, Position pos, String attr, String value, String varName, String varName2) {
+    protected void writeAttribute(ITag tag, String attr, String value, String varName, String varName2) {
       writePortletAttribute(tag, attr, value, varName);
-      writeEventAttribute(tag, pos, attr, value, varName, varName2);
+      writeEventAttribute(tag, attr, value, varName, varName2);
     }
 
-    protected void writeEventAttribute(ITag tag, Position pos, String attr, String value, String varName, String varName2){
+    protected void writeEventAttribute(ITag tag, String attr, String value, String varName, String varName2){
       //There should probably be more checking to see what the attributes are since we allow things like: ; to be used as attributes now.
       if(attr.length() >= 2 && attr.substring(0,2).equals("on")) {
         printlnIndented(varName + "." + attr + " = function " + tag.getName().toLowerCase() + "_" + attr + "(event) {" + value + "};", tag);

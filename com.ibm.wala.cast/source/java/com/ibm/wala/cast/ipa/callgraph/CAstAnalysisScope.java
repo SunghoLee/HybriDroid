@@ -10,14 +10,13 @@
 package com.ibm.wala.cast.ipa.callgraph;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
 import com.ibm.wala.cast.loader.SingleClassLoaderFactory;
 import com.ibm.wala.classLoader.ArrayClassLoader;
 import com.ibm.wala.classLoader.Language;
-import com.ibm.wala.classLoader.SourceModule;
+import com.ibm.wala.classLoader.Module;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.debug.Assertions;
@@ -31,8 +30,7 @@ public class CAstAnalysisScope extends AnalysisScope {
     this.theLoader = loaders.getTheReference();
   }
 
-  public CAstAnalysisScope(String[] sourceFileNames, SingleClassLoaderFactory loaders, Collection<Language> languages)
-      throws IOException {
+  public CAstAnalysisScope(String[] sourceFileNames, SingleClassLoaderFactory loaders, Collection<Language> languages) {
     this(loaders, languages);
     for (int i = 0; i < sourceFileNames.length; i++) {
       File F = new File(sourceFileNames[i]);
@@ -40,8 +38,7 @@ public class CAstAnalysisScope extends AnalysisScope {
     }
   }
 
-  public CAstAnalysisScope(SourceModule[] sources, SingleClassLoaderFactory loaders, Collection<Language> languages)
-      throws IOException {
+  public CAstAnalysisScope(Module[] sources, SingleClassLoaderFactory loaders, Collection<Language> languages) {
     this(loaders, languages);
     for (int i = 0; i < sources.length; i++) {
       addToScope(theLoader, sources[i]);

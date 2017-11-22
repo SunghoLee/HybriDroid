@@ -43,7 +43,9 @@ package com.ibm.wala.dalvik.ipa.callgraph.androidModel.stubs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
@@ -51,7 +53,6 @@ import com.ibm.wala.dalvik.ipa.callgraph.androidModel.AndroidModelClass;
 import com.ibm.wala.dalvik.ipa.callgraph.propagation.cfa.IntentStarters.StartInfo;
 import com.ibm.wala.dalvik.ipa.callgraph.propagation.cfa.IntentStarters.StarterFlags;
 import com.ibm.wala.dalvik.util.AndroidTypes;
-import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ipa.summaries.VolatileMethodSummary;
 import com.ibm.wala.shrikeBT.IInvokeInstruction;
@@ -79,7 +80,9 @@ import com.ibm.wala.util.strings.Atom;
  *  @since  2013-10-22
  */
 public class AndroidStartComponentTool {
-    
+
+	private static final Logger logger = LoggerFactory.getLogger(AndroidStartComponentTool.class);
+
     private final IClassHierarchy cha;
 //    private final MethodReference asMethod;
     private final Set<StarterFlags> flags;
@@ -96,7 +99,7 @@ public class AndroidStartComponentTool {
     public AndroidStartComponentTool(final IClassHierarchy cha, final MethodReference asMethod, final Set<StarterFlags> flags,
             final TypeReference caller, final TypeSafeInstructionFactory instructionFactory, final ParameterAccessor acc,
             final SSAValueManager pm, final VolatileMethodSummary redirect, final Parameter self,
-            final StartInfo info, final CGNode callerNd) {
+            final StartInfo info) {
         
         if (cha == null) {
             throw new IllegalArgumentException("cha may not be null");
@@ -205,7 +208,7 @@ public class AndroidStartComponentTool {
                 AndroidTypes.ConfigurationName }, TypeReference.VoidName);
         final Selector mSel = new Selector(Atom.findOrCreateAsciiAtom("attach"), desc);
         final MethodReference mRef = MethodReference.findOrCreate(AndroidTypes.Activity, mSel);
-        final List<SSAValue> params = new ArrayList<SSAValue>(13);
+        final List<SSAValue> params = new ArrayList<>(13);
         params.add(null);   // activity
         params.add(context);
         params.add(thread);
@@ -308,7 +311,8 @@ public class AndroidStartComponentTool {
             
             return androidContext;
         } else {
-            throw new UnsupportedOperationException("Can not handle the callers android-context of " + caller);
+            logger.debug("Can not handle the callers android-context of " + caller);
+            return null;
         }
     }
 
@@ -344,7 +348,7 @@ public class AndroidStartComponentTool {
                 final MethodReference mRef = MethodReference.findOrCreate(AndroidTypes.IntentSender, mSel);
                 final CallSiteReference site = CallSiteReference.make(callPC, mRef, IInvokeInstruction.Dispatch.VIRTUAL);
                 final SSAValue exception = pm.getException();
-                final List<SSAValue> params = new ArrayList<SSAValue>(1);
+                final List<SSAValue> params = new ArrayList<>(1);
                 params.add(intentSender);
                 final SSAInstruction invokation = instructionFactory.InvokeInstruction(callPC, iIntentSender, params, exception, site);
                 redirect.addStatement(invokation);
@@ -356,7 +360,7 @@ public class AndroidStartComponentTool {
                 final MethodReference mRef = MethodReference.findOrCreate(AndroidTypes.IntentSender, mSel);
                 final CallSiteReference site = CallSiteReference.make(callPC, mRef, IInvokeInstruction.Dispatch.VIRTUAL);
                 final SSAValue exception = pm.getException();
-                final List<SSAValue> params = new ArrayList<SSAValue>(1);
+                final List<SSAValue> params = new ArrayList<>(1);
                 params.add(iIntentSender);
                 final SSAInstruction invokation = instructionFactory.InvokeInstruction(callPC, iBinder, params, exception, site);
                 redirect.addStatement(invokation);
@@ -391,7 +395,7 @@ public class AndroidStartComponentTool {
                 final MethodReference mRef = MethodReference.findOrCreate(AndroidTypes.ActivityThread, mSel);
                 final CallSiteReference site = CallSiteReference.make(callPC, mRef, IInvokeInstruction.Dispatch.VIRTUAL);
                 final SSAValue exception = pm.getException();
-                final List<SSAValue> params = new ArrayList<SSAValue>(1);
+                final List<SSAValue> params = new ArrayList<>(1);
                 params.add(mMainThread);
                 final SSAInstruction invokation = instructionFactory.InvokeInstruction(callPC, iBinder,  params, exception, site);
                 redirect.addStatement(invokation);
@@ -464,7 +468,7 @@ public class AndroidStartComponentTool {
             final MethodReference mRef = MethodReference.findOrCreate(AndroidTypes.Activity, mSel);
             final CallSiteReference site = CallSiteReference.make(callPC, mRef, IInvokeInstruction.Dispatch.VIRTUAL);
             final SSAValue exception = pm.getException();
-            final List<SSAValue> params = new ArrayList<SSAValue>(1);
+            final List<SSAValue> params = new ArrayList<>(1);
             params.add(activity);
             params.add(intent);
             final SSAInstruction invokation = instructionFactory.InvokeInstruction(callPC, params, exception, site);

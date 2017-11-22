@@ -44,7 +44,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
@@ -53,11 +52,9 @@ import com.ibm.wala.dalvik.ipa.callgraph.androidModel.AndroidModel;
 import com.ibm.wala.dalvik.ipa.callgraph.propagation.cfa.IntentStarters;
 import com.ibm.wala.dalvik.util.AndroidComponent;
 import com.ibm.wala.dalvik.util.AndroidEntryPointManager;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.Context;
-import com.ibm.wala.ipa.callgraph.ContextKey;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ipa.summaries.SummarizedMethod;
@@ -85,9 +82,9 @@ public class Overrides {
     private final AndroidModel caller;
     private final IClassHierarchy cha;
     private final AnalysisOptions options;
-    private final AnalysisCache cache;
+    private final IAnalysisCacheView cache;
 
-    public Overrides(AndroidModel caller, IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+    public Overrides(AndroidModel caller, IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache) {
         this.caller = caller;
         this.cha = cha;
         this.options = options;
@@ -161,7 +158,7 @@ public class Overrides {
             final MethodReference mRef = site.getDeclaredTarget();
             if (syntheticMethods.containsKey(mRef)) {
                 if (caller != null) {   // XXX: Debug remove
-                    Context ctx = caller.getContext();
+                    // Context ctx = caller.getContext();
 
                     
                     
@@ -201,13 +198,13 @@ public class Overrides {
      */
     public MethodTargetSelector overrideAll() throws CancelException {
         final HashMap<MethodReference, SummarizedMethod> overrides = HashMapFactory.make();
-        final Map<AndroidComponent, AndroidModel> callTo = new EnumMap<AndroidComponent, AndroidModel>(AndroidComponent.class);
+        final Map<AndroidComponent, AndroidModel> callTo = new EnumMap<>(AndroidComponent.class);
         final IProgressMonitor monitor = AndroidEntryPointManager.MANAGER.getProgressMonitor();
         int monitorCounter = 0;
 
         { // Make Mini-Models to override to
             for (final AndroidComponent target: AndroidComponent.values()) {
-                if (AndroidEntryPointManager.MANAGER.EPContainAny(target)) {
+                if (AndroidEntryPointManager.EPContainAny(target)) {
                     final AndroidModel targetModel = new UnknownTargetModel(this.cha, this.options, this.cache, target);
                     callTo.put(target, targetModel); 
                 } else {

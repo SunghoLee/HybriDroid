@@ -118,7 +118,7 @@ public final class AndroidEntryPointLocator {
         WITH_ANDROID
     }
 
-    private final static List<AndroidPossibleEntryPoint> possibleEntryPoints = new ArrayList<AndroidPossibleEntryPoint>();
+    private final static List<AndroidPossibleEntryPoint> possibleEntryPoints = new ArrayList<>();
     protected final Set<LocatorFlags> flags;
 
     public AndroidEntryPointLocator(final Set<LocatorFlags> flags) {
@@ -146,15 +146,15 @@ public final class AndroidEntryPointLocator {
             throw new IllegalArgumentException("I need a ClassHierarchy to search");
         }
 
-        Set<AndroidEntryPoint> entryPoints = new HashSet<AndroidEntryPoint>();
-        
+        Set<AndroidEntryPoint> entryPoints = new HashSet<>();
+
         mon.beginTask("Locating Entrypoints", IProgressMonitor.UNKNOWN);
         int dummy = 0;  // for the progress monitor
         for (IClass cls : cha) {
             mon.worked(dummy++);
-//            if (cls.getName().toString().contains("MainActivity")) {
-//            	System.err.println("got here");
-//            }
+            if (cls.getName().toString().contains("MainActivity")) {
+            	System.err.println("got here");
+            }
             if (isExcluded(cls)) continue;
             if (!cls.isInterface() && 
             	!cls.isAbstract() && 
@@ -163,9 +163,9 @@ public final class AndroidEntryPointLocator {
             	 )) {
 nextMethod:
                 for (final IMethod m : cls.getDeclaredMethods()) {
-//                    if (cls.getName().toString().contains("MainActivity")) {
-//                    	System.err.println("got here: " + m);
-//                    }
+                    if (cls.getName().toString().contains("MainActivity")) {
+                    	System.err.println("got here: " + m);
+                    }
                 	// If there is a Method signature in the possible entry points use thatone
                     for (AndroidPossibleEntryPoint e: possibleEntryPoints) {
                         if (e.name.equals(m.getName().toString()) ) {
@@ -183,7 +183,7 @@ nextMethod:
         } // for IClass : cha
 
         if (this.flags.contains(LocatorFlags.EP_HEURISTIC) || this.flags.contains(LocatorFlags.CB_HEURISTIC)) {
-            final Set<TypeReference> bases = new HashSet<TypeReference>();
+            final Set<TypeReference> bases = new HashSet<>();
 
             if (this.flags.contains(LocatorFlags.EP_HEURISTIC)) {
                 // Add bases for EP-Heuristic
@@ -216,7 +216,7 @@ nextMethod:
         }
 
 
-        List<AndroidEntryPoint> ret = new ArrayList<AndroidEntryPoint>(entryPoints);
+        List<AndroidEntryPoint> ret = new ArrayList<>(entryPoints);
         Collections.sort(ret, new AndroidEntryPoint.ExecutionOrderComperator());
         mon.done();
         return ret;
@@ -274,7 +274,7 @@ nextMethod:
 //        return test.getName().toString().contains("$"); // PRETTY!
 //    }
 
-    private AndroidEntryPoint makeEntryPointForHeuristic(final IMethod method, final IClassHierarchy cha) {
+    private static AndroidEntryPoint makeEntryPointForHeuristic(final IMethod method, final IClassHierarchy cha) {
         AndroidComponent compo;
         { // Guess component
             compo = AndroidComponent.from(method, cha);
@@ -282,7 +282,7 @@ nextMethod:
 
             }
         }
-        final AndroidEntryPoint ep = new AndroidEntryPoint(selectPositionForHeuristic(method), method, cha, compo);
+        final AndroidEntryPoint ep = new AndroidEntryPoint(selectPositionForHeuristic(), method, cha, compo);
 
         return ep;
     }
@@ -364,13 +364,13 @@ nextMethod:
                         final IMethod method = appClass.getMethod(ifMethod.getSelector());
                         if (method != null && method.getDeclaringClass().getClassLoader().getReference().equals(ClassLoaderReference.Application)) {
                             // The function is overridden
-                            final AndroidEntryPoint ep = new AndroidEntryPoint(selectPositionForHeuristic(method), method, cha);
+                            final AndroidEntryPoint ep = new AndroidEntryPoint(selectPositionForHeuristic(), method, cha);
 
                             if (! eps.contains(ep)) {  // Just to be sure that a previous element stays as-is
                             if (eps.add(ep)) {
                                 logger.debug("Heuristic 2b: selecting {}", method);
                             }}
-                        } else {
+                        } else if (method != null) {
                             // The function is taken from the super-class
                             if (this.flags.contains(LocatorFlags.WITH_SUPER)) {
                                 final AndroidEntryPoint ep = makeEntryPointForHeuristic(method, cha);
@@ -404,11 +404,11 @@ nextMethod:
         }
     }
 
-    private boolean isAPIComponent(final IMethod method) {
+    private static boolean isAPIComponent(final IMethod method) {
         return isAPIComponent(method.getDeclaringClass());
     }
 
-    private boolean isAPIComponent(final IClass cls) {
+    private static boolean isAPIComponent(final IClass cls) {
         ClassLoaderReference clr = cls.getClassLoader().getReference();
 		if (! (clr.equals(ClassLoaderReference.Primordial) || clr.equals(ClassLoaderReference.Extension))) {
             if (cls.getName().toString().startsWith("Landroid/")) {
@@ -420,7 +420,7 @@ nextMethod:
         }
     }
 
-    private boolean isExcluded(final IClass cls) {
+    private static boolean isExcluded(final IClass cls) {
     	final SetOfClasses set = cls.getClassHierarchy().getScope().getExclusions();
     	if (set == null) {
     		return false; // exclusions null ==> no exclusions ==> no class is excluded
@@ -435,7 +435,7 @@ nextMethod:
      *
      *  Currently all methods are placed at ExecutionOrder.MULTIPLE_TIMES_IN_LOOP.
      */
-    private ExecutionOrder selectPositionForHeuristic(IMethod method) {
+    private static ExecutionOrder selectPositionForHeuristic() {
         return ExecutionOrder.MULTIPLE_TIMES_IN_LOOP;
     }
 
@@ -454,21 +454,22 @@ nextMethod:
         private final String name;
         public final AndroidEntryPoint.ExecutionOrder order;
 
-        public AndroidPossibleEntryPoint(AndroidComponent c, String n, ExecutionOrder o) { 
+        public AndroidPossibleEntryPoint(String n, ExecutionOrder o) {
 //            cls = c; 
             name = n; 
             order = o; 
         }
  
-        public AndroidPossibleEntryPoint(AndroidComponent c, String n, AndroidPossibleEntryPoint o) { 
+        public AndroidPossibleEntryPoint(String n, AndroidPossibleEntryPoint o) {
 //            cls = c; 
             name = n; 
             order = o.order; 
         }
        
-        public int getOrderValue() { return order.getOrderValue(); }
-        public int compareTo(AndroidEntryPoint.IExecutionOrder o) { return order.compareTo(o); }
-        public AndroidEntryPoint.ExecutionOrder getSection() { return order.getSection(); }
+        @Override public int getOrderValue() { return order.getOrderValue(); }
+        @Override public int compareTo(AndroidEntryPoint.IExecutionOrder o) { return order.compareTo(o); }
+        @Override public AndroidEntryPoint.ExecutionOrder getSection() { return order.getSection(); }
+
         public static class ExecutionOrderComperator implements Comparator<AndroidPossibleEntryPoint> {
             @Override public int compare(AndroidPossibleEntryPoint a, AndroidPossibleEntryPoint b) {
                 return a.order.compareTo(b.order);

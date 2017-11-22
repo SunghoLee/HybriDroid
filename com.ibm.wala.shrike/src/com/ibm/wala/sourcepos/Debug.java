@@ -45,13 +45,13 @@ public final class Debug {
     public boolean isHigherPriority(LogLevel l) {
       return priority > l.priority;
     }
-  };
+  }
 
   private static PrintStream OUT_STREAM = System.out;
 
-  private static final Map<LogLevel, LogStream> logStreams = new HashMap<LogLevel, LogStream>();
+  private static final Map<LogLevel, LogStream> logStreams = new HashMap<>();
 
-  private static Set<LogLevel> allowed = new HashSet<LogLevel>();
+  private static Set<LogLevel> allowed = new HashSet<>();
   static {
     for (int i = 0; i < LogLevel.values().length; i++) {
       allowed.add(LogLevel.values()[i]);

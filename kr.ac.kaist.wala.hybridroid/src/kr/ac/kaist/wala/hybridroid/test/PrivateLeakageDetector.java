@@ -38,7 +38,10 @@ import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.util.graph.visualize.Visualizer;
 import kr.ac.kaist.wala.hybridroid.util.graph.visualize.Visualizer.GraphType;
 import kr.ac.kaist.wala.hybridroid.utils.TypeRefHelper;
-
+import kr.ac.kaist.wala.hybridroid.callgraph.HybridIRFactory;
+import com.ibm.wala.ssa.SSACache;
+import com.ibm.wala.ssa.AuxiliaryCache;
+    
 import java.io.IOException;
 import java.util.*;
 
@@ -47,7 +50,7 @@ public class PrivateLeakageDetector {
 	private final CallGraph cg;
 	private final PointerAnalysis<InstanceKey> pa;
 	private final IClassHierarchy cha;
-
+    
 	private final IClass activityClass;
 	private final IClass wvClass;
 	private final IClass contextClass;
@@ -106,6 +109,7 @@ public class PrivateLeakageDetector {
 		for(List<PointerKey> lpk : sl){
 			lpk.add(pk);
 		}
+
 		return sl;
 	}
 	
@@ -196,7 +200,7 @@ public class PrivateLeakageDetector {
 		return false;
 	}
 	
-	public PrivateLeakageDetector(CallGraph cg, PointerAnalysis pa){
+    public PrivateLeakageDetector(CallGraph cg, PointerAnalysis pa){
 		IClassHierarchy cha = cg.getClassHierarchy();
 		this.cg = cg;
 		this.pa = pa;

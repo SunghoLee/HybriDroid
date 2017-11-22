@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.ibm.wala.analysis.stackMachine.AbstractIntStackMachine;
 import com.ibm.wala.cfg.ControlFlowGraph;
@@ -29,7 +30,6 @@ import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cfg.ExceptionPrunedCFG;
 import com.ibm.wala.ipa.cfg.PrunedCFG;
-import com.ibm.wala.ipa.modref.DelegatingExtendedHeapModel;
 import com.ibm.wala.ipa.modref.ExtendedHeapModel;
 import com.ibm.wala.ipa.modref.ModRef;
 import com.ibm.wala.ipa.slicer.Slicer.ControlDependenceOptions;
@@ -53,7 +53,6 @@ import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPiInstruction;
 import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.types.TypeReference;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.FilterIterator;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.HashSetFactory;
@@ -78,7 +77,7 @@ import com.ibm.wala.util.intset.OrdinalSet;
 public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
 
 /** BEGIN Custom change: control deps */                
-  public enum Dependency {CONTROL_DEP, DATA_AND_CONTROL_DEP};
+  public enum Dependency {CONTROL_DEP, DATA_AND_CONTROL_DEP}
   
   private final SlowSparseNumberedLabeledGraph<Statement, Dependency> delegate =
     new SlowSparseNumberedLabeledGraph<Statement, Dependency>(Dependency.DATA_AND_CONTROL_DEP);
@@ -118,7 +117,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
 
   private final CallGraph cg;
 
-  private final ModRef modRef;
+  private final ModRef<T> modRef;
 
   private final Map<CGNode, OrdinalSet<PointerKey>> ref;
 
@@ -134,7 +133,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
    */
   public PDG(final CGNode node, PointerAnalysis<T> pa, Map<CGNode, OrdinalSet<PointerKey>> mod,
       Map<CGNode, OrdinalSet<PointerKey>> ref, DataDependenceOptions dOptions, ControlDependenceOptions cOptions,
-      HeapExclusions exclusions, CallGraph cg, ModRef modRef) {
+      HeapExclusions exclusions, CallGraph cg, ModRef<T> modRef) {
     this(node, pa, mod, ref, dOptions, cOptions, exclusions, cg, modRef, false);
   }
 
@@ -146,7 +145,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
    */
   public PDG(final CGNode node, PointerAnalysis<T> pa, Map<CGNode, OrdinalSet<PointerKey>> mod,
       Map<CGNode, OrdinalSet<PointerKey>> ref, DataDependenceOptions dOptions, ControlDependenceOptions cOptions,
-      HeapExclusions exclusions, CallGraph cg, ModRef modRef, boolean ignoreAllocHeapDefs) {
+      HeapExclusions exclusions, CallGraph cg, ModRef<T> modRef, boolean ignoreAllocHeapDefs) {
 
     super();
     if (node == null) {
@@ -178,7 +177,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
       isPopulated = true;
 
       Map<SSAInstruction, Integer> instructionIndices = computeInstructionIndices(ir);
-      createNodes(ref, cOptions, ir);
+      createNodes(ref, ir);
       createScalarEdges(cOptions, ir, instructionIndices);
     }
   }
@@ -234,7 +233,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
       return;
     }
     ControlFlowGraph<SSAInstruction, ISSABasicBlock> controlFlowGraph = ir.getControlFlowGraph();
-    if (cOptions.equals(ControlDependenceOptions.NO_EXCEPTIONAL_EDGES)) {
+    if (cOptions.isIgnoreExceptions()) {
       PrunedCFG<SSAInstruction, ISSABasicBlock> prunedCFG = ExceptionPrunedCFG.make(controlFlowGraph);
       // In case the CFG has only the entry and exit nodes left 
       // and no edges because the only control dependencies
@@ -251,7 +250,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
       Assertions.productionAssertion(cOptions.equals(ControlDependenceOptions.FULL));
     }
 
-    ControlDependenceGraph<SSAInstruction, ISSABasicBlock> cdg = new ControlDependenceGraph<SSAInstruction, ISSABasicBlock>(
+    ControlDependenceGraph<ISSABasicBlock> cdg = new ControlDependenceGraph<ISSABasicBlock>(
         controlFlowGraph);
     for (ISSABasicBlock bb : cdg) {
       if (bb.isExitBlock()) {
@@ -739,7 +738,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
     }
   }
 
-  private boolean hasBasePointer(SSAInstruction use) {
+  private static boolean hasBasePointer(SSAInstruction use) {
     if (use instanceof SSAFieldAccessInstruction) {
       SSAFieldAccessInstruction f = (SSAFieldAccessInstruction) use;
       return !f.isStatic();
@@ -752,7 +751,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
     }
   }
 
-  private int getBasePointer(SSAInstruction use) {
+  private static int getBasePointer(SSAInstruction use) {
     if (use instanceof SSAFieldAccessInstruction) {
       SSAFieldAccessInstruction f = (SSAFieldAccessInstruction) use;
       return f.getRef();
@@ -789,7 +788,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
   /**
    * @return {@link IntSet} representing instruction indices of each PEI in the ir
    */
-  private IntSet getPEIs(final IR ir) {
+  private static IntSet getPEIs(final IR ir) {
     BitVectorIntSet result = new BitVectorIntSet();
     for (int i = 0; i < ir.getInstructions().length; i++) {
       if (ir.getInstructions()[i] != null && ir.getInstructions()[i].isPEI()) {
@@ -853,7 +852,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
   /**
    * Convert a NORMAL or PHI Statement to an SSAInstruction
    */
-  private SSAInstruction statement2SSAInstruction(SSAInstruction[] instructions, Statement s) {
+  private static SSAInstruction statement2SSAInstruction(SSAInstruction[] instructions, Statement s) {
     SSAInstruction statement = null;
     switch (s.getKind()) {
     case NORMAL:
@@ -881,7 +880,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
   /**
    * Create all nodes in this PDG. Each node is a Statement.
    */
-  private void createNodes(Map<CGNode, OrdinalSet<PointerKey>> ref, ControlDependenceOptions cOptions, IR ir) {
+  private void createNodes(Map<CGNode, OrdinalSet<PointerKey>> ref, IR ir) {
 
     if (ir != null) {
       createNormalStatements(ir, ref);
@@ -934,16 +933,6 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
     if (paramCalleeStatements == null) {
       ArrayList<Statement> list = new ArrayList<Statement>();
       int paramCount = node.getMethod().getNumberOfParameters();
-      
-      for (Iterator<CGNode> callers = cg.getPredNodes(node); callers.hasNext(); ) {
-        CGNode caller = callers.next();
-        IR callerIR = caller.getIR();
-        for (Iterator<CallSiteReference> sites = cg.getPossibleSites(caller, node); sites.hasNext(); ) {
-          for (SSAAbstractInvokeInstruction inst : callerIR.getCalls(sites.next())) {
-           paramCount = Math.max(paramCount, inst.getNumberOfParameters()-1);
-          }
-        }
-      }
       
       for (int i = 1; i <= paramCount; i++) {
         ParamCallee s = new ParamCallee(node, i);
@@ -1051,7 +1040,7 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
   /**
    * @return the set of all locations read by any callee at a call site.
    */
-  private OrdinalSet<PointerKey> unionHeapLocations(CallGraph cg, CGNode n, SSAAbstractInvokeInstruction call,
+  private static OrdinalSet<PointerKey> unionHeapLocations(CallGraph cg, CGNode n, SSAAbstractInvokeInstruction call,
       Map<CGNode, OrdinalSet<PointerKey>> loc) {
     BitVectorIntSet bv = new BitVectorIntSet();
     for (CGNode t : cg.getPossibleTargets(n, call.getCallSite())) {
@@ -1138,6 +1127,9 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
     case HEAP_RET_CALLER:
       HeapStatement h = (HeapStatement) N;
       createHeapDataDependenceEdges(h.getLocation());
+      break;
+    default:
+      // do nothing
     }
   }
 
@@ -1158,6 +1150,9 @@ public class PDG<T extends InstanceKey> implements NumberedGraph<Statement> {
     case HEAP_RET_CALLER:
       HeapStatement h = (HeapStatement) N;
       createHeapDataDependenceEdges(h.getLocation());
+      break;
+    default:
+      // do nothing
     }
   }
 

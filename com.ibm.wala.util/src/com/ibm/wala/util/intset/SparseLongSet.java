@@ -298,7 +298,7 @@ public class SparseLongSet implements LongSet {
   }
 
   /**
-   * Reverse of toString(): "{2,3}" -> [2,3]
+   * Reverse of toString(): "{2,3}" -&gt; [2,3]
    * 
    * @throws IllegalArgumentException if str is null
    */
@@ -317,7 +317,7 @@ public class SparseLongSet implements LongSet {
     StringTokenizer tok = new StringTokenizer(str, " ,");
 
     // XXX not very efficient:
-    TreeSet<Long> set = new TreeSet<Long>();
+    TreeSet<Long> set = new TreeSet<>();
     while (tok.hasMoreTokens()) {
       set.add(Long.decode(tok.nextToken()));
     }

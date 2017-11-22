@@ -173,7 +173,6 @@ public class AndroidEntryPoint extends DexEntryPoint {
         return ExecutionOrder.AT_LAST;
     }
 
-    /** {@inheritDoc} */
     public int getOrderValue() { return order.getOrderValue(); }
     public int compareTo(AndroidEntryPoint.IExecutionOrder o) {
         return this.order.compareTo(o);
@@ -189,7 +188,7 @@ public class AndroidEntryPoint extends DexEntryPoint {
      * Before building the model a list of AdroidEntryPoints is to be sorted by that criterion. 
      * You can use AndroidEntryPoint.ExecutionOrderComperator for that task.
      */
-    public static class ExecutionOrder implements Comparable<IExecutionOrder>, IExecutionOrder {
+    public static class ExecutionOrder implements IExecutionOrder {
         // This is an Enum-Style class
         /** Visit the EntryPoint once at the beginning of the model use that for initialization stuff  */
         public final static ExecutionOrder AT_FIRST = new ExecutionOrder(0);
@@ -238,6 +237,7 @@ public class AndroidEntryPoint extends DexEntryPoint {
             throw new IllegalArgumentException("ExecutionOrder was constructed from an illegal label: " + label);
         }
         /** {@inheritDoc} */
+        @Override
         public int getOrderValue() { return this.value; }
 
         /**
@@ -264,7 +264,7 @@ public class AndroidEntryPoint extends DexEntryPoint {
          *  Use this to place a call to an EntryPoint between two other EntryPoint calls or ExecutionOrder "labels".
          *  between() does not care about section-boundaries by itself! 
          *
-         *  Use {@link between(IExecutionOrder[], IExecutionOrder[])} and use labels as additional placement-information 
+         *  Use {@link #between(IExecutionOrder[], IExecutionOrder[])} and use labels as additional placement-information 
          *  to prevent unexpected misplacement.
          *
          *  @param  after   the call or "label" to be executed before this one
@@ -396,6 +396,7 @@ public class AndroidEntryPoint extends DexEntryPoint {
         /**
          * {@inheritDoc}
          */
+        @Override
         public ExecutionOrder getSection() {
             if (this.compareTo(ExecutionOrder.BEFORE_LOOP) == -1) return ExecutionOrder.AT_FIRST;
             if (this.compareTo(ExecutionOrder.START_OF_LOOP) == -1) return ExecutionOrder.BEFORE_LOOP;

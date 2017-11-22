@@ -74,8 +74,6 @@ import com.ibm.wala.util.ssa.TypeSafeInstructionFactory;
  *  restart of the Application (instance-state) or when the potential restart of the App
  *  shall be ignored.
  *
- *  {@inheritDoc}
- *
  *  @author     Tobias Blaschke <code@tobiasblaschke.de>
  */
 public class LoopAndroidModel extends SingleStartAndroidModel {
@@ -104,6 +102,7 @@ public class LoopAndroidModel extends SingleStartAndroidModel {
      *
      * {@inheritDoc}
      */
+    @Override
     protected int enterSTART_OF_LOOP (int PC) {
         logger.info("PC {} is the jump target of START_OF_LOOP", PC);
         
@@ -112,7 +111,7 @@ public class LoopAndroidModel extends SingleStartAndroidModel {
         paramManager.scopeDown(true);
 
         // Top-Half of Phi-Handling
-        outerStartingPhis = new HashMap<TypeReference, SSAValue>();
+        outerStartingPhis = new HashMap<>();
         List<TypeReference> outerPhisNeeded = returnTypesBetween(ExecutionOrder.START_OF_LOOP,
                 ExecutionOrder.AFTER_LOOP);
         
@@ -138,6 +137,7 @@ public class LoopAndroidModel extends SingleStartAndroidModel {
      *
      *  {@inheritDoc}
      */
+    @Override
     protected int enterAFTER_LOOP (int PC) {
         assert(outerLoopPC > 0) : "Somehow you managed to get the loop-target negative. This is wierd!";
 
@@ -147,7 +147,7 @@ public class LoopAndroidModel extends SingleStartAndroidModel {
         logger.info("Setting block-inner Phis");
         for (TypeReference phiType : outerStartingPhis.keySet()) {
             final SSAValue oldPhi = outerStartingPhis.get(phiType);
-            final List<SSAValue> forPhi = new ArrayList<SSAValue>(2);
+            final List<SSAValue> forPhi = new ArrayList<>(2);
             forPhi.add(paramManager.getSuper(oldPhi.key));
             forPhi.add(paramManager.getCurrent(oldPhi.key));
             
@@ -194,6 +194,7 @@ public class LoopAndroidModel extends SingleStartAndroidModel {
      *
      *  {@inheritDoc}
      */
+    @Override
     protected int leaveAT_LAST (int PC) {
         logger.info("Leaving Model with PC = {}", PC);
         return PC;

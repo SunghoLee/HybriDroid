@@ -25,6 +25,7 @@ import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
 import com.ibm.wala.ipa.summaries.SyntheticIR;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.IRView;
 import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInstructionFactory;
@@ -61,6 +62,7 @@ public class ClassFactoryContextInterpreter implements SSAContextInterpreter {
     }
 /** BEGIN Custom change: caching */
     
+    
     final JavaTypeContext context = (JavaTypeContext) node.getContext();
     final IMethod method = node.getMethod();
     final String hashKey = method.toString() + "@" + context.toString();
@@ -74,6 +76,11 @@ public class ClassFactoryContextInterpreter implements SSAContextInterpreter {
     
 /** END Custom change: caching */
     return result;
+  }
+
+  @Override
+  public IRView getIRView(CGNode node) {
+    return getIR(node);
   }
 
   @Override
@@ -122,7 +129,7 @@ public class ClassFactoryContextInterpreter implements SSAContextInterpreter {
     return EmptyIterator.instance();
   }
 
-  private SSAInstruction[] makeStatements(JavaTypeContext context) {
+  private static SSAInstruction[] makeStatements(JavaTypeContext context) {
     SSAInstructionFactory insts = context.getType().getType().getClassLoader().getInstructionFactory();
     ArrayList<SSAInstruction> statements = new ArrayList<SSAInstruction>();
     // vn1 is the string parameter
@@ -142,7 +149,7 @@ public class ClassFactoryContextInterpreter implements SSAContextInterpreter {
     return result;
   }
 
-  private IR makeIR(IMethod method, JavaTypeContext context) {
+  private static IR makeIR(IMethod method, JavaTypeContext context) {
     SSAInstruction instrs[] = makeStatements(context);
     return new SyntheticIR(method, context, new InducedCFG(instrs, method, context), instrs, SSAOptions.defaultOptions(), null);
   }

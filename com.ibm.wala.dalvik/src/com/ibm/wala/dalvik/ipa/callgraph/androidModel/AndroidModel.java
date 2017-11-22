@@ -46,7 +46,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
@@ -68,10 +67,10 @@ import com.ibm.wala.dalvik.ipa.callgraph.propagation.cfa.IntentStarters.StarterF
 import com.ibm.wala.dalvik.util.AndroidComponent;
 import com.ibm.wala.dalvik.util.AndroidEntryPointManager;
 import com.ibm.wala.dalvik.util.AndroidTypes;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ipa.cha.IClassHierarchyDweller;
 import com.ibm.wala.ipa.summaries.MethodSummary;
@@ -130,7 +129,7 @@ public class AndroidModel /* makes SummarizedMethod */
 
     protected IClassHierarchy cha;
     protected AnalysisOptions options;
-    protected AnalysisCache cache;
+    protected IAnalysisCacheView cache;
     private AbstractAndroidModel labelSpecial;
     private IInstantiationBehavior instanceBehavior;
     private SSAValueManager paramManager;
@@ -153,7 +152,7 @@ public class AndroidModel /* makes SummarizedMethod */
     protected boolean built;
     protected SummarizedMethod model;
 
-    public AndroidModel(final IClassHierarchy cha, final AnalysisOptions options, final AnalysisCache cache) {
+    public AndroidModel(final IClassHierarchy cha, final AnalysisOptions options, final IAnalysisCacheView cache) {
         this.options = options;
         this.cha = cha;
         this.cache = cache;
@@ -168,13 +167,13 @@ public class AndroidModel /* makes SummarizedMethod */
      *  Generates the model on a sub-set of Entrypoints. 
      *
      *  Asks {@link #selectEntryPoint(AndroidEntryPoint)} for each EntryPoint known to the AndroidEntryPointManager,
-     *  if the EntryPoint should be included in the model. Then calls {@link #build(Atom, Iterable<? extends Entrypoint>)}
+     *  if the EntryPoint should be included in the model. Then calls {@link #build(Atom, Collection)}
      *  on these.
      *
      *  @param  name    The name the generated method will be known as
      */
     protected void build(Atom name) throws CancelException {
-        final List<AndroidEntryPoint> restrictedEntries = new ArrayList<AndroidEntryPoint>();
+        final List<AndroidEntryPoint> restrictedEntries = new ArrayList<>();
 
         for (AndroidEntryPoint ep: AndroidEntryPointManager.ENTRIES) {
             if (selectEntryPoint(ep)) {
@@ -335,7 +334,7 @@ public class AndroidModel /* makes SummarizedMethod */
     /**
      *  Add Instructions to the model.
      *
-     *  {@link #build(Iterable<?extends Entrypoint>)} prepares the MethodSummary, then calls populate() to
+     *  {@link #build(Atom, Collection)} prepares the MethodSummary, then calls populate() to
      *  add the instructions, then finishes the model. Populate is only an extra function to shorten build(),
      *  calling it doesn't make sense in an other context.
      */
@@ -383,8 +382,8 @@ public class AndroidModel /* makes SummarizedMethod */
 
             
             {
-                final AndroidBoot boot = new AndroidBoot(null); 
-                boot.addBootCode(tsif, null, paramManager, this.body);
+                final AndroidBoot boot = new AndroidBoot(); 
+                boot.addBootCode(tsif, paramManager, this.body);
                 //tool.attachActivities(allActivities, application, boot.getMainThread(), /* Should be application context TODO */
                 //        boot.getPackageContext(), nullBinder, nullIntent); 
             }
@@ -417,11 +416,11 @@ public class AndroidModel /* makes SummarizedMethod */
             //  Collect arguments to ep
             //  if there are multiple paramses call the entrypoint multiple times
             //
-            List<List<SSAValue>> paramses = new ArrayList<List<SSAValue>>(1);
+            List<List<SSAValue>> paramses = new ArrayList<>(1);
             {
-                final List<Integer> mutliTypePositions = new ArrayList<Integer>();
+                final List<Integer> mutliTypePositions = new ArrayList<>();
                 { // Add single-type parameters and collect positions for multi-type
-                    final List<SSAValue> params = new ArrayList<SSAValue>(ep.getNumberOfParameters());
+                    final List<SSAValue> params = new ArrayList<>(ep.getNumberOfParameters());
                     paramses.add(params);
 
                     for (int i = 0; i < ep.getNumberOfParameters(); ++i) {
@@ -453,12 +452,12 @@ public class AndroidModel /* makes SummarizedMethod */
                     final int typeCountOnPosition = typesOnPosition.length;
 
                     { // Extend the list size to hold the product
-                        final List<List<SSAValue>> new_paramses = new ArrayList<List<SSAValue>>(paramses.size() * typeCountOnPosition);
+                        final List<List<SSAValue>> new_paramses = new ArrayList<>(paramses.size() * typeCountOnPosition);
 
                         for (int i = 0; i < typeCountOnPosition; ++i) {
                             //new_paramses.addAll(paramses); *grrr* JVM! You could copy at least null - but noooo...
                             for (final List<SSAValue> params : paramses) {
-                                final List<SSAValue> new_params = new ArrayList<SSAValue>(params.size());
+                                final List<SSAValue> new_params = new ArrayList<>(params.size());
                                 new_params.addAll(params);
                                 new_paramses.add(new_params);
                             }
@@ -534,7 +533,7 @@ public class AndroidModel /* makes SummarizedMethod */
                         this.paramManager.invalidate(returnKey);
                         final SSAValue newValue = this.paramManager.getFree(returnType, returnKey);
                         final int phiPC = body.getNextProgramCounter();
-                        final List<SSAValue> toPhi = new ArrayList<SSAValue>(2);
+                        final List<SSAValue> toPhi = new ArrayList<>(2);
                         toPhi.add(oldValue);
                         toPhi.add(returnValue);
                         final SSAPhiInstruction phi = tsif.PhiInstruction(phiPC, newValue, toPhi);
@@ -576,7 +575,6 @@ public class AndroidModel /* makes SummarizedMethod */
      *  @see    com.ibm.wala.dalvik.ipa.callgraph.propagation.cfa.IntentStarters
      *
      *  @param  asMethod    The signature to generate
-     *  @param  flags       Control the behavior of the wrapper, may be null
      *  @param  caller      The class of the caller; only needed depending on the flags
      *  @param  info        The IntentSterter used
      *  @param  callerNd    CGNoodle of the caller - may be null
@@ -584,7 +582,10 @@ public class AndroidModel /* makes SummarizedMethod */
      */
     public SummarizedMethod getMethodAs(MethodReference asMethod, TypeReference caller,
             IntentStarters.StartInfo info, CGNode callerNd) throws CancelException {
-        Set<StarterFlags> flags = info.getFlags();
+        Set<StarterFlags> flags = null;
+        if (info != null) {
+          flags = info.getFlags();
+        }
         //System.out.println("\n\nAS: " + asMethod + "\n\n");
         if (!built) {
             getMethod();
@@ -633,7 +634,7 @@ public class AndroidModel /* makes SummarizedMethod */
             } catch (Exception e) { }
         }*/
         final List<Parameter> modelsActivities = modelAcc.allExtend(AndroidTypes.ActivityName, getClassHierarchy()); // are in models scope
-        final List<SSAValue> allActivities = new ArrayList<SSAValue>(modelsActivities.size());   // create instances in this scope 
+        final List<SSAValue> allActivities = new ArrayList<>(modelsActivities.size());   // create instances in this scope 
         for (Parameter activity: modelsActivities) {
             final TypeReference activityType = activity.getType();
             final Parameter inAsMethod = acc.firstOf(activityType);
@@ -674,7 +675,7 @@ public class AndroidModel /* makes SummarizedMethod */
         assert(allActivities.size() == modelsActivities.size());
 
         // The defaults for connectThrough
-        final Set<SSAValue> defaults = new HashSet<SSAValue>();
+        final Set<SSAValue> defaults = new HashSet<>();
         { // Calls that don't take a bundle usually call through with a null-bundle
             final SSAValue nullBundle = pm.getUnmanaged(AndroidTypes.Bundle, "nullBundle");
             redirect.addConstant(nullBundle.getNumber(), new ConstantValue(null));
@@ -698,7 +699,7 @@ public class AndroidModel /* makes SummarizedMethod */
         final SSAValue intent = acc.firstExtends(AndroidTypes.Intent, cha);
 
         final AndroidStartComponentTool tool = new AndroidStartComponentTool(getClassHierarchy(), asMethod, flags, caller, instructionFactory,
-                acc, pm, redirect, self, info, callerNd);
+                acc, pm, redirect, self, info);
 
         final AndroidTypes.AndroidContextType contextType;
         final SSAValue androidContext;  // of AndroidTypes.Context: The callers android-context
@@ -720,7 +721,7 @@ public class AndroidModel /* makes SummarizedMethod */
 
         // Call the model
         {
-            final List<SSAValue> redirectParams = acc.connectThrough(modelAcc, new HashSet<SSAValue>(allActivities), defaults,
+            final List<SSAValue> redirectParams = acc.connectThrough(modelAcc, new HashSet<>(allActivities), defaults,
                     getClassHierarchy(), /* IInstantiator this.createInstance(type, redirect, pm)  */ instantiator, false, null, null);
             final int callPC = redirect.getNextProgramCounter();
             final CallSiteReference site = CallSiteReference.make(callPC, this.model.getReference(),
@@ -768,8 +769,8 @@ public class AndroidModel /* makes SummarizedMethod */
             // Collect all Activity.mResultCode and Activity.mResultData
 
             // Result information of all activities.
-            final List<SSAValue> resultCodes = new ArrayList<SSAValue>();
-            final List<SSAValue> resultData = new ArrayList<SSAValue>();
+            final List<SSAValue> resultCodes = new ArrayList<>();
+            final List<SSAValue> resultData = new ArrayList<>();
             final SSAValue mResultCode; // = Phi(resultCodes)
             final SSAValue mResultData; // = Phi(resultData)
            
@@ -794,7 +795,7 @@ public class AndroidModel /* makes SummarizedMethod */
                 final CallSiteReference site = CallSiteReference.make(callPC, mRef, IInvokeInstruction.Dispatch.VIRTUAL);
                 //final SSAValue exception = new SSAValue(pm.getUnmanaged(), TypeReference.JavaLangException, asMethod, "exception");
                 final SSAValue exception = pm.getException();
-                final List<SSAValue> params = new ArrayList<SSAValue>();
+                final List<SSAValue> params = new ArrayList<>();
                 params.add(self);
                 params.add(outRequestCode); // Was an agument to start...
                 params.add(mResultCode);
@@ -878,7 +879,7 @@ public class AndroidModel /* makes SummarizedMethod */
 
         final SummarizedMethod model = getMethod();
 
-        final List<SSAValue> params = new ArrayList<SSAValue>();
+        final List<SSAValue> params = new ArrayList<>();
         { // Collect Params
             final FlatInstantiator instantiator = new FlatInstantiator(encap, instructionFactory, pm, this.cha, asMethod, this.scope);
 
@@ -933,6 +934,7 @@ public class AndroidModel /* makes SummarizedMethod */
         return method;
     }
 
+    @Override
     public IClassHierarchy getClassHierarchy() {
         return this.cha;
     }

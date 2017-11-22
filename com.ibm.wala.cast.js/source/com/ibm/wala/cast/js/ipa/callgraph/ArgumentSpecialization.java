@@ -34,7 +34,6 @@ import com.ibm.wala.cfg.ControlFlowGraph;
 import com.ibm.wala.cfg.IBasicBlock;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
@@ -42,10 +41,12 @@ import com.ibm.wala.ipa.callgraph.ContextItem;
 import com.ibm.wala.ipa.callgraph.ContextItem.Value;
 import com.ibm.wala.ipa.callgraph.ContextKey;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAOptions;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.TypeReference;
@@ -57,14 +58,14 @@ public class ArgumentSpecialization {
 
   public static class ArgumentSpecializationContextIntepreter extends AstContextInsensitiveSSAContextInterpreter {
 
-    public ArgumentSpecializationContextIntepreter(AnalysisOptions options, AnalysisCache cache) {
+    public ArgumentSpecializationContextIntepreter(AnalysisOptions options, IAnalysisCacheView cache) {
       super(options, cache);
     }
 
     @Override
     public IR getIR(CGNode node) {
       if (node.getMethod() instanceof Retranslatable) {
-        return getAnalysisCache().getSSACache().findOrCreateIR(node.getMethod(), node.getContext(), options.getSSAOptions());
+        return getAnalysisCache().getIR(node.getMethod(), node.getContext());
       } else {
         return super.getIR(node);
       }
@@ -73,7 +74,7 @@ public class ArgumentSpecialization {
     @Override
     public DefUse getDU(CGNode node) {
       if (node.getMethod() instanceof Retranslatable) {
-        return getAnalysisCache().getSSACache().findOrCreateDU(node.getMethod(), node.getContext(), options.getSSAOptions());
+        return getAnalysisCache().getDefUse(getIR(node));
       } else {
         return super.getDU(node);
       }
@@ -155,7 +156,7 @@ public class ArgumentSpecialization {
 
   }
 
-  public static class ArgumentCountIRFactory extends AstIRFactory.AstDefaultIRFactory {
+  public static class ArgumentCountIRFactory extends AstIRFactory.AstDefaultIRFactory<IMethod> {
     private static final CAstPattern directAccessPattern = CAstPattern.parse("|(ARRAY_REF(VAR(\"arguments\"),<value>*)||OBJECT_REF(VAR(\"arguments\"),<value>*))|");
 
     private static final CAstPattern destructuredAccessPattern = CAstPattern.parse("BLOCK_EXPR(ASSIGN(VAR(/[$][$]destructure[$]rcvr[0-9]+/),VAR(\"arguments\")),ASSIGN(VAR(<name>/[$][$]destructure[$]elt[0-9]+/),<value>*))");
@@ -226,7 +227,7 @@ public class ArgumentSpecialization {
 
               } else if ((s = CAstPattern.match(destructuredCallPattern, root)) != null) {
                 if (argRefs.containsKey(s.getSingle("name").getValue().toString())) {
-                 List<CAstNode> x = new ArrayList<CAstNode>();
+                 List<CAstNode> x = new ArrayList<>();
                  CAstNode ref = handleArgumentRef(argRefs.get(s.getSingle("name").getValue().toString()));
                  if (ref != null) {
                    x.add(ref);
@@ -309,8 +310,8 @@ public class ArgumentSpecialization {
             }
 
             @Override
-            protected void defineFunction(CAstEntity N, WalkContext definingContext, AbstractCFG cfg, SymbolTable symtab,
-                boolean hasCatchBlock, Map<IBasicBlock,TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation LI,
+            protected void defineFunction(CAstEntity N, WalkContext definingContext, AbstractCFG<SSAInstruction, ? extends IBasicBlock<SSAInstruction>> cfg, SymbolTable symtab,
+                boolean hasCatchBlock, Map<IBasicBlock<SSAInstruction>,TypeReference[]> caughtTypes, boolean hasMonitorOp, AstLexicalInformation LI,
                 DebuggingInformation debugInfo) {
               if (N == codeBodyEntity) {
                 specializedCode = myloader.makeCodeBodyCode(cfg, symtab, hasCatchBlock, caughtTypes, hasMonitorOp, LI, debugInfo, method.getDeclaringClass());

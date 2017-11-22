@@ -30,6 +30,7 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.IRView;
 import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.FieldReference;
@@ -37,9 +38,9 @@ import com.ibm.wala.util.collections.EmptyIterator;
 
 
 /**
- * This ContextInterpreter can be used when using another WALA types than the shrike types. WALA's standard ContextInterpreters, like
+ * This ContextInterpreter can be used when using another WALA frontend than the shrike frontend. WALA's standard ContextInterpreters, like
  * e.g. DefaultSSAInterpreter delegate to CodeScanner, which assumes, that the provided methods are instances of shrike classes.
- * When using these ContextInterpreter with another types than shrike, this leads to ClassCastExceptions. This class can be used to
+ * When using these ContextInterpreter with another frontend than shrike, this leads to ClassCastExceptions. This class can be used to
  * work around this issue. It delegates to a given ContextInterpreter, if the CGNode's IMethod is a Shrike class. 
  * Otherwise, it retrieves the required information from the CGNode's IR, which should always work.
  * 
@@ -63,7 +64,7 @@ public class FallbackContextInterpreter implements SSAContextInterpreter {
 		if (node.getMethod() instanceof SyntheticMethod || node.getMethod() instanceof ShrikeCTMethod) {
 			return shrikeCI.iterateNewSites(node);
 		} else {
-			IR ir = getIR(node);
+			IRView ir = getIR(node);
 		    if (ir == null) {
 		      return EmptyIterator.instance();
 		    } else {
@@ -96,7 +97,7 @@ public class FallbackContextInterpreter implements SSAContextInterpreter {
 		if (node.getMethod() instanceof SyntheticMethod || node.getMethod() instanceof ShrikeCTMethod) {
 			return shrikeCI.iterateCallSites(node);
 		} else {
-			IR ir = getIR(node);
+			IRView ir = getIR(node);
 		    if (ir == null) {
 		      return EmptyIterator.instance();
 		    } else {
@@ -128,6 +129,11 @@ public class FallbackContextInterpreter implements SSAContextInterpreter {
 	public IR getIR(CGNode node) {
 		return shrikeCI.getIR(node);
 	}
+
+  @Override
+  public IRView getIRView(CGNode node) {
+    return getIR(node);
+  }
 
 	/* (non-Javadoc)
 	 * @see com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter#getDU(com.ibm.wala.ipa.callgraph.CGNode)

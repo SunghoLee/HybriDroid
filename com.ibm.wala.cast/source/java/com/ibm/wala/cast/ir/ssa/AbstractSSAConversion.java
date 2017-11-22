@@ -10,11 +10,10 @@
  *****************************************************************************/
 package com.ibm.wala.cast.ir.ssa;
 
-import java.util.EmptyStackException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.Stack;
 
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.ISSABasicBlock;
@@ -117,7 +116,7 @@ public abstract class AbstractSSAConversion {
 
   protected AbstractSSAConversion(IR ir, SSAOptions options) {
     this.CFG = ir.getControlFlowGraph();
-    this.DF = new DominanceFrontiers<ISSABasicBlock>(ir.getControlFlowGraph(), ir.getControlFlowGraph().entry());
+    this.DF = new DominanceFrontiers<>(ir.getControlFlowGraph(), ir.getControlFlowGraph().entry());
     this.dominatorTree = DF.dominatorTree();
     this.flags = new int[2 * ir.getControlFlowGraph().getNumberOfNodes()];
     this.instructions = getInstructions(ir);
@@ -143,7 +142,7 @@ public abstract class AbstractSSAConversion {
   }
 
   protected final Iterator<SSAInstruction> iterateInstructions(IR ir) {
-    return new ArrayIterator<SSAInstruction>(getInstructions(ir));
+    return new ArrayIterator<>(getInstructions(ir));
   }
   
   protected void init() {
@@ -156,11 +155,10 @@ public abstract class AbstractSSAConversion {
   @SuppressWarnings("unchecked")
   private void makeAssignmentMap() {
     this.assignmentMap = new Set[getMaxValueNumber() + 1];
-    for (Iterator BBs = CFG.iterator(); BBs.hasNext();) {
-      SSACFG.BasicBlock BB = (SSACFG.BasicBlock) BBs.next();
+    for (ISSABasicBlock issaBasicBlock : CFG) {
+      SSACFG.BasicBlock BB = (SSACFG.BasicBlock) issaBasicBlock;
       if (BB.getFirstInstructionIndex() >= 0) {
-        for (Iterator IS = BB.iterator(); IS.hasNext();) {
-          SSAInstruction inst = (SSAInstruction) IS.next();
+        for (SSAInstruction inst : BB) {
           if (inst != null) {
             for (int j = 0; j < getNumberOfDefs(inst); j++) {
               addDefiningBlock(assignmentMap, BB, getDef(inst, j));
@@ -174,7 +172,7 @@ public abstract class AbstractSSAConversion {
   private void addDefiningBlock(Set<SSACFG.BasicBlock>[] A, SSACFG.BasicBlock BB, int i) {
     if (!skip(i)) {
       if (A[i] == null) {
-        A[i] = new LinkedHashSet<SSACFG.BasicBlock>(2);
+        A[i] = new LinkedHashSet<>(2);
       }
       A[i].add(BB);
     }
@@ -186,13 +184,13 @@ public abstract class AbstractSSAConversion {
   protected void placePhiNodes() {
     int IterCount = 0;
 
-    for (Iterator Xs = CFG.iterator(); Xs.hasNext();) {
-      SSACFG.BasicBlock X = (SSACFG.BasicBlock) Xs.next();
+    for (ISSABasicBlock issaBasicBlock : CFG) {
+      SSACFG.BasicBlock X = (SSACFG.BasicBlock) issaBasicBlock;
       setHasAlready(X, 0);
       setWork(X, 0);
     }
 
-    Set<BasicBlock> W = new LinkedHashSet<BasicBlock>();
+    Set<BasicBlock> W = new LinkedHashSet<>();
     for (int V = 0; V < assignmentMap.length; V++) {
 
       // some things (e.g. constants) have no defs at all
@@ -205,8 +203,7 @@ public abstract class AbstractSSAConversion {
 
       IterCount++;
 
-      for (Iterator XS = assignmentMap[V].iterator(); XS.hasNext();) {
-        SSACFG.BasicBlock X = (SSACFG.BasicBlock) XS.next();
+      for (BasicBlock X : assignmentMap[V]) {
         setWork(X, IterCount);
         W.add(X);
       }
@@ -214,7 +211,7 @@ public abstract class AbstractSSAConversion {
       while (!W.isEmpty()) {
         SSACFG.BasicBlock X = W.iterator().next();
         W.remove(X);
-        for (Iterator YS = DF.getDominanceFrontier(X); YS.hasNext();) {
+        for (Iterator<ISSABasicBlock> YS = DF.getDominanceFrontier(X); YS.hasNext();) {
           SSACFG.BasicBlock Y = (SSACFG.BasicBlock) YS.next();
           if (getHasAlready(Y) < IterCount) {
             if (isLive(Y, V)) {
@@ -286,25 +283,39 @@ public abstract class AbstractSSAConversion {
     //     SEARCH(Y)
     //   SearchPostRec(X)
     
-    Stack<Frame> stack = new Stack<Frame>();
+    ArrayList<Frame> stack = new ArrayList<>();
     
     SearchPreRec(X);
-    stack.push(new Frame(X, dominatorTree.getSuccNodes(X)));
+    push(stack, new Frame(X, dominatorTree.getSuccNodes(X)));
     
     // invariant: pre-rec phase was performed for elements in the queue. 
     while (!stack.isEmpty()){
-      Frame f = stack.peek();
+      Frame f = peek(stack);
       if (f.i.hasNext()){
         // iterate next child
         BasicBlock next = (BasicBlock) f.i.next();
         SearchPreRec(next);
-        stack.push(new Frame(next, dominatorTree.getSuccNodes(next)));
+        push(stack, new Frame(next, dominatorTree.getSuccNodes(next)));
       } else {
         // finished iterating children, time to "return"
         SearchPostRec(f.X);
-        stack.pop();
+        pop(stack);
       }
     }
+  }
+
+   private static <T> void push(ArrayList<T> stack, T elt) {
+    stack.add(elt);
+  }
+  
+  private static <T> T peek(ArrayList<T> stack) {
+    return stack.get(stack.size()-1); 
+  }
+  
+  private static <T> T pop(ArrayList<T> stack) {
+    T e = stack.get(stack.size()-1);
+    stack.remove(stack.size()-1);
+    return e;
   }
 
   private void SearchPreRec(SSACFG.BasicBlock X) {
@@ -342,7 +353,7 @@ public abstract class AbstractSSAConversion {
       repairExit();
     }
 
-    for (Iterator YS = CFG.getSuccNodes(X); YS.hasNext();) {
+    for (Iterator<ISSABasicBlock> YS = CFG.getSuccNodes(X); YS.hasNext();) {
       SSACFG.BasicBlock Y = (SSACFG.BasicBlock) YS.next();
       int Y_id = Y.getGraphNodeId();
       int j = com.ibm.wala.cast.ir.cfg.Util.whichPred(CFG, Y, X);
@@ -415,7 +426,7 @@ public abstract class AbstractSSAConversion {
     return newDefs;
   }
 
-  protected boolean skipRepair(SSAInstruction inst, int index) {
+  protected boolean skipRepair(SSAInstruction inst, @SuppressWarnings("unused") int index) {
     if (inst == null)
       return true;
     for (int i = 0; i < getNumberOfDefs(inst); i++)
@@ -448,11 +459,8 @@ public abstract class AbstractSSAConversion {
       }
     }
 
-    try {
-      return (isConstant(v)) ? v : S[v].peek();
-    } catch (EmptyStackException e) {
-      throw new RuntimeException("while looking at " + v, e);
-    }
+   
+    return (isConstant(v)) ? v : S[v].peek();
   }
 
 }

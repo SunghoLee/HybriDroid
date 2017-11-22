@@ -51,6 +51,8 @@ import com.ibm.wala.types.TypeName;
  *  @author Tobias Blaschke <code@tobiasblaschke.de>
  */
 public abstract class IInstantiationBehavior implements Serializable {
+	private static final long serialVersionUID = -3698760758700891479L;
+
     /**
      *  The handling for a variable occurring in the AndroidModel.
      */
@@ -67,7 +69,7 @@ public abstract class IInstantiationBehavior implements Serializable {
     } 
     
     /**
-     *  Information on how the IInstanciationBehavior made its decision for {@link #InstanceBehavior}
+     *  Information on how the IInstanciationBehavior made its decision for {@link InstanceBehavior}
      */
     public static enum Exactness { 
         /**
@@ -92,7 +94,7 @@ public abstract class IInstantiationBehavior implements Serializable {
     /**
      *  Returns how the model should behave on the type.
      *
-     *  See the documentation of {@link #InstanceBehavior} for the description of the possible behaviours.
+     *  See the documentation of {@link InstanceBehavior} for the description of the possible behaviours.
      *
      *  Although this function takes a parameter withName one should not rely on its value.
      *

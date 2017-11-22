@@ -11,16 +11,37 @@
 package com.ibm.wala.cast.util;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.Iterator;
 
 import com.ibm.wala.cast.tree.CAstEntity;
 import com.ibm.wala.cast.tree.CAstNode;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap;
 
 public class CAstPrinter {
+  private static final class StringWriter extends Writer {
+    private final StringBuffer sb;
+
+    private StringWriter(StringBuffer sb) {
+      this.sb = sb;
+    }
+
+    @Override
+    public void write(char[] cbuf, int off, int len) {
+      sb.append(new String(cbuf, off, len));
+    }
+
+    @Override
+    public void flush() {
+      // do nothing 
+    }
+
+    @Override
+    public void close() {
+      // do nothing
+    }
+  }
+
   private static CAstPrinter instance= new CAstPrinter();
 
   public static void setPrinter(CAstPrinter printer) {
@@ -91,6 +112,7 @@ public class CAstPrinter {
     case CAstNode.LIST_EXPR: return "LIST_EXPR";
     case CAstNode.EMPTY_LIST_EXPR: return "EMPTY_LIST_EXPR";
     case CAstNode.IS_DEFINED_EXPR: return "IS_DEFINED_EXPR";
+    case CAstNode.NARY_EXPR: return "NARY_EXPR";
 
     // explicit lexical scopes
     case CAstNode.LOCAL_SCOPE: return "SCOPE";
@@ -117,21 +139,24 @@ public class CAstPrinter {
   public String doPrint(CAstNode top) {
     return print(top, null);
   }
-
   public static String print(CAstNode top, CAstSourcePositionMap pos) {
       return instance.doPrint(top, pos);
   }
 
   public String doPrint(CAstNode top, CAstSourcePositionMap pos) {
-    StringWriter writer = new StringWriter();
-    printTo(top, pos, writer);
-    return writer.toString();
+    final StringBuffer sb = new StringBuffer();
+    try (final StringWriter writer = new StringWriter(sb)) {
+      printTo(top, pos, writer);
+    }
+    return sb.toString();
   }
 
   public String doPrint(CAstEntity ce) {
-    StringWriter writer = new StringWriter();
-    printTo(ce, writer);
-    return writer.toString();
+    final StringBuffer sb = new StringBuffer();
+    try (final StringWriter writer = new StringWriter(sb)) {
+      printTo(ce, writer);
+    }
+    return sb.toString();
   }
 
   public static String print(CAstEntity ce) {
@@ -163,10 +188,10 @@ public class CAstPrinter {
   }
 
   public static void xmlTo(CAstNode top, CAstSourcePositionMap pos, Writer w) {
-      instance.doXmlTo(top, pos, w);
+      doXmlTo(top, pos, w);
   }
 
-  private void doXmlTo(CAstNode top, CAstSourcePositionMap pos, Writer w) {
+  private static void doXmlTo(CAstNode top, CAstSourcePositionMap pos, Writer w) {
     printTo(top, pos, w, 0, true);
   }
 
@@ -278,11 +303,9 @@ public class CAstPrinter {
 	    doPrintTo(e.getAST(), e.getSourceMap(), w);
 	    w.write('\n');
 	}
-	for(Iterator i= e.getAllScopedEntities().values().iterator();
-	    i.hasNext(); ) 
-	{
-	  for(Iterator j = ((Collection) i.next()).iterator(); j.hasNext(); ) {
-	    doPrintTo((CAstEntity) j.next(), w);
+	for (Collection<CAstEntity> collection : e.getAllScopedEntities().values()) {
+	  for (CAstEntity entity : collection) {
+	    doPrintTo(entity, w);
 	  }
 	}
 	w.flush();

@@ -1,7 +1,7 @@
 package com.ibm.wala.core.tests.exceptionpruning;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 
 import java.io.File;
@@ -18,7 +18,7 @@ import com.ibm.wala.analysis.exceptionanalysis.ExceptionAnalysis;
 import com.ibm.wala.analysis.exceptionanalysis.IntraproceduralExceptionAnalysis;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.core.tests.util.TestConstants;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -26,6 +26,7 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -34,6 +35,7 @@ import com.ibm.wala.ipa.cfg.exceptionpruning.interprocedural.CombinedInterproced
 import com.ibm.wala.ipa.cfg.exceptionpruning.interprocedural.IgnoreExceptionsInterFilter;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ssa.AllIntegerDueToBranchePiPolicy;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.TypeReference;
@@ -45,7 +47,7 @@ import com.ibm.wala.util.ref.ReferenceCleanser;
  * interprocedural is right. As well as the number of caught exceptions for each
  * call site.
  * 
- * @author Stephan Gocht <stephan@gobro.de>
+ * @author Stephan Gocht {@code <stephan@gobro.de>}
  *
  */
 public class ExceptionAnalysisTest {
@@ -66,16 +68,16 @@ public class ExceptionAnalysisTest {
     AnalysisScope scope;
 
     scope = AnalysisScopeReader.readJavaScope(TestConstants.WALA_TESTDATA, new File(REGRESSION_EXCLUSIONS), CLASS_LOADER);
-    cha = ClassHierarchy.make(scope);
+    cha = ClassHierarchyFactory.make(scope);
 
     Iterable<Entrypoint> entrypoints = Util.makeMainEntrypoints(scope, cha, "Lexceptionpruning/TestPruning");
     options = new AnalysisOptions(scope, entrypoints);
     options.getSSAOptions().setPiNodePolicy(new AllIntegerDueToBranchePiPolicy());
 
     ReferenceCleanser.registerClassHierarchy(cha);
-    AnalysisCache cache = new AnalysisCache();
+    IAnalysisCacheView cache = new AnalysisCacheImpl();
     ReferenceCleanser.registerCache(cache);
-    CallGraphBuilder builder = Util.makeZeroCFABuilder(options, cache, cha, scope);
+    CallGraphBuilder<InstanceKey> builder = Util.makeZeroCFABuilder(options, cache, cha, scope);
     cg = builder.makeCallGraph(options, null);
     pointerAnalysis = builder.getPointerAnalysis();
 
@@ -83,15 +85,15 @@ public class ExceptionAnalysisTest {
      * We will ignore some exceptions to focus on the exceptions we want to
      * raise (OwnException, ArrayIndexOutOfBoundException)
      */
-    filter = new CombinedInterproceduralExceptionFilter<SSAInstruction>();
-    filter.add(new IgnoreExceptionsInterFilter<SSAInstruction>(new IgnoreExceptionsFilter(TypeReference.JavaLangOutOfMemoryError)));
-    filter.add(new IgnoreExceptionsInterFilter<SSAInstruction>(new IgnoreExceptionsFilter(
+    filter = new CombinedInterproceduralExceptionFilter<>();
+    filter.add(new IgnoreExceptionsInterFilter<>(new IgnoreExceptionsFilter(TypeReference.JavaLangOutOfMemoryError)));
+    filter.add(new IgnoreExceptionsInterFilter<>(new IgnoreExceptionsFilter(
         TypeReference.JavaLangNullPointerException)));
-    filter.add(new IgnoreExceptionsInterFilter<SSAInstruction>(new IgnoreExceptionsFilter(
+    filter.add(new IgnoreExceptionsInterFilter<>(new IgnoreExceptionsFilter(
         TypeReference.JavaLangExceptionInInitializerError)));
-    filter.add(new IgnoreExceptionsInterFilter<SSAInstruction>(new IgnoreExceptionsFilter(
+    filter.add(new IgnoreExceptionsInterFilter<>(new IgnoreExceptionsFilter(
         TypeReference.JavaLangExceptionInInitializerError)));
-    filter.add(new IgnoreExceptionsInterFilter<SSAInstruction>(new IgnoreExceptionsFilter(
+    filter.add(new IgnoreExceptionsInterFilter<>(new IgnoreExceptionsFilter(
         TypeReference.JavaLangNegativeArraySizeException)));
   }
 

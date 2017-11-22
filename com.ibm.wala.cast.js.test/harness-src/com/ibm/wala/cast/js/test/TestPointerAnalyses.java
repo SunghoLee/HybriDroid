@@ -15,7 +15,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
-
+import java.util.function.Function;
+import java.util.function.Predicate;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -53,19 +54,17 @@ import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.NullProgressMonitor;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.EmptyIterator;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.MapIterator;
 import com.ibm.wala.util.collections.Pair;
-import com.ibm.wala.util.functions.Function;
 import com.ibm.wala.util.intset.OrdinalSet;
 import com.ibm.wala.util.strings.Atom;
 
 public abstract class TestPointerAnalyses {
 
-  private final class CheckPointers extends Predicate<Pair<Set<Pair<CGNode, NewSiteReference>>, Set<Pair<CGNode, NewSiteReference>>>> {
+  private final class CheckPointers implements Predicate<Pair<Set<Pair<CGNode, NewSiteReference>>, Set<Pair<CGNode, NewSiteReference>>>> {
     private Set<Pair<String,Integer>> map(Set<Pair<CGNode, NewSiteReference>> sites) {
       Set<Pair<String,Integer>> result = HashSetFactory.make();
       for(Pair<CGNode,NewSiteReference> s : sites) {
@@ -93,7 +92,7 @@ public abstract class TestPointerAnalyses {
     JSCallGraphUtil.setTranslatorFactory(factory);
   }
 
-  private Pair<CGNode, NewSiteReference> map(CallGraph CG, Pair<CGNode, NewSiteReference> ptr) {
+  private static Pair<CGNode, NewSiteReference> map(CallGraph CG, Pair<CGNode, NewSiteReference> ptr) {
     CGNode n = ptr.fst;
     
     if (! (n.getMethod() instanceof JavaScriptConstructor)) {
@@ -116,7 +115,7 @@ public abstract class TestPointerAnalyses {
     return Pair.make(caller, new NewSiteReference(site.getProgramCounter(), ptr.snd.getDeclaredType()));
   }
   
-  private Set<Pair<CGNode, NewSiteReference>> map(CallGraph CG, Set<Pair<CGNode, NewSiteReference>> ptrs) {
+  private static Set<Pair<CGNode, NewSiteReference>> map(CallGraph CG, Set<Pair<CGNode, NewSiteReference>> ptrs) {
     Set<Pair<CGNode, NewSiteReference>> result = HashSetFactory.make();
     for(Pair<CGNode, NewSiteReference> ptr : ptrs) {
       result.add(map(CG, ptr));
@@ -124,7 +123,7 @@ public abstract class TestPointerAnalyses {
     return result;
   }
   
-  private Set<Pair<CGNode, NewSiteReference>> ptrs(Set<CGNode> functions, int local, CallGraph CG, PointerAnalysis<? extends InstanceKey> pa) {
+  private static Set<Pair<CGNode, NewSiteReference>> ptrs(Set<CGNode> functions, int local, CallGraph CG, PointerAnalysis<? extends InstanceKey> pa) {
     Set<Pair<CGNode, NewSiteReference>> result = HashSetFactory.make();
 
     for(CGNode n : functions) {
@@ -144,7 +143,7 @@ public abstract class TestPointerAnalyses {
     return result;
   }
   
-  private boolean isGlobal(Set<CGNode> functions, int local, PointerAnalysis<? extends InstanceKey> pa) {
+  private static boolean isGlobal(Set<CGNode> functions, int local, PointerAnalysis<? extends InstanceKey> pa) {
     for(CGNode n : functions) {
       PointerKey l = pa.getHeapModel().getPointerKeyForLocal(n, local);
       if (l != null) {
@@ -162,7 +161,7 @@ public abstract class TestPointerAnalyses {
     return false;
   }
   
-  private void testPage(URL page, Predicate<MethodReference> filter, Predicate<Pair<Set<Pair<CGNode, NewSiteReference>>, Set<Pair<CGNode, NewSiteReference>>>> test) throws IOException, WalaException, CancelException {
+  private void testPage(URL page, Predicate<MethodReference> filter, Predicate<Pair<Set<Pair<CGNode, NewSiteReference>>, Set<Pair<CGNode, NewSiteReference>>>> test) throws WalaException, CancelException {
     boolean save = JSSourceExtractor.USE_TEMP_NAME;
     try {
       JSSourceExtractor.USE_TEMP_NAME = false;
@@ -340,7 +339,7 @@ public abstract class TestPointerAnalyses {
         PrototypeFieldVertex proto = new PrototypeFieldVertex(PrototypeField.__proto__, o);
         if (hg.containsNode(proto)) {
         return 
-            new MapIterator<Object,ObjectVertex>(hg.getSuccNodes(proto),
+            new MapIterator<>(hg.getSuccNodes(proto),
                 new Function<Object,ObjectVertex>() {
                   @Override
                   public ObjectVertex apply(Object object) {
@@ -366,7 +365,7 @@ public abstract class TestPointerAnalyses {
     }, node, vn);
   }
 
-  private void testPageUserCodeEquivalent(URL page) throws IOException, WalaException, CancelException {
+  private void testPageUserCodeEquivalent(URL page) throws WalaException, CancelException {
     final String name = page.getFile().substring(page.getFile().lastIndexOf('/')+1, page.getFile().lastIndexOf('.'));
     testPage(page, nameFilter(name), new CheckPointers());
   }
@@ -383,7 +382,7 @@ public abstract class TestPointerAnalyses {
   }
   
   @Test
-  public void testWindowOnload() throws IOException, WalaException, CancelException {
+  public void testWindowOnload() throws WalaException, CancelException {
     testPageUserCodeEquivalent(getClass().getClassLoader().getResource("pages/windowonload.html"));
   }
 

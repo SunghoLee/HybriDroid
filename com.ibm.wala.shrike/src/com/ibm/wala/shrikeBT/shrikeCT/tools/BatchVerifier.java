@@ -48,7 +48,7 @@ public class BatchVerifier {
   private static int errors = 0;
 
   public static void main(String[] args) throws Exception {
-    OfflineInstrumenter oi = new OfflineInstrumenter(true);
+    OfflineInstrumenter oi = new OfflineInstrumenter();
     args = oi.parseStandardArgs(args);
 
     for (int i = 0; i < args.length; i++) {
@@ -57,18 +57,19 @@ public class BatchVerifier {
       }
     }
 
-    PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter("report", false)));
+    try (final PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter("report", false)))) {
 
-    oi.beginTraversal();
-    ClassInstrumenter ci;
-    while ((ci = oi.nextClass()) != null) {
-      ClassReader cr = ci.getReader();
-      CTUtils.addClassToHierarchy(store, cr);
-    }
+      oi.beginTraversal();
+      ClassInstrumenter ci;
+      while ((ci = oi.nextClass()) != null) {
+        ClassReader cr = ci.getReader();
+        CTUtils.addClassToHierarchy(store, cr);
+      }
 
-    oi.beginTraversal();
-    while ((ci = oi.nextClass()) != null) {
-      doClass(ci.getReader(), w);
+      oi.beginTraversal();
+      while ((ci = oi.nextClass()) != null) {
+        doClass(ci.getReader(), w);
+      }
     }
 
     oi.close();

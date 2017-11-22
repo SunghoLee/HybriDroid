@@ -236,6 +236,8 @@ public final class TypeName implements Serializable {
    * A key into the dictionary; this is just like a type name, but uses value equality instead of object equality.
    */
   private final static class TypeNameKey implements Serializable {
+    private static final long serialVersionUID = -8284030936836318929L;
+
     /**
      * The package, like "java/lang". null means the unnamed package.
      */
@@ -315,7 +317,8 @@ public final class TypeName implements Serializable {
       boolean isPrimitive = (dim==-1) || (dim&ElementMask)==PrimitiveMask;
       if (dim != -1) {
         for (int d = (dim&ElementMask) == PrimitiveMask? dim>>ElementBits: dim; d != 0; d>>=ElementBits) {
-          switch (d&ElementMask) {
+          final int masked = d&ElementMask;
+          switch (masked) {
           case ArrayMask:
             result.append("[");
             break;
@@ -325,6 +328,8 @@ public final class TypeName implements Serializable {
           case ReferenceMask:
             result.append("&");
             break;
+          default:
+            throw new UnsupportedOperationException("unexpected masked type-name component " + masked);
           }
         }
       }

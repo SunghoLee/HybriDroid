@@ -20,7 +20,7 @@ import com.ibm.wala.util.graph.NumberedGraph;
  * increasing discover time. This class follows the outNodes of the graph nodes to define the graph, but this behavior can be
  * changed by overriding the getConnected method.
  */
-public class NumberedDFSDiscoverTimeIterator<T> extends GraphDFSDiscoverTimeIterator<T> implements Iterator<T> {
+public class NumberedDFSDiscoverTimeIterator<T> extends GraphDFSDiscoverTimeIterator<T> {
 
   private static final long serialVersionUID = -3919708273323217304L;
 
@@ -47,7 +47,7 @@ public class NumberedDFSDiscoverTimeIterator<T> extends GraphDFSDiscoverTimeIter
     }
     this.G = G;
     pendingChildren = new Iterator[G.getMaxNumber() + 1];
-    init(G, new NonNullSingletonIterator<T>(N));
+    init(G, new NonNullSingletonIterator<>(N));
   }
 
   /**

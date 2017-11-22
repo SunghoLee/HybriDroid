@@ -10,10 +10,9 @@
  *****************************************************************************/
 package com.ibm.wala.cast.js.ipa.callgraph;
 
-import com.ibm.wala.cast.ipa.callgraph.OneLevelForLexicalAccessFunctions;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ContextInsensitiveSelector;
 import com.ibm.wala.ipa.callgraph.impl.DelegatingContextSelector;
@@ -32,7 +31,7 @@ public class JSZeroOrOneXCFABuilder extends JSCFABuilder {
   private static final boolean USE_OBJECT_SENSITIVITY = false;
   
 
-  public JSZeroOrOneXCFABuilder(IClassHierarchy cha, JSAnalysisOptions options, AnalysisCache cache,
+  public JSZeroOrOneXCFABuilder(IClassHierarchy cha, JSAnalysisOptions options, IAnalysisCacheView cache,
       ContextSelector appContextSelector, SSAContextInterpreter appContextInterpreter, int instancePolicy, boolean doOneCFA) {
     super(cha, options, cache);
 
@@ -83,7 +82,7 @@ public class JSZeroOrOneXCFABuilder extends JSCFABuilder {
     options.setSelector(targetSelector);
   }
 
-  private SSAContextInterpreter setupSSAContextInterpreter(IClassHierarchy cha, JSAnalysisOptions options, AnalysisCache cache,
+  private SSAContextInterpreter setupSSAContextInterpreter(IClassHierarchy cha, JSAnalysisOptions options, IAnalysisCacheView cache,
       SSAContextInterpreter appContextInterpreter) {
     SSAContextInterpreter contextInterpreter = makeDefaultContextInterpreters(appContextInterpreter, options, cha);
     if (options.handleCallApply()) {
@@ -108,7 +107,7 @@ public class JSZeroOrOneXCFABuilder extends JSCFABuilder {
    *          specifications.
    * @return a 0-1-Opt-CFA Call Graph Builder.
    */
-  public static JSCFABuilder make(JSAnalysisOptions options, AnalysisCache cache, IClassHierarchy cha, ClassLoader cl,
+  public static JSCFABuilder make(JSAnalysisOptions options, IAnalysisCacheView cache, IClassHierarchy cha, ClassLoader cl,
       AnalysisScope scope, String[] xmlFiles, byte instancePolicy, boolean doOneCFA) {
     com.ibm.wala.ipa.callgraph.impl.Util.addDefaultSelectors(options, cha);
     for (int i = 0; i < xmlFiles.length; i++) {

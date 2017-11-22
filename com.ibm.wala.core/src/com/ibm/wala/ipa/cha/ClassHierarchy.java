@@ -20,10 +20,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import com.ibm.wala.classLoader.ArrayClass;
 import com.ibm.wala.classLoader.ClassLoaderFactory;
-import com.ibm.wala.classLoader.ClassLoaderFactoryImpl;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IClassLoader;
 import com.ibm.wala.classLoader.IField;
@@ -44,7 +44,6 @@ import com.ibm.wala.util.collections.MapIterator;
 import com.ibm.wala.util.collections.MapUtil;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.debug.UnimplementedError;
-import com.ibm.wala.util.functions.Function;
 import com.ibm.wala.util.ref.CacheReference;
 import com.ibm.wala.util.ref.ReferenceCleanser;
 import com.ibm.wala.util.strings.Atom;
@@ -76,8 +75,7 @@ public class ClassHierarchy implements IClassHierarchy {
    * {@link ConcurrentModificationException}. But with a {@link ConcurrentHashMap}, at least the code merrily chugs along,
    * tolerating the race.
    */
-  final private Map<TypeReference, Node> map = new ConcurrentHashMap<TypeReference, Node>();
-
+  final private Map<TypeReference, Node> map; 
   /**
    * {@link TypeReference} for the root type
    */
@@ -167,22 +165,24 @@ public class ClassHierarchy implements IClassHierarchy {
     return result;
   }
 
-  private ClassHierarchy(AnalysisScope scope, ClassLoaderFactory factory, Language language, IProgressMonitor progressMonitor)
+  ClassHierarchy(AnalysisScope scope, ClassLoaderFactory factory, Language language, IProgressMonitor progressMonitor, Map<TypeReference, Node> map)
       throws ClassHierarchyException, IllegalArgumentException {
-    this(scope, factory, Collections.singleton(language), progressMonitor);
+    this(scope, factory, Collections.singleton(language), progressMonitor, map);
   }
 
-  private ClassHierarchy(AnalysisScope scope, ClassLoaderFactory factory, IProgressMonitor progressMonitor)
+  ClassHierarchy(AnalysisScope scope, ClassLoaderFactory factory, IProgressMonitor progressMonitor, Map<TypeReference, Node> map)
       throws ClassHierarchyException, IllegalArgumentException {
-    this(scope, factory, scope.getLanguages(), progressMonitor);
+    this(scope, factory, scope.getLanguages(), progressMonitor, map);
   }
 
-  private ClassHierarchy(AnalysisScope scope, ClassLoaderFactory factory, Collection<Language> languages,
-      IProgressMonitor progressMonitor) throws ClassHierarchyException, IllegalArgumentException {
+  ClassHierarchy(AnalysisScope scope, ClassLoaderFactory factory, Collection<Language> languages,
+      IProgressMonitor progressMonitor, Map<TypeReference, Node> map) throws ClassHierarchyException, IllegalArgumentException {
     // now is a good time to clear the warnings globally.
     // TODO: think of a better way to guard against warning leaks.
     Warnings.clear();
 
+    this.map = map;
+    
     if (factory == null) {
       throw new IllegalArgumentException();
     }
@@ -595,7 +595,7 @@ public class ClassHierarchy implements IClassHierarchy {
    * @param selector method selector
    * @return the method if found, else null
    */
-  private IMethod findMethod(IClass clazz, Selector selector) {
+  private static IMethod findMethod(IClass clazz, Selector selector) {
     return clazz.getMethod(selector);
   }
 
@@ -673,7 +673,7 @@ public class ClassHierarchy implements IClassHierarchy {
   /**
    * internal representation of a node in the class hiearachy, representing one java class.
    */
-  private static final class Node {
+  static final class Node {
 
     private final IClass klass;
 
@@ -756,17 +756,9 @@ public class ClassHierarchy implements IClassHierarchy {
       return b;
     } else {
       Node n = map.get(b.getReference());
-      if (n == null) {
-        assert n != null : "null n for " + b;
-      }
+      assert n != null : "null n for " + b;
       Set<IClass> superB;
-      try {
-        superB = getSuperclasses(b);
-      } catch (ClassHierarchyException e1) {
-        e1.printStackTrace();
-        Assertions.UNREACHABLE();
-        superB = null;
-      }
+      superB = getSuperclasses(b);
       IClass aa = a;
       while (aa != null) {
         if (b.equals(aa) || superB.contains(aa)) {
@@ -775,19 +767,13 @@ public class ClassHierarchy implements IClassHierarchy {
         aa = aa.getSuperclass();
       }
       Set<IClass> superA;
-      try {
-        superA = getSuperclasses(a);
-      } catch (ClassHierarchyException e1) {
-        e1.printStackTrace();
-        Assertions.UNREACHABLE();
-        superA = null;
-      }
+      superA = getSuperclasses(a);
       Assertions.UNREACHABLE("getLeastCommonSuperclass " + tempA + " " + b + ": " + superA + ", " + superB);
       return null;
     }
   }
 
-  private Set<IClass> getSuperclasses(IClass c) throws ClassHierarchyException {
+  private static Set<IClass> getSuperclasses(IClass c) {
     HashSet<IClass> result = HashSetFactory.make(3);
     while (c.getSuperclass() != null) {
       result.add(c.getSuperclass());
@@ -1197,66 +1183,6 @@ public class ClassHierarchy implements IClassHierarchy {
       result = result.getArrayElementType();
     }
     return result.isPrimitiveType() ? null : lookupClass(result);
-  }
-
-  /**
-   * @return a ClassHierarchy object representing the analysis scope
-   * @throws ClassHierarchyException
-   */
-  public static ClassHierarchy make(AnalysisScope scope) throws ClassHierarchyException {
-    if (scope == null) {
-      throw new IllegalArgumentException("null scope");
-    }
-    return make(scope, new ClassLoaderFactoryImpl(scope.getExclusions()));
-  }
-
-  /**
-   * temporarily marking this internal to avoid infinite sleep with randomly chosen IProgressMonitor.
-   */
-  public static ClassHierarchy make(AnalysisScope scope, IProgressMonitor monitor) throws ClassHierarchyException {
-    if (scope == null) {
-      throw new IllegalArgumentException("null scope");
-    }
-    return make(scope, new ClassLoaderFactoryImpl(scope.getExclusions()), monitor);
-  }
-
-  public static ClassHierarchy make(AnalysisScope scope, ClassLoaderFactory factory) throws ClassHierarchyException {
-    if (scope == null) {
-      throw new IllegalArgumentException("null scope");
-    }
-    if (factory == null) {
-      throw new IllegalArgumentException("null factory");
-    }
-    return new ClassHierarchy(scope, factory, null);
-  }
-
-  /**
-   * temporarily marking this internal to avoid infinite sleep with randomly chosen IProgressMonitor.
-   */
-  public static ClassHierarchy make(AnalysisScope scope, ClassLoaderFactory factory, IProgressMonitor monitor)
-      throws ClassHierarchyException {
-    return new ClassHierarchy(scope, factory, monitor);
-  }
-
-  public static ClassHierarchy make(AnalysisScope scope, ClassLoaderFactory factory, Set<Language> languages)
-      throws ClassHierarchyException {
-    return new ClassHierarchy(scope, factory, languages, null);
-  }
-
-  public static ClassHierarchy make(AnalysisScope scope, ClassLoaderFactory factory, Language language)
-      throws ClassHierarchyException {
-    return new ClassHierarchy(scope, factory, language, null);
-  }
-
-  /**
-   * temporarily marking this internal to avoid infinite sleep with randomly chosen IProgressMonitor. TODO: nanny for testgen
-   */
-  public static ClassHierarchy make(AnalysisScope scope, ClassLoaderFactory factory, Language language, IProgressMonitor monitor)
-      throws ClassHierarchyException {
-    if (factory == null) {
-      throw new IllegalArgumentException("null factory");
-    }
-    return new ClassHierarchy(scope, factory, language, monitor);
   }
 
   @Override

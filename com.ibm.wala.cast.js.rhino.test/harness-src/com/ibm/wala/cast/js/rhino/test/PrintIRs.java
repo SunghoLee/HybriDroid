@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.ibm.wala.cast.ipa.callgraph.CAstAnalysisScope;
 import com.ibm.wala.cast.ir.ssa.AstIRFactory;
@@ -28,21 +29,19 @@ import com.ibm.wala.cast.js.ipa.callgraph.JSCallGraphUtil;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.loader.JavaScriptLoaderFactory;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
-import com.ibm.wala.cast.js.util.Util;
 import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.types.AstMethodReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.SourceModule;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
-import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.IRFactory;
 import com.ibm.wala.ssa.SSAOptions;
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.Pair;
 
@@ -90,7 +89,7 @@ public class PrintIRs {
   }
 
   private static void printIRsForHTML(String filename) throws IllegalArgumentException, MalformedURLException, IOException,
-      CancelException, WalaException, Error {
+      WalaException, Error {
     // use Rhino to parse JavaScript
     JSCallGraphUtil.setTranslatorFactory(new CAstRhinoTranslatorFactory());
     // add model for DOM APIs
@@ -100,8 +99,8 @@ public class PrintIRs {
     SourceModule[] scripts = p.fst.toArray(new SourceModule[] {});
     JavaScriptLoaderFactory loaders = new WebPageLoaderFactory(JSCallGraphUtil.getTranslatorFactory());
     CAstAnalysisScope scope = new CAstAnalysisScope(scripts, loaders, Collections.singleton(JavaScriptLoader.JS));
-    IClassHierarchy cha = ClassHierarchy.make(scope, loaders, JavaScriptLoader.JS);
-    Util.checkForFrontEndErrors(cha);
+    IClassHierarchy cha = ClassHierarchyFactory.make(scope, loaders, JavaScriptLoader.JS);
+    com.ibm.wala.cast.util.Util.checkForFrontEndErrors(cha);
     printIRsForCHA(cha, new Predicate<String>() {
 
       @Override

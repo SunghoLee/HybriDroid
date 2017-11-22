@@ -22,23 +22,18 @@
 package com.ibm.wala.dataflow.IFDS;
 
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 import com.ibm.wala.cfg.ControlFlowGraph;
-import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
-import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.cfg.BasicBlockInContext;
 import com.ibm.wala.ipa.cfg.ExplodedInterproceduralCFG;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.analysis.IExplodedBasicBlock;
 import com.ibm.wala.util.collections.EmptyIterator;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.FilterIterator;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.graph.Graph;
@@ -54,19 +49,14 @@ import com.ibm.wala.util.intset.IntSet;
  */
 public class ICFGSupergraph implements ISupergraph<BasicBlockInContext<IExplodedBasicBlock>, CGNode> {
 
-  private final AnalysisCache analysisCache;
-  
-  private final AnalysisOptions options = new AnalysisOptions();
-
   private final ExplodedInterproceduralCFG icfg;
 
-  protected ICFGSupergraph(ExplodedInterproceduralCFG icfg, AnalysisCache cache) {
+  protected ICFGSupergraph(ExplodedInterproceduralCFG icfg) {
     this.icfg = icfg;
-    this.analysisCache = cache;
   }
 
-  public static ICFGSupergraph make(CallGraph cg, AnalysisCache cache) {
-    ICFGSupergraph w = new ICFGSupergraph(ExplodedInterproceduralCFG.make(cg), cache);
+  public static ICFGSupergraph make(CallGraph cg) {
+    ICFGSupergraph w = new ICFGSupergraph(ExplodedInterproceduralCFG.make(cg));
     return w;
   }
 
@@ -77,18 +67,6 @@ public class ICFGSupergraph implements ISupergraph<BasicBlockInContext<IExploded
 
   public IClassHierarchy getClassHierarchy() {
     return icfg.getCallGraph().getClassHierarchy();
-  }
-
-  public IR getIR(IMethod m, Context c) {
-    //AnalysisOptions options = new AnalysisOptions();
-    IR ir = analysisCache.getSSACache().findOrCreateIR(m, c, options.getSSAOptions());
-    return ir;
-  }
-
-  public IR getIR(CGNode n) {
-    //AnalysisOptions options = new AnalysisOptions();
-    IR ir = analysisCache.getSSACache().findOrCreateIR(n.getMethod(), n.getContext(), options.getSSAOptions());
-    return ir;
   }
 
   @Override

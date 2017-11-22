@@ -12,7 +12,6 @@ package com.ibm.wala.shrikeBT.shrikeCT.tools;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.invoke.CallSite;
@@ -41,7 +40,7 @@ public class BootstrapDumper {
   }
 
   public static void main(String[] args) throws Exception {
-    OfflineInstrumenter oi = new OfflineInstrumenter(true);
+    OfflineInstrumenter oi = new OfflineInstrumenter();
     String[] classpathEntries = oi.parseStandardArgs(args);
     
     PrintWriter w = new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
@@ -55,25 +54,25 @@ public class BootstrapDumper {
       assert f.exists();
       urls[i-1] = f.toURI().toURL(); 
     }
-    URLClassLoader image = URLClassLoader.newInstance(urls, BootstrapDumper.class.getClassLoader().getParent());
-    
-    System.err.println(image);
-    
-    ClassInstrumenter ci;
-    oi.beginTraversal();
-    while ((ci = oi.nextClass()) != null) {
-      try {
-        p.doClass(image, ci.getReader());
-      } finally {
-        w.flush();
+    try (final URLClassLoader image = URLClassLoader.newInstance(urls, BootstrapDumper.class.getClassLoader().getParent())) {
+      System.err.println(image);
+
+      ClassInstrumenter ci;
+      oi.beginTraversal();
+      while ((ci = oi.nextClass()) != null) {
+        try {
+          p.doClass(image, ci.getReader());
+        } finally {
+          w.flush();
+        }
       }
     }
 
     oi.close();
   }
 
-  private void dumpAttributes(Class cl, ClassReader cr, int i, ClassReader.AttrIterator attrs) throws InvalidClassFileException,
-      InvalidBytecodeException, IOException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+  private void dumpAttributes(Class<?> cl, ClassReader.AttrIterator attrs) throws InvalidClassFileException,
+      InvalidBytecodeException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
     for (; attrs.isValid(); attrs.advance()) {
       String name = attrs.getName();
       if (name.equals("Code")) {
@@ -114,7 +113,7 @@ public class BootstrapDumper {
    * @throws IllegalArgumentException if cr is null
    * @throws NoSuchFieldException 
    */
-  public void doClass(ClassLoader image, final ClassReader cr) throws InvalidClassFileException, InvalidBytecodeException, IOException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+  public void doClass(ClassLoader image, final ClassReader cr) throws InvalidClassFileException, InvalidBytecodeException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
     if (cr == null) {
       throw new IllegalArgumentException("cr is null");
     }
@@ -125,7 +124,7 @@ public class BootstrapDumper {
     
     for (int i = 0; i < methodCount; i++) {
       cr.initMethodAttributeIterator(i, attrs);
-      dumpAttributes(Class.forName(cr.getName().replace('/', '.'), false, image), cr, i, attrs);
+      dumpAttributes(Class.forName(cr.getName().replace('/', '.'), false, image), attrs);
     }
   }
 }

@@ -11,13 +11,16 @@
 package com.ibm.wala.core.tests.callGraph;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.core.tests.util.TestConstants;
 import com.ibm.wala.core.tests.util.WalaTestCase;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -25,6 +28,7 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
@@ -38,12 +42,12 @@ public class DefaultMethodsTest extends WalaTestCase {
   @Test public void testDefaultMethods() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
 
     AnalysisScope scope = CallGraphTestUtil.makeJ2SEAnalysisScope(TestConstants.WALA_TESTDATA, CallGraphTestUtil.REGRESSION_EXCLUSIONS);
-    ClassHierarchy cha = ClassHierarchy.make(scope);
+    ClassHierarchy cha = ClassHierarchyFactory.make(scope);
     Iterable<Entrypoint> entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha,
         "LdefaultMethods/DefaultMethods");
     AnalysisOptions options = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
 
-    CallGraph cg = CallGraphTestUtil.buildZeroCFA(options, new AnalysisCache(), cha, scope, false);
+    CallGraph cg = CallGraphTestUtil.buildZeroCFA(options, new AnalysisCacheImpl(), cha, scope, false);
 
     // Find node corresponding to main
     TypeReference tm = TypeReference.findOrCreate(ClassLoaderReference.Application, "LdefaultMethods/DefaultMethods");
@@ -77,5 +81,13 @@ public class DefaultMethodsTest extends WalaTestCase {
 
     // Check call from main to Test3.silly
     Assert.assertTrue("should have call site from main to Test3.silly", cg.getPossibleSites(mnode, ttnode).hasNext());
+    
+    // Check that IClass.getAllMethods() returns default methods #219.
+    TypeReference test1Type = TypeReference.findOrCreate(ClassLoaderReference.Application, "LdefaultMethods/DefaultMethods$Test1");
+    IClass test1Class = cha.lookupClass(test1Type);
+
+    Collection<IMethod> allMethods = test1Class.getAllMethods();
+    IMethod defaultMethod = test1Class.getMethod(t1m.getSelector());
+    Assert.assertTrue("Expecting default methods to show up in IClass.allMethods()", allMethods.contains(defaultMethod));
   }
 }

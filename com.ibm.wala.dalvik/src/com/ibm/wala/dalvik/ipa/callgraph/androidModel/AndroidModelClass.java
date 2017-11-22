@@ -84,7 +84,7 @@ import com.ibm.wala.util.strings.Atom;
  *  
  *  In the generated code this class may be found as "Lcom/ibm/wala/AndroidModelClass"
  *
- *  @see    com.ibm.wala.dalvik.ipa.callgraph.impl.FakeRootClass
+ *  @see    com.ibm.wala.ipa.callgraph.impl.FakeRootClass
  *
  *  @author Tobias Blaschke <code@tobiasblaschke.de>
  *  @todo   Move this class into an other loader? Currently: Primordial
@@ -127,7 +127,7 @@ public final /* singleton */ class AndroidModelClass extends SyntheticClass {
         clinit.setStatic(true);
         final TypeSafeInstructionFactory instructionFactory = new TypeSafeInstructionFactory(cha);
         
-        final Set<TypeReference> components = AndroidEntryPointManager.MANAGER.getComponents();
+        final Set<TypeReference> components = AndroidEntryPointManager.getComponents();
         int ssaNo = 1;
 
         if (AndroidEntryPointManager.MANAGER.doFlatComponents()) {
@@ -144,7 +144,7 @@ public final /* singleton */ class AndroidModelClass extends SyntheticClass {
                     final MethodReference ctor = MethodReference.findOrCreate(component, MethodReference.initSelector);
                     final CallSiteReference site = CallSiteReference.make(pc, ctor, IInvokeInstruction.Dispatch.SPECIAL);
                     final SSAValue exception = new SSAValue(ssaNo++, TypeReference.JavaLangException, clinitRef);
-                    final List<SSAValue> params = new ArrayList<SSAValue>();
+                    final List<SSAValue> params = new ArrayList<>();
                     params.add(instance);
                     final SSAInstruction ctorCall = instructionFactory.InvokeInstruction(pc, params, exception, site);
                     clinit.addStatement(ctorCall);
@@ -237,7 +237,7 @@ public final /* singleton */ class AndroidModelClass extends SyntheticClass {
     //  Contents of the class: Fields
     //  We have none...
     //
-    private Map<Atom, IField> fields = new HashMap<Atom, IField>();
+    private Map<Atom, IField> fields = new HashMap<>();
 
     @Override
     public IField getField(Atom name) {

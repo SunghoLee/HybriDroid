@@ -7,6 +7,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.js"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="libs/junit-4.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

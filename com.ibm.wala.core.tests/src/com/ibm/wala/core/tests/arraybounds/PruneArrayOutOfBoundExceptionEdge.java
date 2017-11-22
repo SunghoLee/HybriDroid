@@ -1,6 +1,9 @@
 package com.ibm.wala.core.tests.arraybounds;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.everyItem;
+import static org.hamcrest.CoreMatchers.hasItem;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -27,6 +30,7 @@ import com.ibm.wala.ipa.cfg.exceptionpruning.filter.CombinedExceptionFilter;
 import com.ibm.wala.ipa.cfg.exceptionpruning.filter.NullPointerExceptionFilter;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.ssa.AllIntegerDueToBranchePiPolicy;
 import com.ibm.wala.ssa.DefaultIRFactory;
 import com.ibm.wala.ssa.IR;
@@ -54,7 +58,7 @@ import com.ibm.wala.util.config.AnalysisScopeReader;
  * For an example how to use the exception pruning see
  * {@link PruneArrayOutOfBoundExceptionEdge#computeCfgAndPrunedCFG(IMethod)}
  * 
- * @author Stephan Gocht <stephan@gobro.de>
+ * @author Stephan Gocht {@code <stephan@gobro.de>}
  *
  */
 public class PruneArrayOutOfBoundExceptionEdge {
@@ -92,7 +96,7 @@ public class PruneArrayOutOfBoundExceptionEdge {
   @BeforeClass
   public static void init() throws IOException, ClassHierarchyException {
     scope = AnalysisScopeReader.readJavaScope(TestConstants.WALA_TESTDATA, null, CLASS_LOADER);
-    cha = ClassHierarchy.make(scope);
+    cha = ClassHierarchyFactory.make(scope);
 
     irFactory = new DefaultIRFactory();
     options = new AnalysisOptions();
@@ -110,11 +114,11 @@ public class PruneArrayOutOfBoundExceptionEdge {
     ArrayOutOfBoundsAnalysis arrayBoundsAnalysis = new ArrayOutOfBoundsAnalysis(ir);
     IntraproceduralNullPointerAnalysis nullPointerAnalysis = new IntraproceduralNullPointerAnalysis(ir);
 
-    CombinedExceptionFilter<SSAInstruction> filter = new CombinedExceptionFilter<SSAInstruction>();
+    CombinedExceptionFilter<SSAInstruction> filter = new CombinedExceptionFilter<>();
     filter.add(new ArrayOutOfBoundFilter(arrayBoundsAnalysis));
     filter.add(new NullPointerExceptionFilter(nullPointerAnalysis));
 
-    ExceptionFilter2EdgeFilter<ISSABasicBlock> edgeFilter = new ExceptionFilter2EdgeFilter<ISSABasicBlock>(filter, cha, cfg);
+    ExceptionFilter2EdgeFilter<ISSABasicBlock> edgeFilter = new ExceptionFilter2EdgeFilter<>(filter, cha, cfg);
     PrunedCFG<SSAInstruction, ISSABasicBlock> prunedCfg = PrunedCFG.make(cfg, edgeFilter);
 
     return Pair.make(cfg, prunedCfg);
@@ -126,7 +130,7 @@ public class PruneArrayOutOfBoundExceptionEdge {
   }
 
   @Test
-  public void detectable() throws ClassNotFoundException {
+  public void detectable() {
     IClass iClass = getIClass(DETECTABLE_TESTDATA);
     checkRemovedEdges(iClass, DETECTABLE_EXPECTED_COUNT);
   }
@@ -191,8 +195,8 @@ public class PruneArrayOutOfBoundExceptionEdge {
   private boolean checkExceptionalSuccessors(ISSABasicBlock block, SSACFG cfg, PrunedCFG<SSAInstruction, ISSABasicBlock> prunedCfg,
       IMethod method, String identifyer) {
     boolean isEdgeRemoved = false;
-    LinkedHashSet<ISSABasicBlock> exceptionalSuccessorCfg = new LinkedHashSet<ISSABasicBlock>(cfg.getExceptionalSuccessors(block));
-    LinkedHashSet<ISSABasicBlock> exceptionalSuccessorPruned = new LinkedHashSet<ISSABasicBlock>(
+    LinkedHashSet<ISSABasicBlock> exceptionalSuccessorCfg = new LinkedHashSet<>(cfg.getExceptionalSuccessors(block));
+    LinkedHashSet<ISSABasicBlock> exceptionalSuccessorPruned = new LinkedHashSet<>(
         prunedCfg.getExceptionalSuccessors(block));
 
     if (!exceptionalSuccessorCfg.equals(exceptionalSuccessorPruned)) {
@@ -225,13 +229,13 @@ public class PruneArrayOutOfBoundExceptionEdge {
   }
 
   private void checkNormalSuccessors(SSACFG cfg, PrunedCFG<SSAInstruction, ISSABasicBlock> prunedCfg, ISSABasicBlock block) {
-    LinkedHashSet<ISSABasicBlock> normalSuccessorCfg = new LinkedHashSet<ISSABasicBlock>(cfg.getNormalSuccessors(block));
-    LinkedHashSet<ISSABasicBlock> normalSuccessorPruned = new LinkedHashSet<ISSABasicBlock>(prunedCfg.getNormalSuccessors(block));
+    LinkedHashSet<ISSABasicBlock> normalSuccessorCfg = new LinkedHashSet<>(cfg.getNormalSuccessors(block));
+    LinkedHashSet<ISSABasicBlock> normalSuccessorPruned = new LinkedHashSet<>(prunedCfg.getNormalSuccessors(block));
     collector.checkThat("", normalSuccessorPruned, equalTo(normalSuccessorCfg));
   }
 
   @AfterClass
-  public static void free() throws IOException, ClassHierarchyException {
+  public static void free() {
     scope = null;
     cha = null;
     irFactory = null;

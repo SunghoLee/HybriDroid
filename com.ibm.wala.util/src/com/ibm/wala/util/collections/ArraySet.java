@@ -106,6 +106,7 @@ public class ArraySet<T> extends AbstractSet<T> {
   /**
    * @throws UnsupportedOperationException if this {@link ArraySet} is immutable (optional)
    */
+  @Override
   @SuppressWarnings("all")
   public boolean add(T o) {
     if (o == null) {
@@ -202,7 +203,7 @@ public class ArraySet<T> extends AbstractSet<T> {
       _curIndex--;
       return true;
     } catch (ArrayIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("invalid ind: " + ind);
+      throw new IllegalArgumentException("invalid ind: " + ind, e);
     }
   }
 
@@ -249,14 +250,14 @@ public class ArraySet<T> extends AbstractSet<T> {
   }
 
   public static <T> ArraySet<T> make() {
-    return new ArraySet<T>();
+    return new ArraySet<>();
   }
 
   public static <T> ArraySet<T> make(Collection<T> other) throws IllegalArgumentException {
     if (other == null) {
       throw new IllegalArgumentException("other == null");
     }
-    return new ArraySet<T>(other);
+    return new ArraySet<>(other);
   }
 
 }

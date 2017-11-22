@@ -55,6 +55,8 @@ import kr.ac.kaist.wala.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser.YMLData;
 import kr.ac.kaist.wala.hybridroid.util.print.IRPrinter;
+import com.ibm.wala.ssa.SSACache;
+import com.ibm.wala.ssa.AuxiliaryCache;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +78,7 @@ import java.util.*;
  */
 public class HybridCFGAnalysis {
 	private Set<String> warnings;
-	
+    
 	public HybridCFGAnalysis() {
 
 	}
@@ -276,8 +278,7 @@ public class HybridCFGAnalysis {
 
 		return Pair.make(cg, pa);
 	}
-
-
+    
 	private void test(AndroidHybridCallGraphBuilder b, CallGraph cg, PointerAnalysis<InstanceKey> pa){
 		for(CGNode n : cg){
 			if(n.toString().contains("error_page")){

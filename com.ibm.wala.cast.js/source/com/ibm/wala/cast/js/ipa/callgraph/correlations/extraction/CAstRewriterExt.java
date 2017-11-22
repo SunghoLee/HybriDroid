@@ -24,8 +24,8 @@ import com.ibm.wala.cast.tree.CAstEntity;
 import com.ibm.wala.cast.tree.CAstNode;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap;
 import com.ibm.wala.cast.tree.impl.CAstControlFlowRecorder;
-import com.ibm.wala.cast.tree.rewrite.CAstRewriter;
 import com.ibm.wala.cast.tree.rewrite.CAstBasicRewriter.NoKey;
+import com.ibm.wala.cast.tree.rewrite.CAstRewriter;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Pair;
@@ -102,7 +102,7 @@ public abstract class CAstRewriterExt extends CAstRewriter<NodePos, NoKey> {
 		}
 	}
 	private final HashSet<Entity> entities_to_add = HashSetFactory.make();
-	private final Stack<CAstEntity> entities = new Stack<CAstEntity>();
+	private final Stack<CAstEntity> entities = new Stack<>();
 	
 	public CAstNode addNode(CAstNode node, CAstControlFlowMap flow) {
 	  Set<CAstNode> nodes = extra_nodes.get(flow);
@@ -229,14 +229,14 @@ public abstract class CAstRewriterExt extends CAstRewriter<NodePos, NoKey> {
 			enterEntity(root);
 			CAstEntity entity = super.rewrite(root);
 			rewrite_cache.put(root, entity);
-			leaveEntity(root);
+			leaveEntity();
 			entities.pop();
 			return entity;
 		}
 	}
 	
-	protected void enterEntity(CAstEntity entity) {}
-	protected void leaveEntity(CAstEntity entity) {}
+	protected void enterEntity(@SuppressWarnings("unused") CAstEntity entity) {}
+	protected void leaveEntity() {}
 
 	public CAstRewriterExt(CAst Ast, boolean recursive,	NodePos rootContext) {
 		super(Ast, recursive, rootContext);

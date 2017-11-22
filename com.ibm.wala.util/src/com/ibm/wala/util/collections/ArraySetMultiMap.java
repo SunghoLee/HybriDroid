@@ -44,8 +44,18 @@ import java.util.Set;
  */
 public class ArraySetMultiMap<K, V> extends AbstractMultiMap<K, V> {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -3475591699051060160L;
+  
   @SuppressWarnings("rawtypes")
   public static final ArraySetMultiMap EMPTY = new ArraySetMultiMap<Object, Object>() {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1839857029830528896L;
 
     @Override
     public boolean put(Object key, Object val) {
@@ -69,7 +79,7 @@ public class ArraySetMultiMap<K, V> extends AbstractMultiMap<K, V> {
 
   @Override
   protected Set<V> createSet() {
-    return new ArraySet<V>();
+    return new ArraySet<>();
   }
 
   @Override
@@ -83,6 +93,6 @@ public class ArraySetMultiMap<K, V> extends AbstractMultiMap<K, V> {
   }
   
   public static <K,V> ArraySetMultiMap<K, V> make() {
-    return new ArraySetMultiMap<K,V>();
+    return new ArraySetMultiMap<>();
   }
 }

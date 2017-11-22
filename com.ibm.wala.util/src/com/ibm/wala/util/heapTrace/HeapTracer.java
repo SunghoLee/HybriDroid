@@ -51,12 +51,12 @@ public class HeapTracer {
     /**
      * Stack of instance objects discovered but not yet traced.
      */
-    private final Stack<Object> scalarWorkList = new Stack<Object>();
+    private final Stack<Object> scalarWorkList = new Stack<>();
 
     /**
      * Stack of array objects discovered but not yet traced.
      */
-    private final Stack<Object> arrayWorkList = new Stack<Object>();
+    private final Stack<Object> arrayWorkList = new Stack<>();
 
     /**
      * How many bytes do we assume the JVM wastes on each instance?
@@ -172,7 +172,7 @@ public class HeapTracer {
 
     /**
      * @param fdir
-     * @return Collection <String>representing the class names in a particular
+     * @return {@link Collection}&lt;{@link String}&gt; representing the class names in a particular
      *         file
      */
     /**
@@ -180,7 +180,7 @@ public class HeapTracer {
      *            root of the classpath governing file f
      * @param f
      *            a File or directory
-     * @return Collection <String>representing the class names in f
+     * @return {@link Collection}&lt;{@link String}&gt; representing the class names in f
      */
     private static Collection<String> findClassNames(String rootDir, File f) {
 	HashSet<String> result = HashSetFactory.make();
@@ -224,7 +224,7 @@ public class HeapTracer {
     public Result perform() throws ClassNotFoundException,
 	    IllegalArgumentException, IllegalAccessException {
 	Result result = new Result();
-	IdentityHashMap<Object, Object> objectsVisited = new IdentityHashMap<Object, Object>();
+	IdentityHashMap<Object, Object> objectsVisited = new IdentityHashMap<>();
 	if (traceStatics) {
 	    for (int i = 0; i < rootClasses.length; i++) {
 		Class<?> c = Class.forName(rootClasses[i]);
@@ -283,7 +283,7 @@ public class HeapTracer {
 	} else {
 	    Integer S = sizeMap.get(c);
 	    if (S == null) {
-		S = new Integer(computeSizeOf(o));
+		S = Integer.valueOf(computeSizeOf(o));
 		sizeMap.put(c, S);
 	    }
 	    return S.intValue();
@@ -660,13 +660,13 @@ public class HeapTracer {
 	public void registerObject(Object key, Object o) {
 	    Integer I = instanceCount.get(key);
 	    int newCount = (I == null) ? 1 : I.intValue() + 1;
-	    instanceCount.put(key, new Integer(newCount));
+	    instanceCount.put(key, Integer.valueOf(newCount));
 	    totalInstances++;
 
 	    I = sizeCount.get(key);
 	    int s = sizeOf(o);
 	    int newSizeCount = (I == null) ? s : I.intValue() + s;
-	    sizeCount.put(key, new Integer(newSizeCount));
+	    sizeCount.put(key, Integer.valueOf(newSizeCount));
 	    totalSize += s;
 	}
 
@@ -674,7 +674,7 @@ public class HeapTracer {
 	public String toString() {
 	    StringBuffer result = new StringBuffer();
 	    result.append("Totals: " + totalInstances + " " + totalSize + "\n");
-	    TreeSet<Object> sorted = new TreeSet<Object>(new SizeComparator());
+	    TreeSet<Object> sorted = new TreeSet<>(new SizeComparator());
 	    sorted.addAll(instanceCount.keySet());
 	    for (Iterator<Object> it = sorted.iterator(); it.hasNext();) {
 		Object key = it.next();
@@ -781,7 +781,7 @@ public class HeapTracer {
 	    result.append("Total instances: " + totalInstances + "\n");
 	    result.append("Total size(bytes): " + totalSize + "\n");
 
-	    TreeSet<Field> sortedDemo = new TreeSet<Field>(new SizeComparator());
+	    TreeSet<Field> sortedDemo = new TreeSet<>(new SizeComparator());
 	    sortedDemo.addAll(roots.keySet());
 	    for (Iterator<Field> it = sortedDemo.iterator(); it.hasNext();) {
 		Object root = it.next();

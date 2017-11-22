@@ -32,7 +32,7 @@ import com.ibm.wala.shrikeBT.analysis.Verifier;
 import com.ibm.wala.shrikeBT.shrikeCT.CTDecoder;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
-import com.ibm.wala.shrikeCT.ClassReader;
+import com.ibm.wala.shrikeCT.ClassConstants;
 import com.ibm.wala.shrikeCT.ClassWriter;
 
 /**
@@ -62,23 +62,24 @@ public class Bench {
   public static void main(String[] args) throws Exception {
     for (int i = 0; i < 1; i++) {
 
-      Writer w = new BufferedWriter(new FileWriter("report", false));
+      try (final Writer w = new BufferedWriter(new FileWriter("report", false))) {
 
-      args = instrumenter.parseStandardArgs(args);
-      if (args.length > 0) {
-        if (args[0].equals("-doexit")) {
-          doExit = true;
-        } else if (args[0].equals("-doexception")) {
-          doExit = true;
-          doException = true;
+        args = instrumenter.parseStandardArgs(args);
+        if (args.length > 0) {
+          if (args[0].equals("-doexit")) {
+            doExit = true;
+          } else if (args[0].equals("-doexception")) {
+            doExit = true;
+            doException = true;
+          }
         }
-      }
-      instrumenter = new OfflineInstrumenter(!doException);
-      instrumenter.setPassUnmodifiedClasses(true);
-      instrumenter.beginTraversal();
-      ClassInstrumenter ci;
-      while ((ci = instrumenter.nextClass()) != null) {
-        doClass(ci, w);
+        instrumenter = new OfflineInstrumenter();
+        instrumenter.setPassUnmodifiedClasses(true);
+        instrumenter.beginTraversal();
+        ClassInstrumenter ci;
+        while ((ci = instrumenter.nextClass()) != null) {
+          doClass(ci, w);
+        }
       }
       instrumenter.close();
     }
@@ -189,7 +190,7 @@ public class Bench {
 
     if (ci.isChanged()) {
       ClassWriter cw = ci.emitClass();
-      cw.addField(ClassReader.ACC_PUBLIC | ClassReader.ACC_STATIC, fieldName, Constants.TYPE_boolean, new ClassWriter.Element[0]);
+      cw.addField(ClassConstants.ACC_PUBLIC | ClassConstants.ACC_STATIC, fieldName, Constants.TYPE_boolean, new ClassWriter.Element[0]);
       instrumenter.outputModifiedClass(ci, cw);
     }
   }

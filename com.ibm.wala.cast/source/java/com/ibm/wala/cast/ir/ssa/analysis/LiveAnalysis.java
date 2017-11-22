@@ -209,7 +209,7 @@ public class LiveAnalysis {
     /**
      * Create the solver
      */
-    final BitVectorSolver<ISSABasicBlock> S = new BitVectorSolver<ISSABasicBlock>(new IKilldallFramework<ISSABasicBlock, BitVectorVariable>() {
+    final BitVectorSolver<ISSABasicBlock> S = new BitVectorSolver<>(new IKilldallFramework<ISSABasicBlock, BitVectorVariable>() {
       private final Graph<ISSABasicBlock> G = GraphInverter.invert(cfg);
 
       @Override
@@ -297,11 +297,10 @@ public class LiveAnalysis {
       }
 
       /**
-       * Calculate set of variables live before instruction
-       * @param instr
+       * Calculate set of variables live before instruction {@code instr}.
        *
        * @see <a href="http://en.wikipedia.org/wiki/Data_flow_analysis#Backward_Analysis">
-       * how the 'in' and 'out' variable sets work</a>
+       * how the "in" and "out" variable sets work</a>
        */
       @Override
       public BitVector getLiveBefore(int instr) {

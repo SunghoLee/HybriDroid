@@ -17,17 +17,14 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
-import com.ibm.wala.util.Predicate;
-import com.ibm.wala.util.WalaException;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.FilterIterator;
-import com.ibm.wala.util.collections.FilterPredicate;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Iterator2Collection;
 import com.ibm.wala.util.collections.IteratorUtil;
 import com.ibm.wala.util.debug.Assertions;
-import com.ibm.wala.util.functions.Function;
 import com.ibm.wala.util.graph.impl.GraphInverter;
 import com.ibm.wala.util.graph.traverse.DFS;
 
@@ -41,9 +38,8 @@ public class GraphSlicer {
    * 
    * @param <T> type for nodes
    * @param g the graph to slice
-   * @param f identifies targets for the backward slice
+   * @param p identifies targets for the backward slice
    * @return the set of nodes in g, from which any of the targets (nodes that f accepts) is reachable.
-   * @throws WalaException
    */
   public static <T> Set<T> slice(Graph<T> g, Predicate<T> p){
     if (g == null) {
@@ -74,7 +70,7 @@ public class GraphSlicer {
 
       @Override
       public Iterator<T> iterator() {
-        return Predicate.filter(g.iterator(), p).iterator();
+        return new FilterIterator<>(g.iterator(), p);
       }
 
       @Override
@@ -105,7 +101,7 @@ public class GraphSlicer {
 
       @Override
       public Iterator<T> getPredNodes(T n) {
-        return Predicate.filter(g.getPredNodes(n), p).iterator();
+        return new FilterIterator<>(g.getPredNodes(n), p);
       }
 
       @Override
@@ -115,7 +111,7 @@ public class GraphSlicer {
 
       @Override
       public Iterator<T> getSuccNodes(T n) {
-        return Predicate.filter(g.getSuccNodes(n), p).iterator();
+        return new FilterIterator<>(g.getSuccNodes(n), p);
       }
 
       @Override
@@ -195,7 +191,7 @@ public class GraphSlicer {
 
       @Override
       public Iterator<E> iterator() {
-        return new FilterIterator<E>(G.iterator(), fmember);
+        return new FilterIterator<>(G.iterator(), fmember);
       }
 
       @Override
@@ -206,16 +202,16 @@ public class GraphSlicer {
 
     final EdgeManager<E> edgeManager = new EdgeManager<E>() {
 
-      private Map<E, Collection<E>> succs = new HashMap<E, Collection<E>>();
+      private Map<E, Collection<E>> succs = new HashMap<>();
 
-      private Map<E, Collection<E>> preds = new HashMap<E, Collection<E>>();
+      private Map<E, Collection<E>> preds = new HashMap<>();
 
       private Set<E> getConnected(E inst, Function<E, Iterator<? extends E>> fconnected) {
-        Set<E> result = new LinkedHashSet<E>();
-        Set<E> seenInsts = new HashSet<E>();
+        Set<E> result = new LinkedHashSet<>();
+        Set<E> seenInsts = new HashSet<>();
         Set<E> newInsts = Iterator2Collection.toSet(fconnected.apply(inst));
         while (!newInsts.isEmpty()) {
-          Set<E> nextInsts = new HashSet<E>();
+          Set<E> nextInsts = new HashSet<>();
           for (E s : newInsts) {
             if (!seenInsts.contains(s)) {
               seenInsts.add(s);

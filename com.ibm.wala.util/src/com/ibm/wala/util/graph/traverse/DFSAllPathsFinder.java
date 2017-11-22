@@ -12,8 +12,8 @@ package com.ibm.wala.util.graph.traverse;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.FilterIterator;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.graph.Graph;
@@ -28,6 +28,8 @@ import com.ibm.wala.util.graph.Graph;
  */
 public class DFSAllPathsFinder<T> extends DFSPathFinder<T> {
 
+  private static final long serialVersionUID = 5413569289853649240L;
+
   public DFSAllPathsFinder(Graph<T> G, Iterator<T> nodes, Predicate<T> f) {
     super(G, nodes, f);
   }
@@ -39,7 +41,7 @@ public class DFSAllPathsFinder<T> extends DFSPathFinder<T> {
   @Override
   protected Iterator<? extends T> getConnected(T n) {
     final List<T> cp = currentPath();
-    return new FilterIterator<T>(G.getSuccNodes(n), new Predicate<T>() {
+    return new FilterIterator<>(G.getSuccNodes(n), new Predicate<T>() {
       @Override public boolean test(T o) {
         return ! cp.contains(o);
       }

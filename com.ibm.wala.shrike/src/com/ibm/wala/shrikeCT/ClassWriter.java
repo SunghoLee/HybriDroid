@@ -26,17 +26,17 @@ public class ClassWriter implements ClassConstants {
 
   private ConstantPoolParser rawCP;
 
-  private HashMap<Object, Integer> cachedCPEntries = new HashMap<Object, Integer>(1);
+  private HashMap<Object, Integer> cachedCPEntries = new HashMap<>(1);
 
-  final private ArrayList<Object> newCPEntries = new ArrayList<Object>(1);
+  final private ArrayList<Object> newCPEntries = new ArrayList<>(1);
 
   private int nextCPIndex = 1;
 
-  final private ArrayList<Element> fields = new ArrayList<Element>(1);
+  final private ArrayList<Element> fields = new ArrayList<>(1);
 
-  final private ArrayList<Element> methods = new ArrayList<Element>(1);
+  final private ArrayList<Element> methods = new ArrayList<>(1);
 
-  final private ArrayList<Element> classAttributes = new ArrayList<Element>(1);
+  final private ArrayList<Element> classAttributes = new ArrayList<>(1);
 
   private int thisClass;
 
@@ -262,6 +262,8 @@ public class ClassWriter implements ClassConstants {
         case CONSTANT_Utf8:
           cachedCPEntries.put(cp.getCPUtf8(i), new Integer(i));
           break;
+        default:
+          throw new UnsupportedOperationException(String.format("unexpected constant-pool item type %s", t));
         }
       }
     }
@@ -763,8 +765,9 @@ public class ClassWriter implements ClassConstants {
         case CONSTANT_MethodHandle: {
           offset = reserveBuf(4);
           CWHandle handle = (CWHandle) item;
-          setUByte(buf, offset + 1, handle.getKind());
-          switch (handle.getKind()) {
+          final byte kind = handle.getKind();
+          setUByte(buf, offset + 1, kind);
+          switch (kind) {
           case REF_getStatic:
           case REF_getField:
           case REF_putField:
@@ -790,6 +793,8 @@ public class ClassWriter implements ClassConstants {
             setUShort(buf, offset + 2, x);
             break;
           }
+          default:
+            throw new UnsupportedOperationException(String.format("unexpected ref kind %s", kind));
           }
          break; 
         }
@@ -952,7 +957,7 @@ public class ClassWriter implements ClassConstants {
     try {
       buf[offset] = (byte) v;
     } catch (ArrayIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("invalid offset: " + offset);
+      throw new IllegalArgumentException("invalid offset: " + offset, e);
     }
   }
 
@@ -971,7 +976,7 @@ public class ClassWriter implements ClassConstants {
       buf[offset + 2] = (byte) (v >> 8);
       buf[offset + 3] = (byte) v;
     } catch (ArrayIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("illegal offset " + offset);
+      throw new IllegalArgumentException("illegal offset " + offset, e);
     }
   }
 
@@ -1013,7 +1018,7 @@ public class ClassWriter implements ClassConstants {
       buf[offset] = (byte) (v >> 8);
       buf[offset + 1] = (byte) v;
     } catch (ArrayIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("invalid offset: " + offset);
+      throw new IllegalArgumentException("invalid offset: " + offset, e);
     }
   }
 }

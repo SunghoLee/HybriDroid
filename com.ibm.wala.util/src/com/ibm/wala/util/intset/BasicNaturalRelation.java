@@ -26,6 +26,8 @@ import com.ibm.wala.util.debug.Assertions;
  */
 public final class BasicNaturalRelation implements IBinaryNaturalRelation, Serializable {
 
+  private static final long serialVersionUID = 4483720230344867621L;
+
   private final static boolean VERBOSE = false;
 
   private final static boolean DEBUG = false;
@@ -46,7 +48,7 @@ public final class BasicNaturalRelation implements IBinaryNaturalRelation, Seria
   /**
    * smallStore[i][x] holds
    * <ul>
-   * <li>if >=0, the ith integer associated with x
+   * <li>if &gt;=0, the ith integer associated with x
    * <li>if -2, then use the delegateStore instead of the small store
    * <li>if -1, then R(x) is empty
    * </ul>
@@ -96,10 +98,10 @@ public final class BasicNaturalRelation implements IBinaryNaturalRelation, Seria
     }
     switch (vectorImpl) {
     case SIMPLE:
-      delegateStore = new SimpleVector<IntSet>();
+      delegateStore = new SimpleVector<>();
       break;
     case TWO_LEVEL:
-      delegateStore = new TwoLevelVector<IntSet>();
+      delegateStore = new TwoLevelVector<>();
       break;
     default:
       throw new IllegalArgumentException("unsupported implementation " + vectorImpl);

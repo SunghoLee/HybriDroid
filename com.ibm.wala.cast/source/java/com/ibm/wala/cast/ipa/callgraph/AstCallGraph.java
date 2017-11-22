@@ -13,6 +13,7 @@ package com.ibm.wala.cast.ipa.callgraph;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.ibm.wala.cast.ir.cfg.AstInducedCFG;
 import com.ibm.wala.cast.ir.ssa.AstLexicalRead;
@@ -20,37 +21,34 @@ import com.ibm.wala.cfg.InducedCFG;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.AbstractRootMethod;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.impl.ExplicitCallGraph;
 import com.ibm.wala.ipa.callgraph.impl.FakeRootMethod;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.ssa.DefUse;
-import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashSetFactory;
-import com.ibm.wala.util.functions.Function;
 
 public class AstCallGraph extends ExplicitCallGraph {
-  public AstCallGraph(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+  public AstCallGraph(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache) {
     super(cha, options, cache);
   }
 
   public static class AstFakeRoot extends AbstractRootMethod {
 
-    public AstFakeRoot(MethodReference rootMethod, IClass declaringClass, IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+    public AstFakeRoot(MethodReference rootMethod, IClass declaringClass, IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache) {
       super(rootMethod, declaringClass, cha, options, cache);
     }
 
-    public AstFakeRoot(MethodReference rootMethod, IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+    public AstFakeRoot(MethodReference rootMethod, IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache) {
       super(rootMethod, cha, options, cache);
     }
 
@@ -68,11 +66,11 @@ public class AstCallGraph extends ExplicitCallGraph {
 
   public static abstract class ScriptFakeRoot extends AstFakeRoot {
 
-    public ScriptFakeRoot(MethodReference rootMethod, IClass declaringClass, IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+    public ScriptFakeRoot(MethodReference rootMethod, IClass declaringClass, IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache) {
       super(rootMethod, declaringClass, cha, options, cache);
     }
 
-    public ScriptFakeRoot(MethodReference rootMethod, IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+    public ScriptFakeRoot(MethodReference rootMethod, IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache) {
       super(rootMethod, cha, options, cache);
     }
 
@@ -83,10 +81,6 @@ public class AstCallGraph extends ExplicitCallGraph {
   public class AstCGNode extends ExplicitNode {
     private Set<Function<Object, Object>> callbacks;
 
-    private IR cachedIR;
-    
-    private DefUse cachedDU;
-    
     private AstCGNode(IMethod method, Context context) {
       super(method, context);
     }
@@ -124,7 +118,7 @@ public class AstCallGraph extends ExplicitCallGraph {
 
         callbacks.add(callback);
 
-        for (Iterator ps = getCallGraph().getPredNodes(this); ps.hasNext();) {
+        for (Iterator<CGNode> ps = getCallGraph().getPredNodes(this); ps.hasNext();) {
           ((AstCGNode) ps.next()).addCallback(callback);
         }
       }
@@ -138,7 +132,7 @@ public class AstCallGraph extends ExplicitCallGraph {
 
         callbacks.addAll(callback);
 
-        for (Iterator ps = getCallGraph().getPredNodes(this); ps.hasNext();) {
+        for (Iterator<CGNode> ps = getCallGraph().getPredNodes(this); ps.hasNext();) {
           ((AstCGNode) ps.next()).addAllCallbacks(callback);
         }
       }

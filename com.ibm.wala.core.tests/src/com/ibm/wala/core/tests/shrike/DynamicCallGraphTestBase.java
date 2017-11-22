@@ -16,12 +16,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.tools.ant.Project;
@@ -40,7 +40,6 @@ import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.io.TemporaryFile;
@@ -85,7 +84,7 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
         }
       }
       
-      List<String> args = new ArrayList<String>();
+      List<String> args = new ArrayList<>();
       args.addAll(Arrays.asList(testJarLocation, "-o", instrumentedJarLocation));
       if (rtJar != null) {
         args.addAll(Arrays.asList("--rt-jar", rtJar));
@@ -99,7 +98,7 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
     }
   }
   
-  protected void run(String mainClass, String exclusionsFile, String... args) throws IOException, ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, InterruptedException {
+  protected void run(String mainClass, String exclusionsFile, String... args) throws IOException, SecurityException, IllegalArgumentException, InterruptedException {
     Project p = new Project();
     p.setBaseDir(new File(System.getProperty("java.io.tmpdir")));
     p.init();
@@ -143,12 +142,12 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
     void edgesTest(CallGraph staticCG, CGNode caller, MethodReference callee);
   }
  
-  private MethodReference callee(String calleeClass, String calleeMethod) {
+  private static MethodReference callee(String calleeClass, String calleeMethod) {
       return MethodReference.findOrCreate(TypeReference.findOrCreate(ClassLoaderReference.Application, "L" + calleeClass), Selector.make(calleeMethod));
   }
 
   protected void checkEdges(CallGraph staticCG) throws IOException {
-    checkEdges(staticCG, Predicate.<MethodReference>truePred());
+    checkEdges(staticCG, (x) -> true );
   }
   
   protected void checkEdges(CallGraph staticCG, Predicate<MethodReference> filter) throws IOException {
@@ -171,7 +170,7 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
   }
  
   protected void checkNodes(CallGraph staticCG) throws IOException {
-    checkNodes(staticCG, Predicate.<MethodReference>truePred());
+    checkNodes(staticCG, (x) -> true);
   }
 
   protected void checkNodes(CallGraph staticCG, Predicate<MethodReference> filter) throws IOException {
@@ -192,42 +191,41 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
   }
  
   protected void check(CallGraph staticCG, EdgesTest test, Predicate<MethodReference> filter) throws IOException {
-    BufferedReader dynamicEdgesFile = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cgLocation))));
-    String line;
     int lines = 0;
-    loop: while ((line = dynamicEdgesFile.readLine()) != null) {
-      lines++;
-      StringTokenizer edge = new StringTokenizer(line, "\t");
-      
-      CGNode caller;
-      String callerClass = edge.nextToken();
-      if ("root".equals(callerClass)) {
-        caller = staticCG.getFakeRootNode();
-      } else if ("clinit".equals(callerClass)) {
-          caller = staticCG.getFakeWorldClinitNode();
-      } else if ("callbacks".equals(callerClass)) {
-          continue loop;
-      } else {
-        String callerMethod = edge.nextToken();
-        MethodReference callerRef = MethodReference.findOrCreate(TypeReference.findOrCreate(ClassLoaderReference.Application, "L" + callerClass), Selector.make(callerMethod));
-        Set<CGNode> nodes = staticCG.getNodes(callerRef);
-        if (! filter.test(callerRef)) {
+    try (final BufferedReader dynamicEdgesFile = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cgLocation))))) {
+      String line;
+      loop: while ((line = dynamicEdgesFile.readLine()) != null) {
+        lines++;
+        StringTokenizer edge = new StringTokenizer(line, "\t");
+        
+        CGNode caller;
+        String callerClass = edge.nextToken();
+        if ("root".equals(callerClass)) {
+          caller = staticCG.getFakeRootNode();
+        } else if ("clinit".equals(callerClass)) {
+            caller = staticCG.getFakeWorldClinitNode();
+        } else if ("callbacks".equals(callerClass)) {
+            continue loop;
+        } else {
+          String callerMethod = edge.nextToken();
+          MethodReference callerRef = MethodReference.findOrCreate(TypeReference.findOrCreate(ClassLoaderReference.Application, "L" + callerClass), Selector.make(callerMethod));
+          Set<CGNode> nodes = staticCG.getNodes(callerRef);
+          if (! filter.test(callerRef)) {
+            continue loop;
+          }
+          Assert.assertEquals(1, nodes.size());
+          caller = nodes.iterator().next();
+        }
+        
+        String calleeClass = edge.nextToken();
+        String calleeMethod = edge.nextToken();
+        MethodReference callee = callee(calleeClass, calleeMethod);
+        if (! filter.test(callee)) {
           continue loop;
         }
-        Assert.assertEquals(1, nodes.size());
-        caller = nodes.iterator().next();
+        test.edgesTest(staticCG, caller, callee);
       }
-      
-      String calleeClass = edge.nextToken();
-      String calleeMethod = edge.nextToken();
-      MethodReference callee = callee(calleeClass, calleeMethod);
-      if (! filter.test(callee)) {
-        continue loop;
-      }
-      test.edgesTest(staticCG, caller, callee);
     }
-    
-    dynamicEdgesFile.close();
     
     Assert.assertTrue("more than one edge", lines > 0);
   }

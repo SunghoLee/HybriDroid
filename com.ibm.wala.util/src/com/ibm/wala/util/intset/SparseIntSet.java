@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.ibm.wala.util.intset;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -22,7 +21,9 @@ import com.ibm.wala.util.debug.UnimplementedError;
 /**
  * A sparse ordered, duplicate-free, fully-encapsulated set of integers; not necessary mutable
  */
-public class SparseIntSet implements IntSet, Serializable {
+public class SparseIntSet implements IntSet {
+
+  private static final long serialVersionUID = 2394141733718319022L;
 
   private final static int SINGLETON_CACHE_SIZE = 5000;
 
@@ -302,7 +303,7 @@ public class SparseIntSet implements IntSet, Serializable {
   }
 
   /**
-   * Reverse of toString(): "{2,3}" -> [2,3]
+   * Reverse of toString(): "{2,3}" -&gt; [2,3]
    * @throws IllegalArgumentException if str is null
    */
   public static int[] parseIntArray(String str)  {
@@ -317,7 +318,7 @@ public class SparseIntSet implements IntSet, Serializable {
     StringTokenizer tok = new StringTokenizer(str, " ,");
 
     // XXX not very efficient:
-    TreeSet<Integer> set = new TreeSet<Integer>();
+    TreeSet<Integer> set = new TreeSet<>();
     while (tok.hasMoreTokens()) {
       set.add(Integer.decode(tok.nextToken()));
     }

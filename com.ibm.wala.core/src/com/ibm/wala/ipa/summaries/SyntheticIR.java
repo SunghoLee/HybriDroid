@@ -56,7 +56,7 @@ public class SyntheticIR extends IR {
   /**
    * throw an assertion if the instruction array contains a phi instruction
    */
-  private void repOK(SSAInstruction[] instructions) {
+  private static void repOK(SSAInstruction[] instructions) {
     for (SSAInstruction s : instructions) {
       if (s instanceof SSAPhiInstruction) {
         Assertions.UNREACHABLE();
@@ -70,7 +70,7 @@ public class SyntheticIR extends IR {
   /**
    * Set up the symbol table according to statements in the IR
    * 
-   * @param constants Map: value number (Integer) -> ConstantValue
+   * @param constants Map: value number (Integer) -&gt; ConstantValue
    */
   private static SymbolTable makeSymbolTable(IMethod method, SSAInstruction[] instructions, Map<Integer, ConstantValue> constants,
       AbstractCFG cfg) {

@@ -18,13 +18,10 @@ import com.ibm.wala.cast.js.callgraph.fieldbased.flowgraph.vertices.FuncVertex;
 import com.ibm.wala.cast.js.callgraph.fieldbased.flowgraph.vertices.VarVertex;
 import com.ibm.wala.cast.js.callgraph.fieldbased.flowgraph.vertices.VertexFactory;
 import com.ibm.wala.cast.js.ipa.callgraph.JSAnalysisOptions;
-import com.ibm.wala.cast.js.ipa.summaries.JavaScriptConstructorFunctions;
 import com.ibm.wala.cast.js.ssa.JavaScriptInvoke;
 import com.ibm.wala.cast.js.types.JavaScriptMethods;
-import com.ibm.wala.cast.types.AstMethodReference;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
-import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.MonitorUtil;
@@ -46,8 +43,8 @@ public class OptimisticCallgraphBuilder extends FieldBasedCallGraphBuilder {
 	
 	private final boolean handleCallApply;
 	
-	public OptimisticCallgraphBuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache, boolean supportFullPointerAnalysis) {
-		super(cha, options, cache, supportFullPointerAnalysis);
+	public OptimisticCallgraphBuilder(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView iAnalysisCacheView, boolean supportFullPointerAnalysis) {
+		super(cha, options, iAnalysisCacheView, supportFullPointerAnalysis);
 		handleCallApply = options instanceof JSAnalysisOptions && ((JSAnalysisOptions)options).handleCallApply();
 	}
 
@@ -78,7 +75,7 @@ public class OptimisticCallgraphBuilder extends FieldBasedCallGraphBuilder {
 				
 				if(newEdge) {
 					// handle it
-					addEdge(flowgraph, edge.fst, edge.snd, monitor);
+					addEdge(flowgraph, edge.fst, edge.snd);
 				
 					// special handling of invocations of Function.prototype.call
 					// TODO: since we've just added some edges to the flow graph, its transitive closure will be
@@ -96,7 +93,7 @@ public class OptimisticCallgraphBuilder extends FieldBasedCallGraphBuilder {
 	}
 
 	// add flow corresponding to a new call edge
-	private void addEdge(FlowGraph flowgraph, CallVertex c, FuncVertex callee, IProgressMonitor monitor) throws CancelException {
+	private static void addEdge(FlowGraph flowgraph, CallVertex c, FuncVertex callee) {
 	  VertexFactory factory = flowgraph.getVertexFactory();
 	  JavaScriptInvoke invk = c.getInstruction();
 	  FuncVertex caller = c.getCaller();
@@ -119,7 +116,7 @@ public class OptimisticCallgraphBuilder extends FieldBasedCallGraphBuilder {
 	
 	// add data flow corresponding to a reflective invocation via Function.prototype.call
 	// NB: for f.call(...), f will _not_ appear as a call target, but the appropriate argument and return data flow will be set up
-	private void addReflectiveCallEdge(FlowGraph flowgraph, CallVertex c, IProgressMonitor monitor) throws CancelException {
+	private static void addReflectiveCallEdge(FlowGraph flowgraph, CallVertex c, IProgressMonitor monitor) throws CancelException {
 	  VertexFactory factory = flowgraph.getVertexFactory();
 	  FuncVertex caller = c.getCaller();
 	  JavaScriptInvoke invk = c.getInstruction();

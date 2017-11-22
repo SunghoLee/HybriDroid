@@ -27,7 +27,6 @@ import com.ibm.wala.dataflow.IFDS.PathEdge;
 import com.ibm.wala.dataflow.IFDS.TabulationDomain;
 import com.ibm.wala.dataflow.IFDS.TabulationResult;
 import com.ibm.wala.dataflow.IFDS.TabulationSolver;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.cfg.BasicBlockInContext;
@@ -63,10 +62,10 @@ public class ContextSensitiveReachingDefs {
    */
   private final ReachingDefsDomain domain = new ReachingDefsDomain();
 
-  public ContextSensitiveReachingDefs(CallGraph cg, AnalysisCache cache) {
+  public ContextSensitiveReachingDefs(CallGraph cg) {
     this.cha = cg.getClassHierarchy();
     // we use an ICFGSupergraph, which basically adapts ExplodedInterproceduralCFG to the ISupergraph interface
-    this.supergraph = ICFGSupergraph.make(cg, cache);
+    this.supergraph = ICFGSupergraph.make(cg);
   }
 
   /**
@@ -74,6 +73,8 @@ public class ContextSensitiveReachingDefs {
    */
   private class ReachingDefsDomain extends MutableMapping<Pair<CGNode, Integer>> implements
       TabulationDomain<Pair<CGNode, Integer>, BasicBlockInContext<IExplodedBasicBlock>> {
+
+    private static final long serialVersionUID = 4014252274660361965L;
 
     @Override
     public boolean hasPriorityOver(PathEdge<BasicBlockInContext<IExplodedBasicBlock>> p1,

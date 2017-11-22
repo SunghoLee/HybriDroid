@@ -13,11 +13,12 @@ package com.ibm.wala.util.graph;
 import com.ibm.wala.util.intset.SimpleIntVector;
 
 /**
- * We represent a path in a numbered graph as a vector of integers <i_1, ...,
- * i_n> where node i_1 is the src and node i_n is the sink
+ * We represent a path in a numbered graph as a vector of integers &lt;i_1, ...,
+ * i_n&gt; where node i_1 is the src and node i_n is the sink
  */
 public class Path extends SimpleIntVector {
 
+  private static final long serialVersionUID = 5622964158500601280L;
   final int size;
 
   private Path(int defaultValue, int size) {

@@ -17,7 +17,7 @@ import com.ibm.wala.fixpoint.IVariable;
 /**
  * Default implementation of a fixed point solver.
  */
-public abstract class DefaultFixedPointSolver<T extends IVariable<?>> extends AbstractFixedPointSolver<T> {
+public abstract class DefaultFixedPointSolver<T extends IVariable<T>> extends AbstractFixedPointSolver<T> {
 
   private final DefaultFixedPointSystem<T> graph;
   
@@ -27,12 +27,12 @@ public abstract class DefaultFixedPointSolver<T extends IVariable<?>> extends Ab
    */
   public DefaultFixedPointSolver(int expectedOut) {
     super();
-    graph = new DefaultFixedPointSystem<T>(expectedOut);
+    graph = new DefaultFixedPointSystem<>(expectedOut);
   }
   
   public DefaultFixedPointSolver() {
     super();
-    graph = new DefaultFixedPointSystem<T>();
+    graph = new DefaultFixedPointSystem<>();
   }
   
   @Override

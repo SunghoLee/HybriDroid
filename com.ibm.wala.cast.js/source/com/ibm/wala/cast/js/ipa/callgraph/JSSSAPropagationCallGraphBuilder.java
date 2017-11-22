@@ -20,6 +20,7 @@ import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
 import com.ibm.wala.cast.ir.ssa.AstGlobalRead;
 import com.ibm.wala.cast.ir.ssa.AstGlobalWrite;
 import com.ibm.wala.cast.ir.ssa.AstIsDefinedInstruction;
+import com.ibm.wala.cast.ir.ssa.CAstUnaryOp;
 import com.ibm.wala.cast.ir.ssa.EachElementHasNextInstruction;
 import com.ibm.wala.cast.js.analysis.typeInference.JSTypeInference;
 import com.ibm.wala.cast.js.ipa.callgraph.JSSSAPropagationCallGraphBuilder.JSPointerAnalysisImpl.JSImplicitPointsToSetVisitor;
@@ -43,10 +44,10 @@ import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.fixpoint.AbstractOperator;
 import com.ibm.wala.fixpoint.UnaryOperator;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.ExplicitCallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
@@ -67,6 +68,7 @@ import com.ibm.wala.shrikeBT.BinaryOpInstruction;
 import com.ibm.wala.shrikeBT.IUnaryOpInstruction;
 import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.IRView;
 import com.ibm.wala.ssa.SSAAbstractBinaryInstruction;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSABinaryOpInstruction;
@@ -81,6 +83,8 @@ import com.ibm.wala.util.MonitorUtil;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.IntSetAction;
+import com.ibm.wala.util.intset.IntSetUtil;
+import com.ibm.wala.util.intset.MutableIntSet;
 import com.ibm.wala.util.intset.MutableMapping;
 import com.ibm.wala.util.intset.MutableSparseIntSet;
 import com.ibm.wala.util.intset.OrdinalSet;
@@ -103,6 +107,7 @@ import com.ibm.wala.util.strings.Atom;
  * reference to a global named {@link #GLOBAL_OBJ_VAR_NAME}, which is handled
  * specially in {@link JSConstraintVisitor#visitAstGlobalRead(AstGlobalRead)}.
  */
+@SuppressWarnings("javadoc")
 public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraphBuilder {
 
   public static final boolean DEBUG_LEXICAL = false;
@@ -146,7 +151,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
     this.scriptBaseURL = url;
   }
 
-  protected JSSSAPropagationCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache,
+  protected JSSSAPropagationCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache,
       PointerKeyFactory pointerKeyFactory) {
     super(cha, options, cache, pointerKeyFactory);
     globalObject = new GlobalObjectKey(cha.lookupClass(JavaScriptTypes.Root));
@@ -237,7 +242,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
   }
 
   @Override
-  protected void addAssignmentsForCatchPointerKey(PointerKey exceptionVar, Set catchClasses, PointerKey e) {
+  protected void addAssignmentsForCatchPointerKey(PointerKey exceptionVar, Set<IClass> catchClasses, PointerKey e) {
     system.newConstraint(exceptionVar, assignOperator, e);
   }
 
@@ -301,7 +306,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
   protected InterestingVisitor makeInterestingVisitor(CGNode node, int vn) {
     return new JSInterestingVisitor(vn);
   }
-
+  
   // ///////////////////////////////////////////////////////////////////////////
   //
   // specialized pointer analysis
@@ -368,13 +373,13 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
         InstanceKey globalObj = ((AstSSAPropagationCallGraphBuilder) jsAnalysis.builder).getGlobalObject(JavaScriptTypes.jsName);
         PointerKey fkey = analysis.getHeapModel().getPointerKeyForInstanceField(globalObj, f);
         if (fkey != null) {
-          OrdinalSet pointees = analysis.getPointsToSet(fkey);
+          OrdinalSet<InstanceKey> pointees = analysis.getPointsToSet(fkey);
           IntSet set = pointees.getBackingSet();
           if (set != null) {
             S.addAll(set);
           }
         }
-        pointsToSet = new OrdinalSet<InstanceKey>(S, analysis.getInstanceKeyMapping());
+        pointsToSet = new OrdinalSet<>(S, analysis.getInstanceKeyMapping());
       }
 
       @Override
@@ -385,13 +390,13 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
       public void visitPrototypeLookup(PrototypeLookup instruction) {
       }
 
-    };
+    }
 
     @Override
     protected ImplicitPointsToSetVisitor makeImplicitPointsToVisitor(LocalPointerKey lpk) {
       return new JSImplicitPointsToSetVisitor(this, lpk);
     }
-  };
+  }
 
   @Override
   protected PropagationSystem makeSystem(AnalysisOptions options) {
@@ -444,6 +449,8 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
     public void visitUnaryOp(SSAUnaryOpInstruction inst) {
       if (inst.getOpcode() == IUnaryOpInstruction.Operator.NEG) {
         addLvalTypeKeyConstraint(inst, JavaScriptTypes.Boolean);
+      } else if (inst.getOpcode() == CAstUnaryOp.MINUS) {
+        addLvalTypeKeyConstraint(inst, JavaScriptTypes.Number);        
       }
     }
 
@@ -549,12 +556,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
     private Position getInstructionPosition(SSAInstruction instruction) {
       IMethod method = node.getMethod();
       if (method instanceof AstMethod) {
-        SSAInstruction[] instructions = ir.getInstructions();
-        for (int ind = basicBlock.getFirstInstructionIndex(); ind <= basicBlock.getLastInstructionIndex(); ind++) {
-          if (instruction.equals(instructions[ind])) {
-            return ((AstMethod) method).getSourcePosition(ind);
-          }
-        }
+        return ((AstMethod) method).getSourcePosition(instruction.iindex);
       }
       return null;
     }
@@ -594,10 +596,12 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
               private AbstractFieldPointerKey getProperty() { return fieldKey; }
               private CGNode getNode() { return node; }
               
+              private MutableIntSet previous = IntSetUtil.make();
+              
               @Override
               public byte evaluate(PointsToSetVariable lhs, PointsToSetVariable ptrs) {
                 if (ptrs.getValue() != null) {
-                  ptrs.getValue().foreach(new IntSetAction() {
+                  ptrs.getValue().foreachExcluding(previous, new IntSetAction() {
                     @Override
                     public void act(int x) {
                       final InstanceKey functionObj = system.getInstanceKey(x);
@@ -615,6 +619,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
                       });
                     } 
                   });
+                  previous.addAll(ptrs.getValue());
                 }
                 return NOT_CHANGED;
               }
@@ -634,7 +639,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
               public String toString() {
                 return "sub-dispatch for " + instruction + ": " + receiverType + ", " + fieldKey;
               } 
-            };
+            }
           
             system.newSideEffect(new FieldValueDispatch(), fieldKey);
         }
@@ -668,6 +673,8 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
           }
       } else {
         class ReceiverForDispatchOp extends UnaryOperator<PointsToSetVariable> {
+          MutableIntSet previous = IntSetUtil.make();
+          
           private JavaScriptInvoke getInstruction() {
             return instruction;
           }
@@ -675,7 +682,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
           @Override
           public byte evaluate(PointsToSetVariable lhs, PointsToSetVariable rhs) {
             if (rhs.getValue() != null) {
-              rhs.getValue().foreach(new IntSetAction() {
+              rhs.getValue().foreachExcluding(previous, new IntSetAction() {
                 @Override
                 public void act(int x) {
                   try {
@@ -687,6 +694,7 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
                   handleJavascriptDispatch(instruction, ik);
                 }
               });
+              previous.addAll(rhs.getValue());
             }
             return NOT_CHANGED;
           }
@@ -811,8 +819,8 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
                     } catch (CancelException e) {
                       throw new CancelRuntimeException(e);
                     }
-                    String v1 = (String) ((ConstantKey) iks1[i]).getValue();
-                    String v2 = (String) ((ConstantKey) iks2[j]).getValue();
+                    String v1 = (String) ((ConstantKey<?>) iks1[i]).getValue();
+                    String v2 = (String) ((ConstantKey<?>) iks2[j]).getValue();
                     if (v1.indexOf(v2) == -1 && v2.indexOf(v1) == -1) {
                       InstanceKey lvalKey = getInstanceKeyForConstant(v1 + v2);
                       if (addKey(lvalKey)) {
@@ -846,6 +854,25 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
                   }
                 }
               }
+          }
+          
+          if (iks1 == null || iks1.length == 0 || iks2 == null || iks2.length == 0) {
+            if (iks1 != null) {
+              for(InstanceKey ik : iks1) {
+                if (addKey(ik)) {
+                  changed = CHANGED;
+                }
+              }
+            }
+            if (iks2 != null) {
+              for(InstanceKey ik : iks2) {
+                if (addKey(ik)) {
+                  changed = CHANGED;
+                }
+              }
+            }
+            
+            System.err.println(instruction);
           }
           
           return changed;
@@ -994,12 +1021,14 @@ public class JSSSAPropagationCallGraphBuilder extends AstSSAPropagationCallGraph
     processCallingConstraintsInternal(this, caller, instruction, target, constParams, uniqueCatchKey);
   }
 
+  @SuppressWarnings("unused")
   public static void processCallingConstraintsInternal(AstSSAPropagationCallGraphBuilder builder, CGNode caller, SSAAbstractInvokeInstruction instruction, CGNode target,
       InstanceKey[][] constParams, PointerKey uniqueCatchKey) {
-    IR sourceIR = builder.getCFAContextInterpreter().getIR(caller);
+        
+    IRView sourceIR = builder.getCFAContextInterpreter().getIRView(caller);
     SymbolTable sourceST = sourceIR.getSymbolTable();
 
-    IR targetIR = builder.getCFAContextInterpreter().getIR(target);
+    IRView targetIR = builder.getCFAContextInterpreter().getIRView(target);
     SymbolTable targetST = targetIR.getSymbolTable();
 
     JSConstraintVisitor targetVisitor = null;

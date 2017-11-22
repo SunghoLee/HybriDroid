@@ -23,9 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import nu.validator.htmlparser.common.XmlViolationPolicy;
-import nu.validator.htmlparser.sax.HtmlParser;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -38,6 +35,9 @@ import com.ibm.wala.cast.js.html.ITag;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
 import com.ibm.wala.cast.tree.impl.LineNumberPosition;
 import com.ibm.wala.util.collections.Pair;
+
+import nu.validator.htmlparser.common.XmlViolationPolicy;
+import nu.validator.htmlparser.sax.HtmlParser;
 
 public class NuValidatorHtmlParser implements IHtmlParser {
 
@@ -55,7 +55,7 @@ public class NuValidatorHtmlParser implements IHtmlParser {
     parser.setXmlPolicy(XmlViolationPolicy.ALLOW);
     parser.setContentHandler(new ContentHandler() {
       private Locator locator;
-      private Stack<ITag> tags = new Stack<ITag>();;
+      private Stack<ITag> tags = new Stack<>();
       
       private int countLines(char[] ch, int start, int length) {
         LineNumberReader r = new LineNumberReader(new StringReader (new String(ch, start, length)));  
@@ -99,7 +99,7 @@ public class NuValidatorHtmlParser implements IHtmlParser {
               @Override
               public Set<java.util.Map.Entry<String, Pair<String,Position>>> entrySet() {
                 if (es == null) {
-                  es = new HashSet<Map.Entry<String,Pair<String,Position>>>();
+                  es = new HashSet<>();
                   for(int i = 0; i < atts.getLength(); i++) {
                     final int index = i;
                     es.add(new Map.Entry<String,Pair<String,Position>>() {

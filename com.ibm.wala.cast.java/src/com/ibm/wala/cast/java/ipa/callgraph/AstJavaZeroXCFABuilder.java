@@ -10,10 +10,10 @@
  *****************************************************************************/
 package com.ibm.wala.cast.java.ipa.callgraph;
 
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
+import com.ibm.wala.ipa.callgraph.IAnalysisCacheView;
 import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DelegatingContextSelector;
 import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
@@ -25,7 +25,7 @@ import com.ibm.wala.ipa.cha.IClassHierarchy;
  */
 public class AstJavaZeroXCFABuilder extends AstJavaCFABuilder {
 
-  public AstJavaZeroXCFABuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache,
+  public AstJavaZeroXCFABuilder(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache,
       ContextSelector appContextSelector, SSAContextInterpreter appContextInterpreter, int instancePolicy) {
     super(cha, options, cache);
 
@@ -37,7 +37,7 @@ public class AstJavaZeroXCFABuilder extends AstJavaCFABuilder {
 
     setContextSelector(contextSelector);
 
-    setInstanceKeys(new JavaScopeMappingInstanceKeys(cha, this, new ZeroXInstanceKeys(options, cha, contextInterpreter,
+    setInstanceKeys(new JavaScopeMappingInstanceKeys(this, new ZeroXInstanceKeys(options, cha, contextInterpreter,
         instancePolicy)));
   }
 
@@ -49,7 +49,7 @@ public class AstJavaZeroXCFABuilder extends AstJavaCFABuilder {
    * @param xmlFiles set of Strings that are names of XML files holding bypass logic specifications.
    * @return a 0-1-Opt-CFA Call Graph Builder.
    */
-  public static AstJavaCFABuilder make(AnalysisOptions options, AnalysisCache cache, IClassHierarchy cha, ClassLoader cl,
+  public static AstJavaCFABuilder make(AnalysisOptions options, IAnalysisCacheView cache, IClassHierarchy cha, ClassLoader cl,
       AnalysisScope scope, String[] xmlFiles, byte instancePolicy) {
 
     com.ibm.wala.ipa.callgraph.impl.Util.addDefaultSelectors(options, cha);

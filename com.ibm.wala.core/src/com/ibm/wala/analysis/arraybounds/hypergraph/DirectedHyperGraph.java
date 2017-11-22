@@ -5,15 +5,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ibm.wala.analysis.arraybounds.hypergraph.DirectedHyperEdge;
-import com.ibm.wala.analysis.arraybounds.hypergraph.HyperNode;
 import com.ibm.wala.analysis.arraybounds.hypergraph.weight.Weight;
 
 /**
  * Implementation of a directed hyper graph. In a hyper graph an edge can have
  * more than one head and more than one tail.
  *
- * @author Stephan Gocht <stephan@gobro.de>
+ * @author Stephan Gocht {@code <stephan@gobro.de>}
  *
  * @param <T>
  */
