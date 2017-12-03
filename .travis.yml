@@ -1,12 +1,14 @@
 language: java
-os: osx
-
+jdk: oraclejdk8
+before_install:
+ - git clone --depth=50 https://github.com/wala/WALA /tmp/WALA
 install:
-- wget https://services.gradle.org/distributions/gradle-3.4.1-bin.zip
-- sudo mkdir /opt/gradle
-- sudo unzip -d /opt/gradle gradle-3.4.1-bin.zip
-- export PATH=$PATH:/opt/gradle/gradle-3.4.1/bin
-
+ - pushd /tmp/WALA
+ - mvn clean install -DskipTests -B -q
+ - popd
 script:
-- bash ./build.sh
-- java -jar kr.ac.kaist.wala.hybridroid.test/build/libs/kr.ac.kaist.wala.hybridroid.test.jar
+ - mvn clean install -B
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2

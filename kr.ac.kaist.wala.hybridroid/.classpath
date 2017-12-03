@@ -2,6 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/kr.ac.kaist.wala.hybridroid.util"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.7.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java"/>
@@ -18,6 +20,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="libs/apktool_2.2.4.jar"/>
+	<classpathentry kind="lib" path="libs/apktool_2.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

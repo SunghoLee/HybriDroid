@@ -16,9 +16,10 @@
   </properties>
   
   <modules>
-    <module>kr.ac.kait.wala.hybridroid</module>
-    <module>kr.ac.kait.wala.hybridroid.util</module>
-    <module>kr.ac.kait.wala.hybridroid.test</module>
+    <module>targets</module>
+    <module>kr.ac.kaist.wala.hybridroid.util</module>
+    <module>kr.ac.kaist.wala.hybridroid</module>
+    <module>kr.ac.kaist.wala.hybridroid.test</module>
   </modules>
 
   <profiles>
@@ -62,8 +63,8 @@
 	<configuration>
 	  <target>
 	    <artifact>
-	      <groupId>com.ibm.wala.target</groupId>
-	      <artifactId>e44</artifactId>
+	      <groupId>kr.ac.kaist.wala.hybridroid.target</groupId>
+	      <artifactId>e47</artifactId>
 	      <version>${project-version}</version>
 	    </artifact>
 	  </target>

@@ -1,6 +1,7 @@
 apply plugin: 'java'
     
 repositories {
+    mavenLocal()
     mavenCentral()
             maven {
     	    url "https://repo.eclipse.org/content/groups/releases/"
@@ -24,7 +25,7 @@ sourceSets {
 
 
 dependencies {
-	compile project(':com.ibm.wala.util')
-	compile project(':com.ibm.wala.dalvik')
-	compile project(':com.ibm.wala.core')
+	implementation 'com.ibm.wala:com.ibm.wala.util:1.4.4-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.dalvik:1.4.4-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.core:1.4.4-SNAPSHOT'
 }

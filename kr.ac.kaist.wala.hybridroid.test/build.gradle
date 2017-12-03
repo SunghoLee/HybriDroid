@@ -4,6 +4,7 @@ apply plugin: 'application'
 mainClassName = 'kr/ac/kaist/wala/hybridroid/test/HybriDroidTestRunner'
 
 repositories {
+    mavenLocal();
     mavenCentral()
             maven {
     	    url "https://repo.eclipse.org/content/groups/releases/"
