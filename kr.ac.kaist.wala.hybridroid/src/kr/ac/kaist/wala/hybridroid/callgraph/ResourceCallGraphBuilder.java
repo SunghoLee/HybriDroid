@@ -12,6 +12,7 @@ package kr.ac.kaist.wala.hybridroid.callgraph;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -51,7 +52,7 @@ public class ResourceCallGraphBuilder extends ZeroXCFABuilder {
 	
 	private ResourceCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache,
 			ContextSelector appContextSelector, SSAContextInterpreter appContextInterpreter, int instancePolicy, AndroidResourceAnalysis ara) {
-		super(cha, options, cache, appContextSelector, appContextInterpreter, instancePolicy);
+		super(Language.JAVA, cha, options, cache, appContextSelector, appContextInterpreter, instancePolicy);
 		this.ara = ara;
 		// TODO Auto-generated constructor stub
 	}

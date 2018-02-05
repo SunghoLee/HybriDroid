@@ -10,6 +10,13 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.callgraph;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder.AstPointerAnalysisImpl.AstImplicitPointsToSetVisitor;
 import com.ibm.wala.cast.ipa.callgraph.CrossLanguageSSAPropagationCallGraphBuilder;
@@ -27,12 +34,41 @@ import com.ibm.wala.cast.js.types.JavaScriptMethods;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.util.TargetLanguageSelector;
-import com.ibm.wala.classLoader.*;
+import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IField;
+import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.fixpoint.UnaryOperator;
-import com.ibm.wala.ipa.callgraph.*;
-import com.ibm.wala.ipa.callgraph.propagation.*;
-import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.ssa.*;
+import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisOptions;
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.ContextKey;
+import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
+import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKeyFactory;
+import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory;
+import com.ibm.wala.ipa.callgraph.propagation.PointsToMap;
+import com.ibm.wala.ipa.callgraph.propagation.PointsToSetVariable;
+import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
+import com.ibm.wala.ipa.callgraph.propagation.PropagationSystem;
+import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
+import com.ibm.wala.ssa.DefUse;
+import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAGetInstruction;
+import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSAInvokeInstruction;
+import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSAPutInstruction;
+import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.Selector;
@@ -43,8 +79,13 @@ import com.ibm.wala.util.CancelRuntimeException;
 import com.ibm.wala.util.MonitorUtil;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
-import com.ibm.wala.util.intset.*;
+import com.ibm.wala.util.intset.IntSet;
+import com.ibm.wala.util.intset.IntSetAction;
+import com.ibm.wala.util.intset.MutableMapping;
+import com.ibm.wala.util.intset.MutableSparseIntSet;
+import com.ibm.wala.util.intset.OrdinalSet;
 import com.ibm.wala.util.strings.Atom;
+
 import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo;
@@ -54,15 +95,12 @@ import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.Pointin
 import kr.ac.kaist.wala.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker.Warning;
-import kr.ac.kaist.wala.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.pointer.InterfaceClass;
 import kr.ac.kaist.wala.hybridroid.pointer.JSCompatibleClassFilter;
 import kr.ac.kaist.wala.hybridroid.pointer.JavaCompatibleClassFilter;
 import kr.ac.kaist.wala.hybridroid.pointer.MockupInstanceKey;
-
-import java.io.UnsupportedEncodingException;
-import java.util.*;
+import kr.ac.kaist.wala.hybridroid.types.AndroidJavaJavaScriptTypeMap;
 
 /**
  * Specialized pointer analysis constraint generation for Hybrid Android
@@ -89,9 +127,9 @@ public class AndroidHybridCallGraphBuilder extends
 	private final Set<String> mismatchW;
 	private final boolean annVersion;
 	
-	public AndroidHybridCallGraphBuilder(IClassHierarchy cha,
+	public AndroidHybridCallGraphBuilder(IMethod fakeRootClass,
 			AnalysisOptions options, AnalysisCache cache, HybridAPIMisusesChecker typeChecker, AndroidStringAnalysis asa, AndroidResourceAnalysis ara, boolean annVersion) {
-		super(cha, options, cache);
+		super(fakeRootClass, options, cache);
 		
 		if((options.getAnalysisScope() instanceof AndroidHybridAnalysisScope) == false)
 			Assertions.UNREACHABLE("AndroidHybridCallGraphBuilder must receive AndroidHybridAnalysisScope as a scope. current: " + options.getAnalysisScope().getClass().getName());

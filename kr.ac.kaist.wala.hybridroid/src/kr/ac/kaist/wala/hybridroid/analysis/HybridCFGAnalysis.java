@@ -10,6 +10,16 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.analysis;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.ibm.wala.cast.ipa.callgraph.GlobalObjectKey;
 import com.ibm.wala.cast.ipa.callgraph.StandardFunctionTargetSelector;
 import com.ibm.wala.cast.ipa.cha.CrossLanguageClassHierarchy;
@@ -23,8 +33,15 @@ import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
-import com.ibm.wala.ipa.callgraph.*;
+import com.ibm.wala.ipa.callgraph.AnalysisCache;
+import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl;
+import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions.ReflectionOptions;
+import com.ibm.wala.ipa.callgraph.AnalysisScope;
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
+import com.ibm.wala.ipa.callgraph.MethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ComposedEntrypoints;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -40,13 +57,18 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.strings.Atom;
+
 import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.wala.hybridroid.analysis.string.ArgumentHotspot;
 import kr.ac.kaist.wala.hybridroid.analysis.string.Hotspot;
 import kr.ac.kaist.wala.hybridroid.appinfo.XMLManifestReader;
-import kr.ac.kaist.wala.hybridroid.callgraph.*;
+import kr.ac.kaist.wala.hybridroid.callgraph.AndroidHybridAnalysisScope;
+import kr.ac.kaist.wala.hybridroid.callgraph.AndroidHybridCallGraphBuilder;
+import kr.ac.kaist.wala.hybridroid.callgraph.AndroidHybridMethodTargetSelector;
+import kr.ac.kaist.wala.hybridroid.callgraph.HybridClassLoaderFactory;
+import kr.ac.kaist.wala.hybridroid.callgraph.HybridIRFactory;
 import kr.ac.kaist.wala.hybridroid.checker.HybridAPIMisusesChecker;
 import kr.ac.kaist.wala.hybridroid.models.AndroidHybridAppModel;
 import kr.ac.kaist.wala.hybridroid.shell.Shell;
@@ -55,13 +77,6 @@ import kr.ac.kaist.wala.hybridroid.util.file.FileWriter;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser;
 import kr.ac.kaist.wala.hybridroid.util.file.YMLParser.YMLData;
 import kr.ac.kaist.wala.hybridroid.util.print.IRPrinter;
-import com.ibm.wala.ssa.SSACache;
-import com.ibm.wala.ssa.AuxiliaryCache;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
 
 /**
  * Build Control-flow graph for the target Android hybrid application. Now, it
@@ -261,7 +276,7 @@ public class HybridCFGAnalysis {
 		addHybridDispatchLogic(options, scope, cha);
 
 		AndroidHybridCallGraphBuilder b = new AndroidHybridCallGraphBuilder(
-				cha, options, cache, HybridAPIMisusesChecker.getInstance(), asa, ara, annVersion);
+				Language.JAVA.getFakeRootMethod(cha, options, cache), options, cache, HybridAPIMisusesChecker.getInstance(), asa, ara, annVersion);
 
 		CallGraph cg = b.makeCallGraph(options);
 		PointerAnalysis<InstanceKey> pa = b.getPointerAnalysis();
