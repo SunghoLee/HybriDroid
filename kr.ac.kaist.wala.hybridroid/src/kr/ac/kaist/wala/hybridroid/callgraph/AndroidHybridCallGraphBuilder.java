@@ -407,7 +407,7 @@ public class AndroidHybridCallGraphBuilder extends
 								
 								InterfaceClass wClass = (InterfaceClass)objKeys[i].getConcreteType();
 										
-								Collection<IMethod> methods = wClass.getAllMethods();
+								Collection<? extends IMethod> methods = wClass.getAllMethods();
 								
 								Set<Pair<String, Integer>> overloadChecker = new HashSet<Pair<String, Integer>>();
 

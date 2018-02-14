@@ -263,7 +263,7 @@ public class InterfaceClass extends AstClass implements IClass {
 	}
 
 	@Override
-	public Collection<IMethod> getDeclaredMethods() {
+	public Collection<? extends IMethod> getDeclaredMethods() {
 		// TODO Auto-generated method stub
 		return javaClass.getDeclaredMethods();
 	}
@@ -290,7 +290,7 @@ public class InterfaceClass extends AstClass implements IClass {
 	}
 
 	@Override
-	public Collection<IMethod> getAllMethods() {
+	public Collection<? extends IMethod> getAllMethods() {
 		// TODO Auto-generated method stub
 		return javaClass.getAllMethods();
 	}
