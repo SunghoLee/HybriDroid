@@ -217,7 +217,7 @@ public class AndroidHybridCallGraphBuilder extends
 	private void processHybridCallingConstraints(CGNode caller, SSAAbstractInvokeInstruction instruction, CGNode target, InstanceKey[][] constParams, PointerKey uniqueCatchKey){
 
 	    int paramCount = target.getMethod().getNumberOfParameters();
-	    int argCount = instruction.getNumberOfParameters() - 1;
+	    int argCount = instruction.getNumberOfPositionalParameters() - 1;
 	    
 	    // pass actual arguments to formals in the normal way
 	    for (int i = 0; i < Math.min(paramCount, argCount); i++) {
