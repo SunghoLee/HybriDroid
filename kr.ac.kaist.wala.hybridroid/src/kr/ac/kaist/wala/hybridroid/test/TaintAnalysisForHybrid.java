@@ -27,6 +27,8 @@ import com.ibm.wala.cast.ir.ssa.AstGlobalWrite;
 import com.ibm.wala.cast.ir.ssa.AstIsDefinedInstruction;
 import com.ibm.wala.cast.ir.ssa.AstLexicalRead;
 import com.ibm.wala.cast.ir.ssa.AstLexicalWrite;
+import com.ibm.wala.cast.ir.ssa.AstPropertyRead;
+import com.ibm.wala.cast.ir.ssa.AstPropertyWrite;
 import com.ibm.wala.cast.ir.ssa.EachElementGetInstruction;
 import com.ibm.wala.cast.js.loader.JavaScriptLoader;
 import com.ibm.wala.cast.js.ssa.JavaScriptCheckReference;
@@ -219,12 +221,12 @@ public class TaintAnalysisForHybrid {
 	        	
 	        }
 	        else if(inst instanceof JavaScriptPropertyRead){
-	        	JavaScriptPropertyRead propertyReadInst = (JavaScriptPropertyRead)inst;
+	        	AstPropertyRead propertyReadInst = (AstPropertyRead)inst;
 	        	if(propertyReadInst.getUse(0) == var)
 	        		return propertyReadInst.getDef();
 	        }
 	        else if(inst instanceof JavaScriptPropertyWrite){
-	        	JavaScriptPropertyWrite propertyWriteInst = (JavaScriptPropertyWrite)inst;
+	        	AstPropertyWrite propertyWriteInst = (AstPropertyWrite)inst;
 	        	if(propertyWriteInst.getUse(2) == var)
 	        		return propertyWriteInst.getUse(0);
 	        }

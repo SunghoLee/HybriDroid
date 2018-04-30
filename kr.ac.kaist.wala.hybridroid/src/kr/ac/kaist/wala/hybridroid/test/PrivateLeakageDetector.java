@@ -909,13 +909,13 @@ public class PrivateLeakageDetector {
 									}
 
 									@Override
-									public void visitJavaScriptPropertyRead(JavaScriptPropertyRead instruction) {
+									public void visitPropertyRead(AstPropertyRead instruction) {
 										// TODO Auto-generated method stub
 										
 									}
 
 									@Override
-									public void visitJavaScriptPropertyWrite(JavaScriptPropertyWrite instruction) {
+									public void visitPropertyWrite(AstPropertyWrite instruction) {
 										// TODO Auto-generated method stub
 										
 									}
