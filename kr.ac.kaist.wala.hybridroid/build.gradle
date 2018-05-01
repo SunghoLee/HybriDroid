@@ -46,18 +46,18 @@ jar {
 
 dependencies {
     compile project(':kr.ac.kaist.wala.hybridroid.util')
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.rhino:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.util:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.html.nu_validator:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.dalvik:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.rhino.test:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.shrike:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.test:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.java:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.core:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.core.tests:1.4.4-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.cast.js.rhino:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.util:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.cast.js.html.nu_validator:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.cast:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.dalvik:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.cast.js.rhino.test:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.shrike:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.cast.js:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.cast.js.test:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.cast.java:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.core:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.core.tests:1.5.0-SNAPSHOT'
 	compile files('libs/apktool_2.3.0.jar')
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'

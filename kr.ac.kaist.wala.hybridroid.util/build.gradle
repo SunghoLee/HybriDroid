@@ -25,7 +25,7 @@ sourceSets {
 
 
 dependencies {
-	implementation 'com.ibm.wala:com.ibm.wala.util:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.dalvik:1.4.4-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.core:1.4.4-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.util:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.dalvik:1.5.0-SNAPSHOT'
+	implementation 'com.ibm.wala:com.ibm.wala.core:1.5.0-SNAPSHOT'
 }

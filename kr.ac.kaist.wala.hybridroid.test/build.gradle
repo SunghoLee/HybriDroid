@@ -40,5 +40,6 @@ jar {
 }
 
 dependencies {
+	testCompile ('junit:junit:3.8.1' )
 	compile project(':kr.ac.kaist.wala.hybridroid')
 }
