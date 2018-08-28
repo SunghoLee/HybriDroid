@@ -22,7 +22,6 @@ import kr.ac.kaist.wala.hybridroid.command.CommandArguments;
 import kr.ac.kaist.wala.hybridroid.test.PrivateLeakageDetector;
 import kr.ac.kaist.wala.hybridroid.utils.LocalFileReader;
 import org.apache.commons.cli.ParseException;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,12 +53,11 @@ public class Shell {
 	 * @throws IllegalArgumentException
 	 * @throws CancelException
 	 * @throws ParseException
-	 * @throws Invalid
 	 * @throws WalaException 
 	 */
 	public static void main(String[] args) throws IOException,
 			IllegalArgumentException, CancelException,
-			ParseException, Invalid, WalaException {
+			ParseException, WalaException {
 			Shell.args = new CommandArguments(args);
 		// Load wala property. Now, 'PROP_ARG' is essential option, so else
 		// branch cannot be reached.
@@ -139,12 +137,10 @@ public class Shell {
 	 * @param target
 	 *            the path that indicates the target file.
 	 * @return target file for analysis.
-	 * @throws Invalid
-	 *             the file is not apk file.
 	 */
-	private static File getTargetFile(String target) throws Invalid {
+	private static File getTargetFile(String target) throws WalaException{
 		if (!target.endsWith(".apk"))
-			throw new Invalid("target file must be 'apk' file. TARGET: "
+			throw new WalaException("target file must be 'apk' file. TARGET: "
 					+ target);
 
 		return new File(target);
