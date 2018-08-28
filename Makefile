@@ -27,7 +27,7 @@ $(HYBRIDROID_TARGET): $(HYBRIDROID)
 	cp $(HYBRIDROID) $(HYBRIDROID_TARGET) 
 
 $(HYBRIDROID): $(WALA_TARGETS)
-	sudo $(GRD) build -PwalaDir=$(WALA_DIR)
+	$(GRD) build -PwalaDir=$(WALA_DIR)
 
 $(WALA_TARGETS): $(WALA_DIR)
 	$(MVN) clean install -DskipTests -B -q -f $(WALA_DIR)/pom.xml
