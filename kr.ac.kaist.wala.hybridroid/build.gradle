@@ -32,7 +32,7 @@ jar {
     )
   }
 
-  from({ (configurations.runtime).collect { it.isDirectory() ? it : zipTree(it) } }){
+  from({ (configurations.compileClasspath).collect { it.isDirectory() ? it : zipTree(it) } }){
   	exclude "META-INF/*.SF"
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
@@ -45,22 +45,28 @@ jar {
 }
 
 dependencies {
-    compile project(':kr.ac.kaist.wala.hybridroid.util')
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.rhino:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.util:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.html.nu_validator:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.dalvik:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.rhino.test:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.shrike:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.js.test:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.cast.java:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.core:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.core.tests:1.5.0-SNAPSHOT'
-	compile files('libs/apktool_2.3.0.jar')
+
+    implementation project(':kr.ac.kaist.wala.hybridroid.util')
+	implementation files(wala_path + '/com.ibm.wala.cast.js.rhino/target/com.ibm.wala.cast.js.rhino-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.util/target/com.ibm.wala.util-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.cast.js.html.nu_validator/target/com.ibm.wala.cast.js.html.nu_validator-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.cast/target/com.ibm.wala.cast-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.dalvik/target/com.ibm.wala.dalvik-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.cast.js.rhino.test/target/com.ibm.wala.cast.js.rhino.test-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.shrike/target/com.ibm.wala.shrike-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.cast.js/target/com.ibm.wala.cast.js-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.cast.js.test/target/com.ibm.wala.cast.js.test-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.cast.java/target/com.ibm.wala.cast.java-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.core/target/com.ibm.wala.core-1.5.1-SNAPSHOT.jar',
+		wala_path + '/com.ibm.wala.core.tests/target/com.ibm.wala.core.tests-1.5.1-SNAPSHOT.jar',
+		'libs/apktool_2.3.0.jar')
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 	// https://mvnrepository.com/artifact/commons-cli/commons-cli
-//	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+	implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+	implementation group: 'org.smali', name: 'dexlib2', version: '2.2.4'
+	implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.20'
+	implementation group: 'net.htmlparser.jericho', name: 'jericho-html', version: '3.2'
+	implementation group: 'commons-io', name: 'commons-io', version: '2.4'
+	implementation group: 'org.mozilla', name: 'rhino', version: '1.7.10'
 }

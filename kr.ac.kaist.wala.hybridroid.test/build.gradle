@@ -1,45 +1,55 @@
 apply plugin: 'java'
-apply plugin: 'application'
-
-mainClassName = 'kr/ac/kaist/wala/hybridroid/test/HybriDroidTestRunner'
 
 repositories {
-    mavenLocal();
     mavenCentral()
-            maven {
-    	    url "https://repo.eclipse.org/content/groups/releases/"
-	    }
 }
 
+test {
+	useJUnitPlatform()
 
-sourceSets {
-    main {
-        java  {
-    	    srcDir 'src'
-    	    }
+	//testLogging.showStandardStreams = true
+
+//	beforeTest { descriptor ->
+//		logger.lifecycle("Running test: " + descriptor)
+//	}
+
+	testLogging {
+        	events "passed", "started", "failed", "skipped"
     	}
-    test {
-        java {
-    	    srcDir 'test'
-    	    }
+
+	reports {
+        	junitXml.enabled = false
+        	html.enabled = true
     	}
-}
-
-jar {
-  manifest {
-    attributes(
-      'Main-Class': 'kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner'
-    )
-  }
-
-  from({ (configurations.runtime).collect { it.isDirectory() ? it : zipTree(it) } }){
-  	exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-  }
+	//onOutput { descriptor, event ->
+     	//	logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+  	//}
 }
 
 dependencies {
-	testCompile ('junit:junit:3.8.1' )
-	compile project(':kr.ac.kaist.wala.hybridroid')
+	implementation gradleApi()
+	testImplementation ('junit:junit:3.8.1')
+	testCompileOnly('junit:junit:4.12')
+    	testImplementation('org.junit.jupiter:junit-jupiter-api:5.1.0')
+    	testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0',
+            'org.junit.vintage:junit-vintage-engine:5.1.0'
+    	)
+	//testImplementation project(':kr.ac.kaist.wala.hybridroid')
+	testImplementation files("../hybridroid.jar")
+	//testImplementation files(wala_path + '/com.ibm.wala.cast.js.rhino/target/com.ibm.wala.cast.js.rhino-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.util/target/com.ibm.wala.util-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.cast.js.html.nu_validator/target/com.ibm.wala.cast.js.html.nu_validator-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.cast/target/com.ibm.wala.cast-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.dalvik/target/com.ibm.wala.dalvik-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.cast.js.rhino.test/target/com.ibm.wala.cast.js.rhino.test-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.shrike/target/com.ibm.wala.shrike-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.cast.js/target/com.ibm.wala.cast.js-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.cast.js.test/target/com.ibm.wala.cast.js.test-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.cast.java/target/com.ibm.wala.cast.java-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.core/target/com.ibm.wala.core-1.5.1-SNAPSHOT.jar',
+	//	wala_path + '/com.ibm.wala.core.tests/target/com.ibm.wala.core.tests-1.5.1-SNAPSHOT.jar',
+	//	'libs/apktool_2.3.0.jar')
+	//testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	testImplementation group: 'org.smali', name: 'dexlib2', version: '2.2.4'
 }

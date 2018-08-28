@@ -1,0 +1,11 @@
+if(project.findProperty("walaDir")){
+	def wala = file(project.getProperty("walaDir"))
+	
+	subprojects{
+		ext {
+			wala_path = wala.getAbsolutePath()
+		}
+	}
+}else{
+	println "NONE?"
+}

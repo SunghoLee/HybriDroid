@@ -1,14 +1,7 @@
 apply plugin: 'java'
     
 repositories {
-    mavenLocal()
-    mavenCentral()
-            maven {
-    	    url "https://repo.eclipse.org/content/groups/releases/"
-	    }
 }
-
-
 
 sourceSets {
     main {
@@ -23,9 +16,8 @@ sourceSets {
     	}
 }
 
-
 dependencies {
-	implementation 'com.ibm.wala:com.ibm.wala.util:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.dalvik:1.5.0-SNAPSHOT'
-	implementation 'com.ibm.wala:com.ibm.wala.core:1.5.0-SNAPSHOT'
+	implementation files(wala_path + '/com.ibm.wala.util/target/com.ibm.wala.util-1.5.1-SNAPSHOT.jar', 
+		      wala_path + '/com.ibm.wala.dalvik/target/com.ibm.wala.dalvik-1.5.1-SNAPSHOT.jar', 
+		      wala_path + '/com.ibm.wala.core/target/com.ibm.wala.core-1.5.1-SNAPSHOT.jar')
 }
