@@ -251,4 +251,10 @@ public final class MockupClass implements IClass {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public boolean isSynthetic() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
