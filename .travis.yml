@@ -4,6 +4,7 @@ android:
     - build-tools-26.0.2
 jdk: oraclejdk8
 before_install:
+ - gradle wrapper
  - git clone --depth=50 https://github.com/wala/WALA WALA
 install:
  - pushd WALA
