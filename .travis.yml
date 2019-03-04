@@ -10,8 +10,7 @@ install:
  - mvn clean install -DskipTests -B -q
  - popd
 script:
- - mvn clean install -DskipTests -B -q
- - mvn clean install -B -q
+ - make test
 sudo: false
 cache:
   directories:
