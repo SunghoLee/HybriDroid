@@ -1,12 +1,15 @@
-if(project.findProperty("walaDir")){
-	def wala = file(project.getProperty("walaDir"))
-	
-	subprojects{
-		ext {
-			wala_path = wala.getAbsolutePath()
-            wala_version = "1.5.3"
-		}
-	}
-}else{
-	println "NONE?"
+def wala = file(project.getProperty("walaDir"))
+
+subprojects{
+    ext {
+        wala_path = wala.getAbsolutePath()
+        wala_version = "1.5.3"
+    }
+}
+
+wrapper{
+  ext {
+    wala_path = wala.getAbsolutePath()
+    wala_version = "1.5.3"
+  }
 }
