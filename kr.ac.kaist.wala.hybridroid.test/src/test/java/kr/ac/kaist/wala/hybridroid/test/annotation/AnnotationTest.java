@@ -4,7 +4,8 @@ import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
 import kr.ac.kaist.wala.hybridroid.test.FileCollector;
-import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+import kr.ac.kaist.wala.hybridroid.test.TestConfig;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -17,14 +18,15 @@ public class AnnotationTest {
 	
 	public static String TEST_DIR = "annotation";
 	
-	@Test
+	
+@Test
 	public void missingAnnotationMethodShouldInvisible() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
-		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
+		File[] tests = FileCollector.getAPKsInDir(TestConfig.getTestDir() + File.separator + TEST_DIR);
 		boolean AnnotationTest_apk = false;
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
+			cfgAnalysis.main(f.getCanonicalPath(), TestConfig.getLibPath());
 								System.out.println("name: DONE??");
 			for(String s: cfgAnalysis.getWarnings()){
 				switch(testName){
@@ -39,7 +41,8 @@ public class AnnotationTest {
 		assertTrue(AnnotationTest_apk);
 	}
 	
-	@Test
+	
+@Test
 	public void ignoreAnnotationInfoBeforeKitkat(){
 		//TODO: implement test apps
 	}	

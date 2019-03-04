@@ -16,7 +16,8 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Pair;
 import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
-import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+import kr.ac.kaist.wala.hybridroid.test.TestConfig;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -35,16 +36,17 @@ public class ReachableBridgeTest {
 	 * @throws IOException
 	 * @throws CancelException
 	 */
-	@Test
+	
+@Test
 	public void haveEdgesToReachableJavaMethodFromJavaScript() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
-//		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
-		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "ReachableMethodTest.apk")};
+//		File[] tests = FileCollector.getAPKsInDir(TestConfig.getTestDir() + File.separator + TEST_DIR);
+		File[] tests = {new File(TestConfig.getTestDir() + File.separator + TEST_DIR + File.separator + "ReachableMethodTest.apk")};
 		boolean ReachableMethodTest = false;
 		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
+			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), TestConfig.getLibPath());
 			CallGraph cg = p.fst;
 			
 			switch(testName){
@@ -112,16 +114,17 @@ public class ReachableBridgeTest {
 	 * @throws IOException
 	 * @throws CancelException
 	 */
-	@Test
+	
+@Test
 	public void haveEdgeOnlyReachableMethod() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
-//		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
-		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "UnreachableMethodTest.apk")};
+//		File[] tests = FileCollector.getAPKsInDir(TestConfig.getTestDir() + File.separator + TEST_DIR);
+		File[] tests = {new File(TestConfig.getTestDir() + File.separator + TEST_DIR + File.separator + "UnreachableMethodTest.apk")};
 		boolean UnreachableMethodTest = false;
 		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
+			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), TestConfig.getLibPath());
 			CallGraph cg = p.fst;
 			
 			switch(testName){
@@ -189,16 +192,17 @@ public class ReachableBridgeTest {
 	 * @throws IOException
 	 * @throws CancelException
 	 */
-	@Test
+	
+@Test
 	public void haveEdgeFromBoth() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
-//		File[] tests = FileCollector.getAPKsInDir(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR);
-		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "DualReachableMethodTest.apk")};
+//		File[] tests = FileCollector.getAPKsInDir(TestConfig.getTestDir() + File.separator + TEST_DIR);
+		File[] tests = {new File(TestConfig.getTestDir() + File.separator + TEST_DIR + File.separator + "DualReachableMethodTest.apk")};
 		boolean DualReachableMethodTest = false;
 		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
+			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), TestConfig.getLibPath());
 			CallGraph cg = p.fst;
 
 			switch(testName){

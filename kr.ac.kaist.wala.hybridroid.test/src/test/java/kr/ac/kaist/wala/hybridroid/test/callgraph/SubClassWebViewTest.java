@@ -17,7 +17,8 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Pair;
 import kr.ac.kaist.wala.hybridroid.analysis.HybridCFGAnalysis;
-import kr.ac.kaist.wala.hybridroid.test.HybriDroidTestRunner;
+import kr.ac.kaist.wala.hybridroid.test.TestConfig;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -31,14 +32,15 @@ import static org.junit.Assert.assertTrue;
 public class SubClassWebViewTest {
 	public static String TEST_DIR = "callgraph" + File.separator + "subwebview";
 	
-	@Test
+	
+@Test
 	public void subWebViewBridgeInteraction() throws ClassHierarchyException, IllegalArgumentException, IOException, CancelException{
-		File[] tests = {new File(HybriDroidTestRunner.getTestDir() + File.separator + TEST_DIR + File.separator + "SubWebViewTest.apk")};
+		File[] tests = {new File(TestConfig.getTestDir() + File.separator + TEST_DIR + File.separator + "SubWebViewTest.apk")};
 		
 		for(File f : tests){
 			String testName = f.getName();
 			HybridCFGAnalysis cfgAnalysis = new HybridCFGAnalysis();
-			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), HybriDroidTestRunner.getLibPath());
+			Pair<CallGraph, PointerAnalysis<InstanceKey>> p = cfgAnalysis.main(f.getCanonicalPath(), TestConfig.getLibPath());
 			CallGraph cg = p.fst;
 			
 			switch(testName){

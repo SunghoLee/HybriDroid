@@ -10,13 +10,6 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.callgraph;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder;
 import com.ibm.wala.cast.ipa.callgraph.AstSSAPropagationCallGraphBuilder.AstPointerAnalysisImpl.AstImplicitPointsToSetVisitor;
 import com.ibm.wala.cast.ipa.callgraph.CrossLanguageSSAPropagationCallGraphBuilder;
@@ -34,41 +27,12 @@ import com.ibm.wala.cast.js.types.JavaScriptMethods;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.cast.util.TargetLanguageSelector;
-import com.ibm.wala.classLoader.CallSiteReference;
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IField;
-import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.classLoader.NewSiteReference;
+import com.ibm.wala.classLoader.*;
 import com.ibm.wala.fixpoint.UnaryOperator;
-import com.ibm.wala.ipa.callgraph.AnalysisCache;
-import com.ibm.wala.ipa.callgraph.AnalysisOptions;
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.ContextKey;
-import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
-import com.ibm.wala.ipa.callgraph.propagation.FilteredPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKeyFactory;
-import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory;
-import com.ibm.wala.ipa.callgraph.propagation.PointsToMap;
-import com.ibm.wala.ipa.callgraph.propagation.PointsToSetVariable;
-import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
-import com.ibm.wala.ipa.callgraph.propagation.PropagationSystem;
-import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
-import com.ibm.wala.ssa.DefUse;
-import com.ibm.wala.ssa.IR;
-import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
-import com.ibm.wala.ssa.SSAGetInstruction;
-import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.ssa.SSAInvokeInstruction;
-import com.ibm.wala.ssa.SSANewInstruction;
-import com.ibm.wala.ssa.SSAPutInstruction;
-import com.ibm.wala.ssa.SymbolTable;
+import com.ibm.wala.ipa.callgraph.*;
+import com.ibm.wala.ipa.callgraph.propagation.*;
+import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.ssa.*;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.Selector;
@@ -79,17 +43,11 @@ import com.ibm.wala.util.CancelRuntimeException;
 import com.ibm.wala.util.MonitorUtil;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
-import com.ibm.wala.util.intset.IntSet;
-import com.ibm.wala.util.intset.IntSetAction;
-import com.ibm.wala.util.intset.MutableMapping;
-import com.ibm.wala.util.intset.MutableSparseIntSet;
-import com.ibm.wala.util.intset.OrdinalSet;
+import com.ibm.wala.util.intset.*;
 import com.ibm.wala.util.strings.Atom;
-
 import kr.ac.kaist.wala.hybridroid.analysis.resource.AndroidResourceAnalysis;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis;
-import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo;
-import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo.BridgeDescription;
+//import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.BridgeInfo;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.HotspotDescriptor;
 import kr.ac.kaist.wala.hybridroid.analysis.string.AndroidStringAnalysis.Pointing;
 import kr.ac.kaist.wala.hybridroid.callgraph.ResourceCallGraphBuilder.ResourceVisitor;
@@ -101,6 +59,9 @@ import kr.ac.kaist.wala.hybridroid.pointer.JSCompatibleClassFilter;
 import kr.ac.kaist.wala.hybridroid.pointer.JavaCompatibleClassFilter;
 import kr.ac.kaist.wala.hybridroid.pointer.MockupInstanceKey;
 import kr.ac.kaist.wala.hybridroid.types.AndroidJavaJavaScriptTypeMap;
+
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * Specialized pointer analysis constraint generation for Hybrid Android
@@ -123,7 +84,7 @@ public class AndroidHybridCallGraphBuilder extends
 	private final IClass wvClass;
 	private final IClass jsinterAnnClass;
 	private final Selector addjsSelector;
-	private final BridgeInfo bi;
+//	private final BridgeInfo bi;
 	private final Set<String> mismatchW;
 	private final boolean annVersion;
 	
@@ -147,13 +108,26 @@ public class AndroidHybridCallGraphBuilder extends
 		wvClass = cha.lookupClass(wvTR);
 		jsinterAnnClass = cha.lookupClass(jsinterAnnTR);
 		addjsSelector = Selector.make("addJavascriptInterface(Ljava/lang/Object;Ljava/lang/String;)V");
-		bi = asa.getBridgeInfo();
+//		bi = asa.getBridgeInfo();
 		mismatchW = new HashSet<String>();
 	}
 
+	private class MGlabalObjectKey extends GlobalObjectKey{
+		private Atom file;
+
+		public MGlabalObjectKey(IClass concreteType, Atom file) {
+			super(concreteType);
+			this.file = file;
+		}
+
+		@Override
+		public String toString(){
+			return super.toString() + "(" + file + ")";
+		}
+	}
 	private void globalInit(Collection<Atom> files){
 		for(Atom file : files){
-			jsGlobalMap.put(file, new GlobalObjectKey(cha.lookupClass(JavaScriptTypes.Root)));
+			jsGlobalMap.put(file, new MGlabalObjectKey(cha.lookupClass(JavaScriptTypes.Root), file));
 		}
 	}
 	
@@ -269,7 +243,6 @@ public class AndroidHybridCallGraphBuilder extends
 		// TODO Auto-generated method stub
 		if (JavaScriptLoader.JS.equals(caller.getMethod().getDeclaringClass()
 				.getClassLoader().getLanguage())) {
-
 			if (constParams != null && constParams[0] != null
 					&& constParams[0][0] instanceof MockupInstanceKey) {
 				
@@ -360,9 +333,44 @@ public class AndroidHybridCallGraphBuilder extends
 						if (symTab.isConstant(nameUse)) {
 							String name = (String) symTab
 									.getConstantValue(nameUse);
-							
+							PointerAnalysis<InstanceKey> pa = getPointerAnalysis();
+
+							PointerKey objPK = pa.getHeapModel().getPointerKeyForLocal(node, objUse);
+							OrdinalSet<InstanceKey> objIKSet = pa.getPointsToSet(objPK);
+
+							if(objIKSet.size() == 0){
+								String err = "Cannot find the bridge object instance: \n";
+								err += "# caller: " + node;
+								err += "# instruction: " + invoke;
+								System.err.println(err);
+								super.visitInvoke(instruction);
+								return;
+							}
+
+							ConcreteTypeKey[] objKeys = new ConcreteTypeKey[objIKSet.size()];
+
+							int objIndex = 0;
+							for(InstanceKey objIK : objIKSet){
+								IClass objClass = objIK.getConcreteType();
+								InterfaceClass wClass = wrappingClass(objClass);
+								cha.addClass(wClass);
+
+								objKeys[objIndex] = new ConcreteTypeKey(wClass);
+
+                        		//make same field relation between a bridge object and Java object
+								for(IField field : objIK.getConcreteType().getAllFields()){
+									PointerKey javaFieldKey = pa.getHeapModel().getPointerKeyForInstanceField(objIK, field);
+									PointerKey jsFieldKey = pa.getHeapModel().getPointerKeyForInstanceField(objKeys[objIndex], field);
+									system.newConstraint(jsFieldKey, assignOperator, javaFieldKey);
+									system.newConstraint(javaFieldKey, assignOperator, jsFieldKey);
+								}
+
+								AndroidHybridAppModel.addJSInterface(name, objKeys[objIndex++]);
+							}
+
+							/*
 							Set<BridgeDescription> bdSet = bi.getDescriptionsOfBridge(node, objUse);
-								
+
 							if(bdSet.isEmpty()){
 								String err = "Cannot find the bridge object instance: \n";
 								err += "# caller: " + node;
@@ -387,6 +395,9 @@ public class AndroidHybridCallGraphBuilder extends
 								objKeys[objIndex] = new ConcreteTypeKey(wClass);
 								AndroidHybridAppModel.addJSInterface(name, objKeys[objIndex++]);
 							}
+
+							*/
+
 
 							/*
 							 * make mock-up object for Android Java methods of
@@ -439,8 +450,8 @@ public class AndroidHybridCallGraphBuilder extends
 							
 							/*
 							 * there could be multiple global objects, because a
-							 * webview has a global ojbect repectively. the
-							 * global objects are seperated by javascript file
+							 * webview has a global object repectively. the
+							 * global objects are separated by javascript file
 							 * name.
 							 */
 							Set<HotspotDescriptor> descSet = asa.getAllDescriptors();
@@ -450,8 +461,15 @@ public class AndroidHybridCallGraphBuilder extends
 								if(desc.getReceiverAlias().contains(Pointing.make(node, instruction.getUse(0)))){
 									htmls = desc.getValues();
 
+									// if at least one of string analysis is fail, all html files can be loaded for sound approaches.
+									//TODO: need to tune this approach for precise?
+									if(htmls.isEmpty()){
+										globalObjs.clear();
+										break;
+									}
+
 									if(htmls.size() == 1 && htmls.iterator().next().equals("about:blank")){ // no-op.
-										return;
+										continue;
 									}else if (!htmls.isEmpty()) {
 										boolean isOnlineConnection = false;
 										for (String html : htmls) {
@@ -460,7 +478,7 @@ public class AndroidHybridCallGraphBuilder extends
 //													System.out.println("Load online page: " + html +", we do not deal with it.");
 											
 											Atom js = getJSOfHtml(html);
-											
+
 											if(js != null){
 												globalObjs.add(getGlobalObject(JavaScriptTypes.jsName, js));
 												if(DEBUG){
@@ -475,7 +493,7 @@ public class AndroidHybridCallGraphBuilder extends
 										}
 										
 										if(isOnlineConnection && globalObjs.isEmpty()){ //no-op; for online connection.
-											return;
+											continue;
 										}
 									}
 								}else{
@@ -527,9 +545,9 @@ public class AndroidHybridCallGraphBuilder extends
 							for(InstanceKey globalObj : globalObjs){
 								PointerKey fieldPtr = builder
 										.getPointerKeyForInstanceField(globalObj, f);
-	
-								for(int i=0; i<objKeys.length; i++)
-									system.newConstraint(fieldPtr, objKeys[i]);							
+								for(int i=0; i<objKeys.length; i++) {
+									system.newConstraint(fieldPtr, objKeys[i]);
+								}
 							}
 							
 						} else {
@@ -1040,3 +1058,4 @@ public class AndroidHybridCallGraphBuilder extends
 		return mismatchW;
 	}
 }
+
