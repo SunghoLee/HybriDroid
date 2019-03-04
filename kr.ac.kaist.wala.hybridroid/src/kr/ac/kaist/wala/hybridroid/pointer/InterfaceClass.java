@@ -10,6 +10,7 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.pointer;
 
+import com.ibm.wala.classLoader.IMethod.SourcePosition;
 import com.ibm.wala.cast.loader.AstClass;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
 import com.ibm.wala.classLoader.*;
@@ -87,7 +88,7 @@ public class InterfaceClass extends AstClass implements IClass {
 			}
 
 			@Override
-			public int compareTo(Object o) {
+			public int compareTo(SourcePosition o) {
 				// TODO Auto-generated method stub
 				return 0;
 			}

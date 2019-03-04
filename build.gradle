@@ -4,6 +4,7 @@ if(project.findProperty("walaDir")){
 	subprojects{
 		ext {
 			wala_path = wala.getAbsolutePath()
+            wala_version = "1.5.3"
 		}
 	}
 }else{

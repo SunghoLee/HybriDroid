@@ -17,7 +17,7 @@ sourceSets {
 }
 
 dependencies {
-	implementation files(wala_path + '/com.ibm.wala.util/target/com.ibm.wala.util-1.5.1-SNAPSHOT.jar', 
-		      wala_path + '/com.ibm.wala.dalvik/target/com.ibm.wala.dalvik-1.5.1-SNAPSHOT.jar', 
-		      wala_path + '/com.ibm.wala.core/target/com.ibm.wala.core-1.5.1-SNAPSHOT.jar')
+	implementation files(wala_path + '/com.ibm.wala.util/target/com.ibm.wala.util-' + wala_version + '-SNAPSHOT.jar', 
+		      wala_path + '/com.ibm.wala.dalvik/target/com.ibm.wala.dalvik-' + wala_version + '-SNAPSHOT.jar', 
+		      wala_path + '/com.ibm.wala.core/target/com.ibm.wala.core-' + wala_version + '-SNAPSHOT.jar')
 }

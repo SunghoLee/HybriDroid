@@ -10,6 +10,7 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.test;
 
+import java.util.stream.Stream;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
@@ -910,6 +911,10 @@ public class ModeledCallGraphForTaint implements CallGraph {
 		return res.iterator();
 	}
 
+    @Override
+    public Stream stream() {
+        throw new UnsupportedOperationException();
+    }
 	
 	class UnreachableCGNode extends ExplicitNode{
 		

@@ -22,7 +22,6 @@ HYBRIDROID := kr.ac.kaist.wala.hybridroid/build/libs/kr.ac.kaist.wala.hybridroid
 HYBRIDROID_TARGET := hybridroid.jar 
 HYBRIDROID_TEST := kr.ac.kaist.wala.hybridroid.test
 
-
 $(HYBRIDROID_TARGET): $(HYBRIDROID)
 	cp $(HYBRIDROID) $(HYBRIDROID_TARGET) 
 
@@ -39,7 +38,7 @@ clean:
 	$(GRD) clean -PwalaDir=$(WALA_DIR)
 	rm $(HYBRIDROID_TARGET)
 
-test: $(HYBRIDROID_TARGET)
+test: 
 	$(GRD) cleanTest test -PwalaDir=$(WALA_DIR) -b $(HYBRIDROID_TEST)/build.gradle
 
 .PHONY: compile clean test

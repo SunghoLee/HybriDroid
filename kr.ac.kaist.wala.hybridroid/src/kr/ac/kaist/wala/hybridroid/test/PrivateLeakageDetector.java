@@ -10,6 +10,7 @@
 *******************************************************************************/
 package kr.ac.kaist.wala.hybridroid.test;
 
+import java.util.stream.Stream;
 import com.ibm.wala.cast.ir.ssa.*;
 import com.ibm.wala.cast.js.ssa.*;
 import com.ibm.wala.cast.js.types.JavaScriptTypes;
@@ -220,6 +221,10 @@ public class PrivateLeakageDetector {
 		bitmapClass = cha.lookupClass(bitmapTR);
 	}
 
+    public Stream stream() {
+        throw new UnsupportedOperationException();
+    }
+
 	/**
 	 * Add a Method as a sink
 	 * @param mr MethodReference object denoting a method
@@ -267,6 +272,10 @@ public class PrivateLeakageDetector {
 			this.add(dummy);
 		}
 		
+        public Stream stream() {
+            throw new UnsupportedOperationException();
+        }
+
 		@Override
 		public PointerKey getMappedObject(int n) throws NoSuchElementException {
 			// TODO Auto-generated method stub
