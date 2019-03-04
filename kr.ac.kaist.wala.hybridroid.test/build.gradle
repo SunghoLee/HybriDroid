@@ -7,11 +7,6 @@ repositories {
 test {
     maxHeapSize = "8g"
 	useJUnitPlatform()
-	//testLogging.showStandardStreams = true
-
-//	beforeTest { descriptor ->
-//		logger.lifecycle("Running test: " + descriptor)
-//	}
 
 	testLogging {
         	events "passed", "started", "failed", "skipped"
@@ -21,9 +16,6 @@ test {
         	junitXml.enabled = false
         	html.enabled = true
     	}
-	//onOutput { descriptor, event ->
-     	//	logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
-  	//}
 }
 
 dependencies {
@@ -36,7 +28,6 @@ dependencies {
             'org.junit.vintage:junit-vintage-engine:5.1.0'
     	)
 	testImplementation project(':kr.ac.kaist.wala.hybridroid')
-	//testImplementation files("../hybridroid.jar")
 	testImplementation files(wala_path + '/com.ibm.wala.cast.js.rhino/target/com.ibm.wala.cast.js.rhino-' + wala_version + '-SNAPSHOT.jar',
 		wala_path + '/com.ibm.wala.util/target/com.ibm.wala.util-' + wala_version + '-SNAPSHOT.jar',
 		wala_path + '/com.ibm.wala.cast.js.html.nu_validator/target/com.ibm.wala.cast.js.html.nu_validator-' + wala_version + '-SNAPSHOT.jar',
@@ -49,7 +40,5 @@ dependencies {
 		wala_path + '/com.ibm.wala.cast.java/target/com.ibm.wala.cast.java-' + wala_version + '-SNAPSHOT.jar',
 		wala_path + '/com.ibm.wala.core/target/com.ibm.wala.core-' + wala_version + '-SNAPSHOT.jar',
 		wala_path + '/com.ibm.wala.core.tests/target/com.ibm.wala.core.tests-' + wala_version + '-SNAPSHOT.jar')
-	//	'libs/apktool_2.3.0.jar')
-	//testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 	testImplementation group: 'org.smali', name: 'dexlib2', version: '2.2.4'
 }

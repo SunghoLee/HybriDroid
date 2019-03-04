@@ -1,1 +1,1 @@
-include 'kr.ac.kaist.wala.hybridroid', 'kr.ac.kaist.wala.hybridroid.frontend', 'kr.ac.kaist.wala.hybridroid.test', 'kr.ac.kaist.wala.hybridroid.test.data','kr.ac.kaist.wala.hybridroid.types', 'kr.ac.kaist.wala.hybridroid.util'
+include 'kr.ac.kaist.wala.hybridroid', 'kr.ac.kaist.wala.hybridroid.frontend', 'kr.ac.kaist.wala.hybridroid.util', 'kr.ac.kaist.wala.hybridroid.test'

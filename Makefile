@@ -1,4 +1,6 @@
+BASH := bash
 GRD := gradle
+GRDW := gradlew
 MVN := mvn 
 GIT := git
 
@@ -26,7 +28,7 @@ $(HYBRIDROID_TARGET): $(HYBRIDROID)
 	cp $(HYBRIDROID) $(HYBRIDROID_TARGET) 
 
 $(HYBRIDROID): $(WALA_TARGETS)
-	$(GRD) build -PwalaDir=$(WALA_DIR)
+	$(BASH) $(GRDW) build -x test
 
 $(WALA_TARGETS): $(WALA_DIR)
 	$(MVN) clean install -DskipTests -B -q -f $(WALA_DIR)/pom.xml
@@ -35,11 +37,11 @@ $(WALA_DIR):
 	$(GIT) clone --depth=50 https://github.com/wala/WALA $(WALA_DIR)
 
 clean:
-	$(GRD) clean -PwalaDir=$(WALA_DIR)
+	$(BASH) $(GRDW) clean -PwalaDir=$(WALA_DIR)
 	rm $(HYBRIDROID_TARGET)
 
 test: 
-	$(GRD) cleanTest test -PwalaDir=$(WALA_DIR) -b $(HYBRIDROID_TEST)/build.gradle
+	$(BASH) $(GRDW) cleanTest test -b $(HYBRIDROID_TEST)/build.gradle
 
 .PHONY: compile clean test
 .SILENT: compile $(WALA_TARGETS) $(WALA_DIR) clean $(HYBRIDROID_TARGET) $(HYBRIDROID) test
