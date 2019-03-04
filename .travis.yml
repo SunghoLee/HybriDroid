@@ -4,9 +4,9 @@ android:
     - build-tools-26.0.2
 jdk: oraclejdk8
 before_install:
- - git clone --depth=50 https://github.com/wala/WALA /tmp/WALA
+ - git clone --depth=50 https://github.com/wala/WALA WALA
 install:
- - pushd /tmp/WALA
+ - pushd WALA
  - mvn clean install -DskipTests -B -q
  - popd
 script:
