@@ -1,7 +1,7 @@
 language: android
 android:
   components:
-    - build-tools-26.0.2
+    - build-tools-28.0.3
 jdk: oraclejdk8
 before_install:
  - git clone --depth=50 https://github.com/wala/WALA WALA
